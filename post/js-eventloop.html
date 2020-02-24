@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="renderer" content="webkit">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Event loop</title>
+    <meta name="description" content="我们先来看一道题目：console.log('1');setTimeout(function() {    console.log('2');    process.nextTick(function() {        console.log('3');    })">
+    <link rel="shortcut icon" href="https://nerrol.com/static/user_file/favicon.ico">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@9.13.1/styles/github.css">
+    <link rel="stylesheet" href="/static/casper/css/screen.css">
+    
+</head>
+<body class="post-template nav-closed">
+<div class="nav">
+    <h3 class="nav-title">Menu</h3>
+    <a href="#" class="nav-close">
+        <span class="hidden">关闭</span>
+    </a>
+    <ul>
+        <li><a class="nav-" role="presentation" href="/">Index</a></li></ul>
+    <a class="subscribe-button icon-feed" href="/rss">Feed</a>
+</div>
+<span class="nav-cover"></span>
+<div class="site-wrapper">
+    <header class="main-header post-head no-cover">
+        <nav class="main-nav clearfix">
+            <a class="menu-button icon-menu" href="#"><span class="word">Menu</span></a>
+        </nav>
+    </header>
+
+    <main class="content" role="main">
+        <article class="post">
+
+            <header class="post-header">
+                <h1 class="post-title">Event loop</h1>
+                <section class="post-meta">
+                    <time class="post-date" datetime="2019-03-21">2019-03-21</time>
+                </section>
+            </header>
+
+            <section class="post-content">
+                <p>我们先来看一道题目：</p>
+
+<pre><code>console.log(&#39;1&#39;);
+setTimeout(function() {
+    console.log(&#39;2&#39;);
+    process.nextTick(function() {
+        console.log(&#39;3&#39;);
+    })
+    new Promise(function(resolve) {
+        console.log(&#39;4&#39;);
+        resolve();
+    }).then(function() {
+        console.log(&#39;5&#39;)
+    })
+})
+process.nextTick(function() {
+    console.log(&#39;6&#39;);
+})
+new Promise(function(resolve) {
+    console.log(&#39;7&#39;);
+    resolve();
+}).then(function() {
+    console.log(&#39;8&#39;)
+})
+
+setTimeout(function() {
+    console.log(&#39;9&#39;);
+    process.nextTick(function() {
+        console.log(&#39;10&#39;);
+    })
+    new Promise(function(resolve) {
+        console.log(&#39;11&#39;);
+        resolve();
+    }).then(function() {
+        console.log(&#39;12&#39;)
+    })
+})
+</code></pre>
+
+<p>要解出这道题需要了解一些基本的概念，首先我们从进程和线程开始：</p>
+
+<h3>进程与线程</h3>
+
+<ul>
+<li>进程(Process)是计算机中的程序关于某数据集合上的一次运⾏活动，是系统进⾏资源分配和调度的基本单位。</li>
+<li>线程(thread)是操作系统能够进⾏运算调度的最⼩单位。它被包含在进程之中，是进程中的实际运作单位。</li>
+</ul>
+
+<h3>浏览器常驻线程</h3>
+
+<ul>
+<li>GUI 渲染线程；</li>
+<li>JavaScript引擎线程；</li>
+<li>定时触发器器线程；</li>
+<li>事件触发线程；</li>
+<li>异步http请求线程；</li>
+</ul>
+
+<p>** 可以知道，javaScript是单线程的语言，在一段时间内只能做一件事。</p>
+
+<h3>执行栈</h3>
+
+<p>可以认为执行栈是一个存储函数调用的栈结构，遵循先进后出的原则。当开始执行javaScript代码时，会先将main()函数压入栈中，然后再执行我们的代码。</p>
+
+<pre><code>function a() {
+  console.log(&#39;a&#39;);
+}
+function b() {
+  a();
+}
+b()
+</code></pre>
+
+<p>这段代码中执行栈如下图：</p>
+
+<p><img src="https://ws2.sinaimg.cn/large/006tKfTcly1g1bn5r49tfj30fi0ngwex.jpg" alt=""></p>
+
+<p>了解完执行栈的概念，接下来我们来看同步任务和异步任务：</p>
+
+<h3>同步任务和异步任务</h3>
+
+<p>我们可以通过下图来具体看javaScript引擎对于同步和异步任务的处理：</p>
+
+<ul>
+<li>首先同步任务和异步任务被放入两个不同的栈中；同步任务会直接进入主线程，而异步任务会进入一个叫做Event Table中并注册回调函数；</li>
+<li>异步任务注册的回调函数会放入Event Queue队列中，待主线程内的任务执行完毕为空时，会去Event Queue中拿出响应的函数放入主线程栈中执行；</li>
+<li>以上过程会不断地重复，也就是Event Loop。</li>
+<li>javaScript引擎存在monitoring process进程，会轮询检查主线程执行栈是否为空，一旦为空，就会去Event Queue检查是否有等待被调用的函数。</li>
+</ul>
+
+<p><img src="https://ws2.sinaimg.cn/large/006tKfTcly1g1g8xdbqclj30yf0u0nll.jpg" alt=""></p>
+
+<p>不同的异步任务源也会也会进入不同的队列中，异步任务源又可以分为宏任务（macrotask）和微任务（microtask）。</p>
+
+<h3>宏任务和微任务</h3>
+
+<h4>宏任务</h4>
+
+<ul>
+<li> script；</li>
+<li> setTimeout；</li>
+<li> setInterval；</li>
+<li> setImmediate；</li>
+<li> UI rendering；</li>
+<li> I/0（Node中）；</li>
+</ul>
+
+<h4>微任务</h4>
+
+<ul>
+<li>原生Promise(有些实现的promise将then方法放到了宏任务中)；</li>
+<li>process.nextTick（ Node中）；</li>
+<li>MutationObserver；</li>
+</ul>
+
+<p><img src="https://ws2.sinaimg.cn/large/006tKfTcly1g1g9gjxvj3j30zk0u017x.jpg" alt=""></p>
+
+<p><strong>这里很多人会有个误区，认为微任务快于宏任务，其实是错误的。因为宏任务中包括了 script ，浏览器会先执行一个宏任务，接下来有异步代码的话才会先执行微任务。</strong></p>
+
+<hr>
+
+<ol>
+<li> 回到开头的代码上，按照上面我们的步骤，会先执行一个宏任务，执行同步代码，输出1。</li>
+<li>接着遇到setTimeout，我们将它放入宏任务queue中先不管；</li>
+<li>然后process.nextTick被推入微任务queue中；</li>
+<li>遇到new Promise会直接执行，输出7。接着回调函数then被推入微任务queue中；</li>
+<li>最后的setTimeout放入宏任务queue中。</li>
+</ol>
+
+<table>
+<thead>
+<tr>
+<th>宏任务</th>
+<th>微任务</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td>setTimeout1</td>
+<td>process1</td>
+</tr>
+<tr>
+<td>setTimeout2</td>
+<td>then1</td>
+</tr>
+</tbody>
+</table>
+
+<ol>
+<li>检查到Event Queue中有微任务；</li>
+<li>执行process1，输出6；</li>
+<li>执行then1，输出8；</li>
+</ol>
+
+<p>** 此时第一轮宏任务执行完成，输出1、7、6、8。开始第二轮：**</p>
+
+<ol>
+<li>执行宏任务setTimeout1，输出2，将process.nextTick推入微任务queue中；</li>
+<li>new Promise直接执行，输出4，回调函数then被推入微任务queue中；</li>
+</ol>
+
+<table>
+<thead>
+<tr>
+<th>宏任务</th>
+<th>微任务</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td>setTimeout2</td>
+<td>process2</td>
+</tr>
+<tr>
+<td></td>
+<td>then2</td>
+</tr>
+</tbody>
+</table>
+
+<ol>
+<li>检查到Event Queue中有微任务；</li>
+<li>执行process2，输出3；</li>
+<li>执行then2，输出5； </li>
+</ol>
+
+<p>** 此时第二轮宏任务执行完成，输出1、7、6、8、2、4、3、5。开始第三轮：**</p>
+
+<ol>
+<li>执行宏任务setTimeout2，输出9，将process.nextTick推入微任务queue中；</li>
+<li>new Promise直接执行，输出11，回调函数then被推入微任务queue中；</li>
+</ol>
+
+<table>
+<thead>
+<tr>
+<th>宏任务</th>
+<th>微任务</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td></td>
+<td>process3</td>
+</tr>
+<tr>
+<td></td>
+<td>then3</td>
+</tr>
+</tbody>
+</table>
+
+<ol>
+<li>检查到Event Queue中有微任务；</li>
+<li>执行process3，输出10；</li>
+<li>执行then3，输出12； </li>
+</ol>
+
+<p>** 此时第三轮宏任务执行完成，输出1、7、6、8、2、4、3、5、9、11、10、12。（node环境下的事件监听依赖libuv与前端环境不完全相同，输出顺序可能会有误差）。**</p>
+
+            </section>
+
+            <footer class="post-footer">
+
+                <figure class="author-image">
+                    <img class="img" src="https://i.loli.net/2018/02/14/5a843d9dc3706.jpg" alt="author" lazyload="on">
+                </figure>
+
+                <section class="author">
+                    <center><h4><a href="/">nerrol</a></h4></center>
+                    <p></p>
+                </section>
+
+                
+
+            </footer>
+
+        </article>
+    </main>
+
+<footer class="site-footer clearfix">
+    <section class="copyright"><a href="/">Nerrol</a> &copy; 2020</section>
+    <section class="poweredby">Powered by <a href="https://silverblog.org">SilverBlog</a> , Theme By Casper</section>
+    
+</footer>
+</div>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/highlight.js@9.13.1/lib/highlight.min.js"></script>
+<script type="text/javascript" src="/static/casper/js/index.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bplayer@1.0.7/dist/bplayer.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bplayer@1.0.7/dist/bp_init.js"></script>
+
+</body>
+</html>

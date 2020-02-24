@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="renderer" content="webkit">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>关于img的error事件与页面中的load事件的加载关系</title>
+    <meta name="description" content="在看这个问题之前，首先需要明确的是：<br页面中的load事件和DOMContentLoad事件的区别？ 页面中的load事件 也就是我们平时在代码中写的window.onload  function(){}； 这个事件仅仅在DOM和所有的相关资源全部加载完之后才会被触发；">
+    <link rel="shortcut icon" href="https://nerrol.com/static/user_file/favicon.ico">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@9.13.1/styles/github.css">
+    <link rel="stylesheet" href="/static/casper/css/screen.css">
+    
+</head>
+<body class="post-template nav-closed">
+<div class="nav">
+    <h3 class="nav-title">Menu</h3>
+    <a href="#" class="nav-close">
+        <span class="hidden">关闭</span>
+    </a>
+    <ul>
+        <li><a class="nav-" role="presentation" href="/">Index</a></li></ul>
+    <a class="subscribe-button icon-feed" href="/rss">Feed</a>
+</div>
+<span class="nav-cover"></span>
+<div class="site-wrapper">
+    <header class="main-header post-head no-cover">
+        <nav class="main-nav clearfix">
+            <a class="menu-button icon-menu" href="#"><span class="word">Menu</span></a>
+        </nav>
+    </header>
+
+    <main class="content" role="main">
+        <article class="post">
+
+            <header class="post-header">
+                <h1 class="post-title">关于img的error事件与页面中的load事件的加载关系</h1>
+                <section class="post-meta">
+                    <time class="post-date" datetime="2018-04-12">2018-04-12</time>
+                </section>
+            </header>
+
+            <section class="post-content">
+                <p>在看这个问题之前，首先需要明确的是：<br>
+<strong>页面中的load事件和DOMContentLoad事件的区别？</strong></p>
+
+<hr>
+
+<h4>页面中的load事件</h4>
+
+<ul>
+<li>也就是我们平时在代码中写的<code>window.onload = function(){}</code>；</li>
+<li>这个事件仅仅在DOM和所有的相关资源全部加载完之后才会被触发；</li>
+<li>因此在load事件中无法触发img标签的error事件，可见示例一中的代码；</li>
+</ul>
+
+<pre><code> window.onload = function(){
+          $(&quot;img&quot;).on(&quot;error&quot;,function(){
+            console.log(&quot;window.onload可以触发img的error事件&quot;)
+          })
+  }
+    //当html中img标签的src属性无效时，控制台不会输出任何结果
+</code></pre>
+
+<hr>
+
+<h4>DOMContentLoad事件</h4>
+
+<ul>
+<li>dom内容加载完毕，无需等待图片等其他资源加载完成就会被触发，会在页面的load事件加载完之前被触发；</li>
+<li>JQ中的$(function(){})，或$(document).ready(function(){})，监听的就是DOMContentLoaded事件；</li>
+<li>一般将函数写在ready方法内，当页面被解析后就可以访问dom元素，缩短页面交互时间，提高体验；</li>
+<li>img的error事件可被触发，可见示例二代码；</li>
+</ul>
+
+<pre><code>$(function(){
+          $(&quot;img&quot;).on(&quot;error&quot;,function(){
+                console.log(&quot;DOMContentLoaded事件可以触发img的error事件&quot;)
+           })
+    })
+    //当html中img标签的src属性无效时，触发error事件，控制台输出&quot;DOMContentLoaded事件可以触发img的error事件&quot;
+</code></pre>
+
+<hr>
+
+<h4>一些注意事项</h4>
+
+<ul>
+<li>onload事件不需要做兼容；</li>
+<li>DOMContentLoaded事件需要做兼容；</li>
+</ul>
+
+            </section>
+
+            <footer class="post-footer">
+
+                <figure class="author-image">
+                    <img class="img" src="https://i.loli.net/2018/02/14/5a843d9dc3706.jpg" alt="author" lazyload="on">
+                </figure>
+
+                <section class="author">
+                    <center><h4><a href="/">nerrol</a></h4></center>
+                    <p></p>
+                </section>
+
+                
+
+            </footer>
+
+        </article>
+    </main>
+
+<footer class="site-footer clearfix">
+    <section class="copyright"><a href="/">Nerrol</a> &copy; 2020</section>
+    <section class="poweredby">Powered by <a href="https://silverblog.org">SilverBlog</a> , Theme By Casper</section>
+    
+</footer>
+</div>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/highlight.js@9.13.1/lib/highlight.min.js"></script>
+<script type="text/javascript" src="/static/casper/js/index.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bplayer@1.0.7/dist/bplayer.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bplayer@1.0.7/dist/bp_init.js"></script>
+
+</body>
+</html>

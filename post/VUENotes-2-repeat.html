@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="renderer" content="webkit">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>vue使用过程中的一些TIPS</title>
+    <meta name="description" content="一、关于methods钩子中的axios回调函数中的this指向代码一：此时axios的回调中this的指向是window,而不是vm实例；methods:{   getData: function () {      axios        .get('url')">
+    <link rel="shortcut icon" href="https://nerrol.com/static/user_file/favicon.ico">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@9.13.1/styles/github.css">
+    <link rel="stylesheet" href="/static/casper/css/screen.css">
+    
+</head>
+<body class="post-template nav-closed">
+<div class="nav">
+    <h3 class="nav-title">Menu</h3>
+    <a href="#" class="nav-close">
+        <span class="hidden">关闭</span>
+    </a>
+    <ul>
+        <li><a class="nav-" role="presentation" href="/">Index</a></li></ul>
+    <a class="subscribe-button icon-feed" href="/rss">Feed</a>
+</div>
+<span class="nav-cover"></span>
+<div class="site-wrapper">
+    <header class="main-header post-head no-cover">
+        <nav class="main-nav clearfix">
+            <a class="menu-button icon-menu" href="#"><span class="word">Menu</span></a>
+        </nav>
+    </header>
+
+    <main class="content" role="main">
+        <article class="post">
+
+            <header class="post-header">
+                <h1 class="post-title">vue使用过程中的一些TIPS</h1>
+                <section class="post-meta">
+                    <time class="post-date" datetime="2018-07-04">2018-07-04</time>
+                </section>
+            </header>
+
+            <section class="post-content">
+                <h4>一、关于methods钩子中的axios回调函数中的this指向</h4>
+
+<p>代码一：此时axios的回调中this的指向是window,而不是vm实例；</p>
+
+<pre><code>methods:{
+   getData: function () {
+      axios
+        .get(&#39;url&#39;)
+        .then(function(res){
+          console.log(this);//window
+        })
+    }
+}
+ 
+</code></pre>
+
+<p>为了避免这种情况，可以在函数内部首先保存当前this的引用，防止this指向丢失。</p>
+
+<pre><code>methods:{
+   getData: function () {
+      var self = this;
+      axios
+        .get(&#39;url&#39;)
+        .then(function(res){
+          console.log(this);//vm
+        })
+    }
+}
+</code></pre>
+
+<p>其实这种情况类似于我们平时写js代码中的一个经典问题：</p>
+
+<pre><code>        var name = &#39;b&#39;;
+        var obj = {
+            name: &#39;a&#39;,
+            fun: function () {
+                console.log(this);//obj
+                return function () {
+                    console.log(this);//window
+                    console.log(this.name);//b
+                }
+            }
+        }
+        var fun = obj.fun();
+        fun();
+</code></pre>
+
+<p>PS:这种this指向丢失的问题其实不仅仅存在于axios的回调中，在钩子函数中声明的函数的回调产生这种情况；因此我们的解决方案有两种：</p>
+
+<ul>
+<li>声明一个变量保存当前this指向；（上述例子）</li>
+<li>使用es6箭头函数；</li>
+</ul>
+
+<h4>二、关于axios的get方式调用接口</h4>
+
+<p>官方文档有给出正确的调用方式：<a href="https://www.kancloud.cn/yunye/axios/234845">axios</a></p>
+
+<pre><code>axios.get(&#39;/user&#39;, {
+    params: {
+      ID: 12345
+    }
+  })
+  .then(function (response) {
+    console.log(response);
+  })
+  .catch(function (error) {
+    console.log(error);
+  });
+</code></pre>
+
+<p>这里要注意的点是：发送给server的data（查询字符串）需要有params这个key值，才能够被server正确接受！！！！！（联调时候的坑啊啊啊）</p>
+
+<h4>三、关于vue中无需事件触发的函数</h4>
+
+<p>场景是：想在页面初始化的时候就直接调用这个函数（函数可以是计算功能等等），比如我们想在页面初始化的时候给div一个style样式，这个样式是经过计算后渲染的，那么这时我们可以在模板里这样写：</p>
+
+<pre><code>//item是v-for出来的单个数据
+&lt;span :style=&quot;changeWidth(item)&quot;&gt;
+</code></pre>
+
+<p>js中声明这个方法，并return出想要的结果</p>
+
+<pre><code>methods: {
+  changeWidth: function (item) {
+        return  {
+          width: item.cnt/ this.answerCnt * 100 + &#39;%&#39;
+        }
+      }
+}
+</code></pre>
+
+<p>（算是一个小技巧~~）</p>
+
+<h4>四、关于vue中在数组中判断是否包含某数组的某项</h4>
+
+<p>标题看起来很啰嗦，其实就是一个类似于判断正确答案的应用场景。详细描述一下场景：总选项数组arrA，用户选项数组arrB，判断arrA中是否含有arrB的某项，渲染不同的答案样式。</p>
+
+<ol>
+<li>在computed钩子中创建一个对象C，并返回这个对象；</li>
+<li>遍历数组B，将数组B遍历后的结果在对象C中设置value值（值随意）；</li>
+<li>接下来就可以在模板中通过v-for遍历数组A，通过obj[item]的判断方式添加样式；</li>
+</ol>
+
+<p>代码见下方：</p>
+
+<pre><code>&lt;template&gt;
+  &lt;div&gt;
+       &lt;ul&gt;
+           &lt;li v-for=&quot;item in arrB&quot; :class=&quot;[{&#39;style1&#39;:obj[item]}]&quot;&gt;&lt;/li&gt;
+         &lt;/ul&gt;
+    &lt;/div&gt;
+&lt;/template&gt;
+&lt;script&gt;
+  export default {
+      computed: {
+          obj () {
+              for(let i=0;i&lt;arrB.length;i++){
+                  obj[arrB[i]] = true
+                }
+                return obj;
+            }
+        }
+    }
+&lt;/script&gt;
+</code></pre>
+
+<h4>五、关于v-for后的数组动态绑定ref</h4>
+
+<p>v-for后的项动态绑定ref生成的是一个数组，因此直接对ref进行操作将不会取到相应的数值。</p>
+
+<pre><code>&lt;li v-for=&quot;(item,i) in teacherList&quot;  :ref=&quot;&#39;item&#39;+i&quot;&gt;
+&lt;/li&gt;
+</code></pre>
+
+<p>此时若想获取单个li的width需要：
+<code>
+self.$refs.item0[0].offsetWidth
+</code></p>
+
+<h4>六、异步渲染刷新或者加载出现闪烁</h4>
+
+<p>异步接口在页面初始化取数据时可能会出现直接渲染Mustache 语法（{{}}）再编译，这种情况是因为编译还未结束，使用v-cloak来解决，这个指令的作用是：保持在元素上直到关联实例结束编译。配合css使用</p>
+
+<pre><code>&lt;div v-cloak&gt;
+{{message}}
+&lt;/div&gt;
+
+[v-cloak] {
+  display: none;
+}
+</code></pre>
+
+            </section>
+
+            <footer class="post-footer">
+
+                <figure class="author-image">
+                    <img class="img" src="https://i.loli.net/2018/02/14/5a843d9dc3706.jpg" alt="author" lazyload="on">
+                </figure>
+
+                <section class="author">
+                    <center><h4><a href="/">nerrol</a></h4></center>
+                    <p></p>
+                </section>
+
+                
+
+            </footer>
+
+        </article>
+    </main>
+
+<footer class="site-footer clearfix">
+    <section class="copyright"><a href="/">Nerrol</a> &copy; 2020</section>
+    <section class="poweredby">Powered by <a href="https://silverblog.org">SilverBlog</a> , Theme By Casper</section>
+    
+</footer>
+</div>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/highlight.js@9.13.1/lib/highlight.min.js"></script>
+<script type="text/javascript" src="/static/casper/js/index.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bplayer@1.0.7/dist/bplayer.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bplayer@1.0.7/dist/bp_init.js"></script>
+
+</body>
+</html>

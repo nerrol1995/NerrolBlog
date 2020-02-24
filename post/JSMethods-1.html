@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="renderer" content="webkit">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>JavaScript各种数据结构之间的转化方法</title>
+    <meta name="description" content="1、嵌套对象数据格式转化单层对象数据格式var showList  {    "第一": {      "11": "一年级",      "12": "二年级",      "13": "三年级",      "14": "四年级",      "15": "五年级">
+    <link rel="shortcut icon" href="https://nerrol.com/static/user_file/favicon.ico">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@9.13.1/styles/github.css">
+    <link rel="stylesheet" href="/static/casper/css/screen.css">
+    
+</head>
+<body class="post-template nav-closed">
+<div class="nav">
+    <h3 class="nav-title">Menu</h3>
+    <a href="#" class="nav-close">
+        <span class="hidden">关闭</span>
+    </a>
+    <ul>
+        <li><a class="nav-" role="presentation" href="/">Index</a></li></ul>
+    <a class="subscribe-button icon-feed" href="/rss">Feed</a>
+</div>
+<span class="nav-cover"></span>
+<div class="site-wrapper">
+    <header class="main-header post-head no-cover">
+        <nav class="main-nav clearfix">
+            <a class="menu-button icon-menu" href="#"><span class="word">Menu</span></a>
+        </nav>
+    </header>
+
+    <main class="content" role="main">
+        <article class="post">
+
+            <header class="post-header">
+                <h1 class="post-title">JavaScript各种数据结构之间的转化方法</h1>
+                <section class="post-meta">
+                    <time class="post-date" datetime="2018-05-16">2018-05-16</time>
+                </section>
+            </header>
+
+            <section class="post-content">
+                <h4>1、嵌套对象数据格式转化单层对象数据格式</h4>
+
+<pre><code>var showList = {
+    &quot;第一&quot;: {
+      &quot;11&quot;: &quot;一年级&quot;,
+      &quot;12&quot;: &quot;二年级&quot;,
+      &quot;13&quot;: &quot;三年级&quot;,
+      &quot;14&quot;: &quot;四年级&quot;,
+      &quot;15&quot;: &quot;五年级&quot;,
+      &quot;16&quot;: &quot;六年级&quot;
+    },
+    &quot;第二&quot;: {
+      &quot;2&quot;: &quot;初一&quot;,
+      &quot;3&quot;: &quot;初二&quot;,
+      &quot;4&quot;: &quot;初三&quot;
+    },
+    &quot;第三&quot;: {
+      &quot;5&quot;: &quot;高一&quot;,
+      &quot;6&quot;: &quot;高二&quot;,
+      &quot;7&quot;: &quot;高三&quot;
+    }
+  
+    //处理
+    function formatObj (originObj) {
+        var obj = {};
+        for (let key in originObj) {
+          for (let index in originObj[key]) {
+            obj[index] = originObj[key][index]
+          }
+        }
+        // console.log(obj);
+        return obj;
+      }
+  console.log(obj)
+    formatObj(showList);
+</code></pre>
+
+<p>结果为：<br>
+<img src="https://s1.ax1x.com/2018/05/16/CyDK6x.png" alt=""></p>
+
+            </section>
+
+            <footer class="post-footer">
+
+                <figure class="author-image">
+                    <img class="img" src="https://i.loli.net/2018/02/14/5a843d9dc3706.jpg" alt="author" lazyload="on">
+                </figure>
+
+                <section class="author">
+                    <center><h4><a href="/">nerrol</a></h4></center>
+                    <p></p>
+                </section>
+
+                
+
+            </footer>
+
+        </article>
+    </main>
+
+<footer class="site-footer clearfix">
+    <section class="copyright"><a href="/">Nerrol</a> &copy; 2020</section>
+    <section class="poweredby">Powered by <a href="https://silverblog.org">SilverBlog</a> , Theme By Casper</section>
+    
+</footer>
+</div>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/highlight.js@9.13.1/lib/highlight.min.js"></script>
+<script type="text/javascript" src="/static/casper/js/index.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bplayer@1.0.7/dist/bplayer.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bplayer@1.0.7/dist/bp_init.js"></script>
+
+</body>
+</html>

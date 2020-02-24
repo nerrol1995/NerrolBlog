@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="renderer" content="webkit">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>JS高级程序设计笔记-表单</title>
+    <meta name="description" content="一、表单基础1、特性：  method  action  enctype  accept  ：下拉列表框，里面的值由：多行文本框，尺寸由rows和cols定义2、访问表单字段（按钮、文本框等）">
+    <link rel="shortcut icon" href="https://nerrol.com/static/user_file/favicon.ico">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@9.13.1/styles/github.css">
+    <link rel="stylesheet" href="/static/casper/css/screen.css">
+    
+</head>
+<body class="post-template nav-closed">
+<div class="nav">
+    <h3 class="nav-title">Menu</h3>
+    <a href="#" class="nav-close">
+        <span class="hidden">关闭</span>
+    </a>
+    <ul>
+        <li><a class="nav-" role="presentation" href="/">Index</a></li></ul>
+    <a class="subscribe-button icon-feed" href="/rss">Feed</a>
+</div>
+<span class="nav-cover"></span>
+<div class="site-wrapper">
+    <header class="main-header post-head no-cover">
+        <nav class="main-nav clearfix">
+            <a class="menu-button icon-menu" href="#"><span class="word">Menu</span></a>
+        </nav>
+    </header>
+
+    <main class="content" role="main">
+        <article class="post">
+
+            <header class="post-header">
+                <h1 class="post-title">JS高级程序设计笔记-表单</h1>
+                <section class="post-meta">
+                    <time class="post-date" datetime="2018-02-22">2018-02-22</time>
+                </section>
+            </header>
+
+            <section class="post-content">
+                <h4>一、表单基础</h4>
+
+<p>1、特性：
+*  method
+*  action
+*  enctype
+*  accept
+*  <code>&lt;input/&gt;</code>：通过type特性判断是那种输入控件：text、radio、checkbox、file、password、  button、submit、reset、hidden、image
+*  <code>&lt;select/&gt;</code>：下拉列表框，里面的值由<code>&lt;option/&gt;</code>元素定义。
+*  <code>&lt;textarea/&gt;</code>：多行文本框，尺寸由rows和cols定义</p>
+
+<p>2、访问表单字段（按钮、文本框等）<br>
+* 通过elements集合访问：oForm.elements[0];
+* 通过name特性访问：oForm.textbox1;</p>
+
+<p>3、表单字段的共性
+* disabled：用来获取或设置表单控件是否被禁用（被禁用的控件不允许用户输入）
+* form：用来指向字段所在的表单
+* blur()：使表单字段失去焦点
+* focus()：使表单字段获取焦点</p>
+
+<p>4、聚焦于第一个字段</p>
+
+<pre><code>var FormUtil = new Object;
+FormUtil.focusOnFirst=function(){
+    if(document.forms.length&gt;0){
+        for(var i=0;i&lt;document.forms[0].elements.length;i++){
+            var oField = document.forms[0].elements[i];
+                if(oField.type != &quot;hidden&quot;){
+                    oField.focus();
+                    return ;
+                }
+            }
+    }
+}
+//使用这个方法时，要检查第一个字段中是否有值，有的话则不改变焦点，因为在加载很慢的页面中，用户有可能在页面完全在载入之前就开始进行输入，这时设置焦点会中断用户当前的输入。
+</code></pre>
+
+<p>5、提交表单</p>
+
+<p>（1）提交表单时，可以通过在action特性中加入警告来检测表单是否已经被提交。<br/>
+<code>&lt;form method=&quot;post&quot; action=&quot;javascript:alert(&quot;Submitted&quot;)&quot;&gt;</code><br/></p>
+
+<p>（2）方式
+*   通过type值为submit或image来提交表单
+*   通过submit()方法</p>
+
+<p>（3）onsubmit事件处理函数<br/>
+可以用来在提交过程前验证表单，仅限于使用提交按钮和图片按钮，如果使用的是submit()方法，不会触发submit事件。</p>
+
+<p>6、仅提交一次<br/>
+使用普通按钮，设置disabled属性为true。</p>
+
+<p>7、重置表单
+* reset按钮
+* reset()方法：会触发reset事件并执行onreset事件处理函数</p>
+
+<h4>二、文本框</h4>
+
+<p>1、<code>&lt;input type=&quot;text&quot;/&gt;</code>
+* size特性：指定文本框宽度（可见字符数目）；
+* value特性：文本框中初始内容；
+* maxlength特性：指定文本框中允许的最大字符数</p>
+
+<p>2、<code>&lt;textarea&gt;&lt;/textarea&gt;</code>
+* 初始值放在标签之间
+* 不能指定允许的最大字符数</p>
+
+<p>3、选择文本<br/>
+调用focus()，再调用select()</p>
+
+<p>4、文本框事件
+* blur
+* focus
+* change
+* select</p>
+
+<p>5、自动选择文本</p>
+
+<pre><code>FormUtil.setTextboxes = function(){
+    var colInputs = document.getElementsByTagName(&quot;input&quot;);
+    var colTextAreas = document.getElementsByTagName(&quot;textarea&quot;);
+    for(var i=0;i&lt;colInputs.length;i++){
+        if(colInputs[i].type == &quot;text&quot; || colInputs[i].type == &quot;password&quot;){
+            colInputs[i].onfocus = function(){
+                this.select();
+            }
+        }
+        }
+    for(var i=0;i&lt;colTextAreas.length;i++){
+            colTextArea[i].onfocus=function(){
+                this.select();
+            }
+    }
+}
+
+</code></pre>
+
+<p>6、自动切换到下一个<br/>
+PS:文本框必须上设置maxlength特性；</p>
+
+<pre><code>//参数为要检查的文本框
+FormUtil.tabForward = function(oTextbox){
+    var oForm = oTextbox.form;
+    //判断文本框不是表单中最后一个
+    if(oForm.elements[oForm.elements.length-1] != oTextbox &amp;&amp; oTextbox.value.length == oTextbox.getAttribute(&quot;maxlength&quot;)){
+        for(var i = 0;i&lt;oForm.elements.length;i++){
+            if(oForm.elements[i]==oTextbox){
+                for(var j=i+1;j&lt;oForm.elements.length;j++){
+                    if(oForm.elements[j].type != &quot;hidden&quot;){
+                        oForm.elements[j].focus();
+                        return;
+                    }
+                }
+                return;
+            }
+        }
+    }
+}
+</code></pre>
+
+<p>7、限制textarea的字符数</p>
+
+<pre><code>var TextUtil = new Object();
+TextUtil.isNotMax = function(){
+    return oTextArea.value.length != oTextArea.getAttribute(&quot;maxlength&quot;);
+    //maxlength并非textarea的有效HTML特性，仍然可以用getAttribute()来获取它的值
+}
+</code></pre>
+
+<p>8、允许/阻止文本框中的字符<br/>
+（1）阻止无效的字符
+* <code>&lt;input type=&quot;text&quot; invalidchars=&quot;0123456789&quot; /&gt;</code>
+* </p>
+
+<pre><code>TextUtil.blockChars = function(oTextbox,oEvent){
+    oEvent = EventUtil.formatEvent(oEvent);
+    var sInvalidChars = oTextbox.getAttribute(&quot;invalidchars&quot;);
+    var sChar = String.fromCharCode(oEvent.charCode);
+    var bIsValidChar = sInvalidChars.indexOf(sChar) == -1;
+    return bIsValidChar || oEvent.ctrlKey;
+}
+</code></pre>
+
+<p>（2）允许有效的字符
+* <code>&lt;input type=&quot;text&quot; validchars=&quot;0123456789&quot; /&gt;</code>
+*  </p>
+
+<pre><code>TextUtil.allowChars = function(oTextbox,oEvent){
+    oEvent = EventUtil.formatEvent(oEvent);
+    var sValidChars = oTextbox.getAttribute(&quot;validchars&quot;);
+    var sChar = String.fromCharCode(oEvent.charCode);
+    var bIsValidChar = sValidChars.indexOf(sChar) &gt; -1;
+    return bIsValidChar || oEvent.ctrlKey;
+}
+</code></pre>
+
+<p>（3）禁止粘贴<br/>
+* IE中paste事件：<code>&lt;input type=&quot;text&quot; validchars=&quot;0123456789&quot; onpaste=&quot;return false&quot; /&gt;</code><br/>
+*  其他浏览器：<br/>
+第一步：阻止上下文菜单：<code>&lt;input type=&quot;text&quot; validchars=&quot;0123456789&quot; oncontextmenu=&quot;return false&quot;/&gt;</code><br/>
+第二步：阻止用户按下ctrl+v：</p>
+
+<pre><code>//重写以上方法，阻止文本框粘贴，将bBlockPaste参数设置为true
+TextUtil.blockChars = function(oTextbox,oEvent,bBlockPaste){
+    var sInvalidChars = oTextbox.getAttribute(&quot;invalidchars&quot;);
+    var sChar = String.fromCharCode(oEvent.keyCode).toLowerCase();
+    var bIsValidChar = sInvalidChars.indexOf(sChar) == -1;
+    if(bBlockPaste){
+        var result = bIsValidChar &amp;&amp; !(oEvent.ctrlKey &amp;&amp; sChar == &quot;v&quot;)
+        return  result;
+    }else{
+        return bIsValidChar || oEvent.ctrlKey;
+    }
+}
+TextUtil.allowChars = function(oTextbox,oEvent,bBlockPaste){
+    var sValidChars = oTextbox.getAttribute(&quot;validchars&quot;);
+    var sChar = String.fromCharCode(oEvent.charCode).toLowerCase();
+    var bIsValidChar = sValidChars.indexOf(sChar) &gt; -1;
+    if(bBlockPaste){
+        var result = bIsValidChar &amp;&amp; !(oEvent.ctrlKey &amp;&amp; sChar == &quot;v&quot;)
+        return  result;
+    }else{
+        return bIsValidChar || oEvent.ctrlKey;
+    }
+}
+
+</code></pre>
+
+<p><strong>注意：ctrlKey属性只有在onkeydown事件处理程序才能被触发，onkeypress不能。</strong></p>
+
+<p>（4）失去焦点时验证</p>
+
+<pre><code>TextUtil.blurBlock = function(oTextbox){
+    var sInvalidChars = oTextbox.getAttribute(&quot;invalidchars&quot;);
+    var arrInvalidChars = sInvalidChars.split(&quot;&quot;);
+    for(var i=0;i&lt;arrInvalidChars.length;i++){
+        if(oTextbox.value.indexOf(arrInvalidChars[i])&gt;-1){
+            oTextbox.focus();
+            oTextbox.select();
+            return;
+        }
+    }
+}
+//此方法要插入到onblur事件处理函数中
+</code></pre>
+
+<h4>三、列表框和组合框</h4>
+
+<ul>
+<li><code>&lt;option/&gt;</code>的value特性：用来确定空间所有可能的值；</li>
+<li><code>&lt;select/&gt;</code>得size特性：用来指示同时可见的条目的个数；</li>
+</ul>
+
+<p>1、访问选项<br/>
+* 显示文本：dom.options[1].text<br/>
+* 显示value：dom.options[1].value<br/>
+* 在集合中的位置：dom.options[1].index<br/>
+* 选中某一项：dom.value = xx<br/>
+2、获取/更改选中项<br/>
+（1）目前选中的选项的索引：<code>&lt;select/&gt;</code>的selectedIndex特性；（未找到则返回-1）<br/>
+（2）选中多个选项：<code>&lt;select/&gt;</code>的multiple特性设置为“multiple”<br/>
+（3）获取所有选中选项索引的方式<br/></p>
+
+<pre><code>ListUtil.getSelectedIndexes = function(oListbox){
+    var arrIndexes = [];
+    for(var i=0;i&lt;oListbox.options.length;i++){
+        if(oListbox.options[i].selected){
+            arrIndexes.push(i);
+        }
+    }
+    return arrIndexes;
+}
+</code></pre>
+
+<p>3、删除选项
+* dom.options[1] = null;（BOM的功能）
+* dom.remove(index);（index为要删除的选项的索引）
+ps:dom为<code>&lt;select/&gt;</code>元素<br/></p>
+
+<pre><code>//删除所有选项时，需要对每个选项调用remove()方法，逆序删除，因为删除一个选项以后Index特性会被重置。
+ListUtil.clear = function(oListbox){
+    for(var i=oListbox.options.length-1;i&gt;=0;i--){
+        oListbox.remove(i);
+    }
+}
+</code></pre>
+
+<p>4、移动选项</p>
+
+<pre><code>//参数为当前选项长春村在的列表、要移入的列表、要移动的选项的索引
+ListUtil.move = function (oListboxFrom,oListboxTo,index){
+    var oOption = oListboxFrom.options[iIndex];
+    if(oOption != null){
+        oListboxTo.appendChild(oOption);
+    }
+}
+</code></pre>
+
+<p>5、添加选项</p>
+
+<pre><code>//参数为：要处理的列表框、要添加的选项名称、要添加的选项的值
+ListUtil.add = function(oListbox,sName,sValue){
+    var oOption = document.createElement(&quot;option&quot;);
+    oOption,appendChild(document.createTextNode(sName));
+    if(arguments.length==3){
+        oOption.setAttribute(&quot;value&quot;,sValue);
+    }
+    oListbox.appendChild(oOption);
+}
+</code></pre>
+
+<h4>四、创建自动提示的文本框</h4>
+
+<pre><code>//参数：要匹配的文本以及要进行匹配的数组
+TextUtil.autosuggestMatch = function(sText,arrValues){
+    var arrResult = [];
+    if(sText != &quot;&quot;){
+        for(var i=0;i&lt;arrValues.length;i++){
+            if(arrValues[i].indexOf(sText) == 0){
+                arrResult.push(arrValues[i]);
+            }
+        }
+    }
+    return arrResult;
+}
+//参数为：要处理的文本框，可能值的数组，所要显示候选项的列表框的ID
+TextUtil.autosuggest = function(oTextbox,arrValues,sListboxId){
+    var oListbox = document.getElementById(sListboxId);
+    ListUtil.clear(oListbox);
+    var arrMatches = TextUtil.autosuggestMatch(oTextbox.value,arrValues);
+    for(var i=0;i&lt;arrMatches.length;i++){
+        ListUtil.add(oListbox,arrMatches[i])
+    }
+    
+}
+
+</code></pre>
+
+<pre><code>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+    &lt;title&gt;style example&lt;/title&gt;
+    &lt;script type=&quot;text/javascript&quot; src=&quot;listutil.js&quot;&gt;&lt;/script&gt;
+    &lt;script type=&quot;text/javascript&quot; src=&quot;textutil.js&quot;&gt;&lt;/script&gt;
+    &lt;script type=&quot;text/javascript&quot;&gt;
+        var arrColors = [&#39;red&#39;,&#39;orange&#39;,&#39;yellow&#39;,&#39;green&#39;,&#39;blue&#39;,&#39;indigo&#39;,&#39;violet&#39;,&#39;brown&#39;,&#39;black&#39;,&#39;tan&#39;,&#39;ivory&#39;,&#39;navy&#39;,&#39;aqua&#39;,&#39;white&#39;,&#39;purple&#39;,&#39;pink&#39;,&#39;gray&#39;,&#39;silver&#39;];
+        arrColors.sort();
+        function setText(oListbox,sTextboxId){
+            var oTextbox = document.getElementById(sTextboxId);
+            if(oListbox.selectedIndex &gt; -1){
+                oTextbox.value = oListbox.options[oListbox.selectedIndex].text;
+            }
+        }
+    &lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;input type=&quot;text&quot; value=&quot;&quot; id=&quot;txtColor&quot; onkeyup=&quot;TextUtil.autosuggest(this,arrColors,&#39;lstColors&#39;)&quot;&gt;&lt;br/&gt;
+&lt;select id=&quot;lstColors&quot; size=&quot;5&quot; style=&quot;width: 200px&quot; onclick=&quot;setText(this,&#39;txtColor&#39;)&quot;&gt;
+&lt;/select&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+
+            </section>
+
+            <footer class="post-footer">
+
+                <figure class="author-image">
+                    <img class="img" src="https://i.loli.net/2018/02/14/5a843d9dc3706.jpg" alt="author" lazyload="on">
+                </figure>
+
+                <section class="author">
+                    <center><h4><a href="/">nerrol</a></h4></center>
+                    <p></p>
+                </section>
+
+                
+
+            </footer>
+
+        </article>
+    </main>
+
+<footer class="site-footer clearfix">
+    <section class="copyright"><a href="/">Nerrol</a> &copy; 2020</section>
+    <section class="poweredby">Powered by <a href="https://silverblog.org">SilverBlog</a> , Theme By Casper</section>
+    
+</footer>
+</div>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/highlight.js@9.13.1/lib/highlight.min.js"></script>
+<script type="text/javascript" src="/static/casper/js/index.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bplayer@1.0.7/dist/bplayer.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bplayer@1.0.7/dist/bp_init.js"></script>
+
+</body>
+</html>

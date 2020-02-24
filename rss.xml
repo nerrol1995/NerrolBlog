@@ -1,0 +1,4151 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0"><channel><title>Nerrol</title><link>https://nerrol.com</link><description></description><lastBuildDate>Tue, 05 Nov 2019 16:34:32 GMT</lastBuildDate><generator>SilverBlog</generator><docs>https://github.com/SilverBlogTeam</docs><item><title>编写一个loader</title><link>https://nerrol.com/post/webpack-1</link><description><![CDATA[<h3>什么是loader？</h3>
+
+<p>loader是负责将webpack打包过程中，加载的资源文件进行一些处理。如下图：</p>
+
+<p><img src="https://i.loli.net/2019/10/28/NmcYsMjpJZ7uVav.png" alt="WechatIMG1.png"></p>
+
+<blockquote>
+<p>loader的本质就是接收字符串，再返回处理完的字符串的过程。loader就是一个node模块，webpack会将加载的资源作为参数传入loader方法，交于loader处理再返回。</p>
+</blockquote>
+
+<h3>loader的配置</h3>
+
+<h4>单个loader配置</h4>
+
+<p>增加config.module.rules数组中的规则对象。</p>
+
+<pre><code class="language-javaScript">let webpackConfig = {
+  module: {
+      rules: [{
+          test: /.js$/,
+            use: [{
+              loader: path.resolve(__dirname,&#39;loaders/a-loader.js&#39;),
+                options:{}
+            }]
+        }]
+    }
+}
+</code></pre>
+
+<h4>多个loader配置</h4>
+
+<pre><code class="language-javaScript">let webpackConfig = {
+    //...
+    module: {
+        rules: [{
+            test: /\.js$/,
+            use: [{
+                //这里写 loader 名即可
+                loader: &#39;a-loader&#39;, 
+                options: {/* ... */}
+            }, {
+                loader: &#39;b-loader&#39;, 
+                options: {/* ... */}
+            }]
+        }]
+    },
+    resolveLoader: {
+        // 告诉 webpack 该去那个目录下找 loader 模块
+        modules: [&#39;node_modules&#39;, path.resolve(__dirname, &#39;loaders&#39;)]
+    }
+}
+</code></pre>
+
+<h3>实现一个loader</h3>
+
+<p>这个loader的功能是将加载的html文件都嵌套在一个layout.html文件中：</p>
+
+<pre><code>&lt;!-- layout.html --&gt;
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+  &lt;meta charset=&quot;utf-8&quot;&gt;
+  &lt;title&gt;Pure Web&lt;/title&gt;
+  &lt;meta name=viewport content=&quot;width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,user-scalable=no&quot;&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;header&gt;This is Header&lt;/header&gt;
+
+  &lt;!-- 我希望我webpack加载的html，都会被嵌套在这个{{__content__}}部分 --&gt;
+  {{__content__}}
+
+  &lt;footer&gt;This is footer&lt;/header&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+
+<h4>获取loader配置</h4>
+
+<p>通过loader-utils可以获取loader的配置项：</p>
+
+<pre><code class="language-javaScript">const loaderUtils = require(&#39;loader-utils&#39;);
+const fs = require(&#39;fs&#39;)
+module.exports = function (source) {
+  const options = loaderUtils.getOptions(this);
+    const layoutHtml = fs.readFileSync(options.layout,&#39;utf-8&#39;);
+    return layoutHtml.replace(&#39;{{__content__}}&#39;,source);
+}
+</code></pre>
+
+<p>webpack的config增加loader设置：</p>
+
+<pre><code class="language-javaScript">let webpackConfig = {
+ test: /\.(html)$/,
+ loader: &#39;html-layout-loader&#39;,
+ include: htmlPath,
+ options: {
+ // path of layout html
+   layout: layoutHtmlPath
+ }
+}
+</code></pre>
+]]></description><guid isPermaLink="true">https://nerrol.com/post/webpack-1</guid><pubDate>Mon, 28 Oct 2019 14:45:36 GMT</pubDate></item><item><title>merge request</title><link>https://nerrol.com/post/git-chat1</link><description><![CDATA[<h3>什么是merge request？</h3>
+
+<p>merge request是gitlab的一种push代码的流程，适合于团队工作。当我们创建一个个人分支，并且在分支上修改了一些内容，直接merge到主分支往往是不太安全的。</p>
+
+<h3>如何创建merge request？</h3>
+
+<ul>
+<li>打开gitlab；</li>
+<li><p>进入代码库，点击create merge request;
+<img src="https://i.loli.net/2019/10/08/AZ5K1fFpS4H6Bzk.png" alt="WechatIMG1.png"></p></li>
+<li><p>填写下方的source branch（源分支）、target branch（目标分支）、以及assignee（代码审核人）</p></li>
+</ul>
+
+<p><img src="https://i.loli.net/2019/10/08/5FGqoUEKhIOCL2t.png" alt="WechatIMG2.png"></p>
+
+<ul>
+<li>点击下方的submit merge request；</li>
+<li>审核人在通知中可以查看到相关的todo信息</li>
+</ul>
+
+<p><img src="https://i.loli.net/2019/10/08/EUOy8kTL4xKv57S.png" alt="WechatIMG4.png"></p>
+]]></description><guid isPermaLink="true">https://nerrol.com/post/git-chat1</guid><pubDate>Tue, 08 Oct 2019 15:47:23 GMT</pubDate></item><item><title>移动端适配方案</title><link>https://nerrol.com/post/mobileCSS-1</link><description><![CDATA[<p>首先了解下面这些基本概念：</p>
+
+<h4>视窗(viewport)</h4>
+
+<p>viewport就是是用户网页的可视区域。</p>
+
+<h4>物理像素(physical pixel)</h4>
+
+<p>一个物理像素是显示器(手机屏幕)上最小的物理显示单元，在操作系统的调度下，每一个设备像素都有自己的颜色值和亮度值。</p>
+
+<h4>设备独立像素(density-independent pixel)</h4>
+
+<p>设备独立像素(也叫密度无关像素)，可以认为是计算机坐标系统中得一个点，这个点代表一个可以由程序使用的虚拟像素(比如: css像素)，然后由相关系统转换为物理像素。</p>
+
+<p>所以说，物理像素和设备独立像素之间存在着一定的对应关系，这就是接下来要说的设备像素比。</p>
+
+<h4>CSS像素</h4>
+
+<p>CSS像素是一个抽像的单位，主要使用在浏览器上，用来精确度量Web页面上的内容。一般情况之下，CSS像素称为与设备无关的像素(device-independent pixel)，简称DIPs。</p>
+
+<h4>屏幕密度</h4>
+
+<p>屏幕密度是指一个设备表面上存在的像素数量，它通常以每英寸有多少像素来计算(PPI)。著作权归作者所有。</p>
+
+<h4>设备像素比(device pixel ratio)</h4>
+
+<p>设备像素比(简称dpr)定义了物理像素和设备独立像素的对应关系，它的值可以按如下的公式的得到：</p>
+
+<blockquote>
+<p><strong>设备像素比 = 物理像素 / 设备独立像素</strong></p>
+</blockquote>
+
+<p>JavaScript中可以使用<code>window.devicePixelRatio</code>获取当前设备的dpr。</p>
+
+<p>在css中，可以通过-webkit-device-pixel-ratio，-webkit-min-device-pixel-ratio和 -webkit-max-device-pixel-ratio进行媒体查询，对不同dpr的设备，做一些样式适配(这里只针对webkit内核的浏览器和webview)。</p>
+
+<hr>
+
+<h4>举例说明：</h4>
+
+<p>以iphone6为例：</p>
+
+<ul>
+<li>设备宽高为375×667，可以理解为设备独立像素(或css像素)。</li>
+<li>dpr为2，根据上面的计算公式，其物理像素就应该×2，为750×1334。</li>
+</ul>
+
+<p>在不同的屏幕上(普通屏幕 vs retina屏幕)，css像素所呈现的大小(物理尺寸)是一致的，不同的是1个css像素所对应的物理像素个数是不一致的。</p>
+
+<p><img src="https://i.loli.net/2019/10/08/pxTaIn7LhNo6HAq.png" alt=""></p>
+
+<ul>
+<li>在普通屏幕下，1个css像素 对应 1个物理像素(1:1)。</li>
+<li>在retina 屏幕下，1个css像素对应 4个物理像素(1:4)。</li>
+</ul>
+
+<p>对图片来说也是如此：</p>
+
+<p><img src="https://i.loli.net/2019/10/08/rfyzivLeuqbtjUV.png" alt="WechatIMG6.png"></p>
+
+<hr>
+
+<h4>位图像素</h4>
+
+<p>一个位图像素是栅格图像(如：png, jpg, gif等)最小的数据单元。每一个位图像素都包含着一些自身的显示信息(如：显示位置，颜色值，透明度等)。</p>
+
+<hr>
+
+<p>理论上，1个位图像素对应于1个物理像素，图片才能得到完美清晰的展示。</p>
+
+<p>在普通屏幕下是没有问题的，但是在retina屏幕下就会出现位图像素点不够，从而导致图片模糊的情况。于是就产生了<strong>retina屏幕下图片模糊的问题</strong>。</p>
+
+<hr>
+
+<h4>retina屏幕下图片模糊的问题：</h4>
+
+<p>对于图片高清问题，比较好的方案就是两倍图片(@2x)，比如<code>100*100</code>的图片，需要提供<code>200*200</code>的图片。如此一来，位图像素点数就是之前的4倍，在retina屏幕下，位图像素点数与物理像素点数形成1：1的比例，图片就清晰了。</p>
+
+<p><strong>位图像素点数/物理像素点数 = 1是决定了图片展示是否清晰的指标。</strong></p>
+
+<hr>
+
+<h4>但是这种方案也引申出一个问题：如果不加分辨的使用两倍图，普通屏幕下会怎么样呢？</h4>
+
+<p>普通屏幕下，<code>100*100</code>的图片，所对应的物理像素个数也是<code>100*100</code>个，而两倍图的位图像素个数是<code>200*200</code>个，所以就出现一个物理像素对应4个位图像素点，取色也只能通过一定的算法（显示结果也只是一张只有原图像素总数的四分之一，这个过程叫做downsampling），肉眼看上去图片不会模糊，但是会缺少一些锐利度，或者说有一些色差。</p>
+
+<p>缺点可以总结为：</p>
+
+<ol>
+<li>不加分辨的使用@2x图，造成资源浪费；</li>
+<li>图片由于downsamping，会造成一些色差；</li>
+</ol>
+
+<p><strong>最好的解决方法是：不同的dpr下，加载不同的尺寸的图片：通过媒体查询或者js判断。</strong></p>
+
+<p>这样的话，就需要准备两套图片，是比较麻烦的，一般情况下，我们都会有一个图片服务器，通过url获取参数，然后控制图片质量，也可以将图片裁剪成不同的尺寸，因此我们只需要上传@2x图，其余小图都交给图片服务器来进行处理，我们只负责拼接url。</p>
+
+<hr>
+
+<p>下面说一下其他的不同分辨率下，不同屏幕手机下会遇到的几个经典问题：</p>
+
+<h4>retina屏幕下，border:1px问题</h4>
+
+<blockquote>
+<p>在切图的过程中，我们应该都有碰到过某些手机border:1px无法显示的问题，那么为什么会出现这种情况呢？</p>
+</blockquote>
+
+<p>对于一条1px宽的直线，在明目上的物理尺寸是相同的，但不同的是屏幕上的物理像素。对于一条直线，设计师想要的retina下的border:1px，其实就是1物理像素宽，对于css而言，可以认为是border:0.5px，这是retina下（dpr=2）能显示的最小单位。</p>
+
+<p>然而不是所有的手机浏览器都能识别border:0.5px，ios7以下及android等其他系统，0.5px会被当成为0px处理，那么如何实现0.5px呢？</p>
+
+<p>最简单直接的方案就是元素scale：</p>
+
+<pre><code class="language-css">.scale{
+    position: relative;
+}
+.scale:after{
+    content:&quot;&quot;;
+    position: absolute;
+    bottom:0px;
+    left:0px;
+    right:0px;
+    border-bottom:1px solid #ddd;
+    -webkit-transform:scaleY(.5);
+    -webkit-transform-origin:0 0;
+}
+
+</code></pre>
+
+<p>但是这种方法不够通用且繁琐，比较好的方案是，添加一下meta标签，设置viewport：</p>
+
+<p><code>&lt;meta name=&quot;viewport&quot; content=&quot;width=640,initial-scale=0.5,maximum-scale=0.5, minimum-scale=0.5,user-scalable=no&quot;&gt;
+</code></p>
+
+<p>这样页面上所有的border:1px都能缩小0.5，从而达到border:0.5px的效果。</p>
+
+<p>页面scale会产生一些问题：</p>
+
+<ol>
+<li>字体大小被缩放；</li>
+<li>页面布局被缩放；</li>
+</ol>
+
+<hr>
+
+<h4>多屏适配布局问题</h4>
+
+<p>移动端布局，为了适配各种手机，目前比较好的方案就是rem(flexible方案)。</p>
+
+<h3>一、Flexible方案</h3>
+
+<p>基于rem的原理，我们要做得就是针对不同的屏幕尺寸及dpr动态改变根节点html的font-size大小。</p>
+
+<p>提取一个公式：</p>
+
+<p><code>rem = document.documentElement.clientWidth * dpr / 10</code></p>
+
+<p>说明：</p>
+
+<ol>
+<li>乘以dpr，是因为页面有可能为了实现1px border页面会缩放(scale) 1/dpr 倍(如果没有，dpr=1)；</li>
+<li>除以10，是为了取整，方便计算(理论上可以是任何值)；</li>
+</ol>
+
+<pre><code class="language-javascript">var dpr, rem, scale;
+var docEl = document.documentElement;
+var fontEl = document.createElement(&#39;style&#39;);
+var metaEl = document.querySelector(&#39;meta[name=&quot;viewport&quot;]&#39;);
+
+dpr = window.devicePixelRatio || 1;
+rem = docEl.clientWidth * dpr / 10;
+scale = 1 / dpr;
+
+
+// 设置viewport，进行缩放，达到高清效果
+metaEl.setAttribute(&#39;content&#39;, &#39;width=&#39; + dpr * docEl.clientWidth + &#39;,initial-scale=&#39; + scale + &#39;,maximum-scale=&#39; + scale + &#39;, minimum-scale=&#39; + scale + &#39;,user-scalable=no&#39;);
+
+// 设置data-dpr属性，留作的css hack之用
+docEl.setAttribute(&#39;data-dpr&#39;, dpr);
+
+// 动态写入样式
+docEl.firstElementChild.appendChild(fontEl);
+fontEl.innerHTML = &#39;html{font-size:&#39; + rem + &#39;px!important;}&#39;;
+
+// 给js调用的，某一dpr下rem和px之间的转换函数
+window.rem2px = function(v) {
+v = parseFloat(v);
+return v * rem;
+};
+window.px2rem = function(v) {
+    v = parseFloat(v);
+    return v / rem;
+};
+
+window.dpr = dpr;
+window.rem = rem;
+
+</code></pre>
+
+<p>这种方案可以同时解决三个问题：</p>
+
+<ol>
+<li>border:1px问题；</li>
+<li>图片高清问题；</li>
+<li>屏幕适配问题；</li>
+</ol>
+
+<h4>flexible方案缺陷</h4>
+
+<ul>
+<li>在奇葩的dpr设备上表现效果不太好，比如 一些华为的高端机型 用rem布局会出现错乱。</li>
+<li>不支持css3 calc的需要大量密集的 @media hack；</li>
+<li>使用iframe引用也会出现问题；</li>
+</ul>
+
+<h3>二、vw方案</h3>
+
+<p>以前的Flexible方案是通过JavaScript来模拟vw的特性，那么到今天为止，vw已经得到了众多浏览器的支持，也就是说，可以直接考虑将vw单位运用于我们的适配布局中。</p>
+
+<p><img src="https://i.loli.net/2019/10/08/Fanm6Hb9ce1VS3U.png" alt="WechatIMG7.png"></p>
+
+<blockquote>
+<p>vw是基于Viewport视窗的长度单位，这里的视窗（Viewport）指的就是浏览器可视化的区域，而这个可视区域是window.innerWidth/window.innerHeight的大小。</p>
+</blockquote>
+
+<p><img src="https://i.loli.net/2019/10/08/LJbBumSKgclPQZa.png" alt="WechatIMG8.png"></p>
+
+<p>那么根据以上定义：
+1. <code>1vw=width.innerWidth  / 100</code>；
+2. <code>1vh=width.innerHeight  / 100</code>；
+3. vmin：vmin的值是当前vw和vh中较小的值；
+4. vmax：vmax的值是当前vw和vh中较大的值；</p>
+
+<hr>
+
+<p>因此这个方案中，根据设计稿（750px宽度），<code>100vw = 750px</code>，即<code>1vw = 7.5px</code>，我们可以直接根据px值转换成对应的vw，但是重复的计算会耗费一些时间，为此我们可以使用PostCSS的插件<strong>post-px-to--viewport</strong>，在代码中就可以直接写px了，PostCSS编译之后就是我们所需要的带vw代码，需要对插件进行相关的参数配置，详细可以<a href="https://github.com/evrone/postcss-px-to-viewport">阅读官方文档</a>。</p>
+
+<ul>
+<li>容器适配，可以使用vw</li>
+<li>文本的适配，可以使用vw</li>
+<li>大于1px的边框、圆角、阴影都可以使用vw</li>
+<li>内距和外距，可以使用vw</li>
+</ul>
+
+<hr>
+
+<h4>解决1px方案</h4>
+
+<p>使用PostCSS插件，解决1px可以使用<a href="https://github.com/jonathantneal/postcss-write-svg">postcss-write-svg</a>。</p>
+
+<h4>降级处理</h4>
+
+<p>到目前为止，T30的机型中还有几款机型是不支持vw的适配方案。那么如果业务需要，应该怎么处理呢？有两种方式可以进行降级处理：</p>
+
+<ul>
+<li><a href="https://www.w3cplus.com/css/css-houdini.html">CSS Houdin</a>i：通过CSS Houdini针对vw做处理，调用CSS Typed OM Level1 提供的CSSUnitValue API。</li>
+<li>CSS Polyfill：通过相应的Polyfill做相应的处理，目前针对于vw单位的Polyfill主要有：vminpoly、Viewport Units Buggyfill、vunits.js和Modernizr。个人推荐采用Viewport Units Buggyfill</li>
+</ul>
+
+<h4>vw的缺陷</h4>
+
+<ul>
+<li>比如当容器使用vw单位，margin采用px单位时，很容易造成整体宽度超过100vw，从而影响布局效果。对于类似这样的现象，我们可以采用相关的技术进行规避。比如将margin换成padding，并且配合box-sizing。只不过这不是最佳方案，随着将来浏览器或者应用自身的Webview对calc()函数的支持之后，碰到vw和px混合使用的时候，可以结合calc()函数一起使用，这样就可以完美的解决。</li>
+<li>px转换成vw单位，多少还会存在一定的像素差，毕竟很多时候无法完全整除。</li>
+</ul>
+]]></description><guid isPermaLink="true">https://nerrol.com/post/mobileCSS-1</guid><pubDate>Fri, 30 Aug 2019 17:13:52 GMT</pubDate></item><item><title>vue实现全文/折叠效果</title><link>https://nerrol.com/post/jsEffect-01</link><description><![CDATA[<h3>step 1</h3>
+
+<p>变量：</p>
+
+<ul>
+<li>是否超过行数限制；（isOverflow）</li>
+<li>全文/收起状态；（isFold）</li>
+</ul>
+
+<h3>step 2</h3>
+
+<p>限制行数（收起状态）的css样式：</p>
+
+<pre><code>.limit-line {
+    word-break: break-all;
+    margin: 0.32rem 0 0 0;
+    font-size: 0.28rem;
+    line-height: 1.5;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 6;
+    -webkit-box-orient: vertical;
+}
+</code></pre>
+
+<p>以及取消限制（全文状态）的css样式：</p>
+
+<pre><code>.invalid-limit {
+     display: block;
+ }
+</code></pre>
+
+<h3>step 3</h3>
+
+<p>模板部分：</p>
+
+<pre><code>```
+&lt;!-- 内容部分 --&gt;
+&lt;p :class=&quot;[&#39;limit-line&#39;,{&#39;invalid-limit&#39;:item.isFold}]&quot;&gt;{{ item.content }} &lt;/p&gt;
+&lt;!-- 状态部分 --&gt;
+</code></pre>
+
+<p>&lt;\p v-if=&quot;item.isOverflow&quot;  class=&quot;limit-text&quot;  @click=&quot;switchFoldStatus(item)&quot;&gt;&gt;
+   {{ item.isFold ? &#39;收起&#39; : &#39;展开&#39; }}
+&lt;\/p&gt;
+    ```</p>
+
+<pre><code>### step 4
+</code></pre>
+
+<p>isOverflow的判断条件：利用dom的scrollHeight和真实高度offsetHeight进行判断，offsetHeight小于scrollHeight，表示可滚动，超出了行数限制。</p>
+
+<pre><code>// 给每个数据添加isOverflow属性，并将isFold属性都设置为False收起状态。
+// isCommentOverflow在mounted钩子中执行；
+    isCommentOverflow() {
+      this.$nextTick(() =&gt; {
+        this.commentList.forEach((item, index) =&gt; {
+          const el = document.getElementsByClassName(&#39;limit-line&#39;)[index];
+          this.$set(item, &#39;isFold&#39;, false);
+          if (el.offsetHeight &lt; el.scrollHeight) {
+            this.$set(item, &#39;isOverflow&#39;, true);
+          } else {
+            this.$set(item, &#39;isOverflow&#39;, false);
+          }
+        });
+      });
+    },
+</code></pre>
+
+<p>完成切换isFold属性的函数：</p>
+
+<pre><code>// 切换评论展示状态
+    switchFoldStatus(item) {
+      item.isFold = !item.isFold;
+    }
+</code></pre>
+]]></description><guid isPermaLink="true">https://nerrol.com/post/jsEffect-01</guid><pubDate>Sat, 15 Jun 2019 16:53:00 GMT</pubDate></item><item><title>Reverse String in JavaScript</title><link>https://nerrol.com/post/jsReverse</link><description><![CDATA[<h3>1.for loop</h3>
+
+<p>Apply decrementing loop to iterate through each letter or string to create a new reverse string.</p>
+
+<pre><code> function reverse(str){
+      let reversed = &#39;&#39;;
+    for(var i = str.length-1;i&gt;=0;i--){
+      reversed += str[i];
+    }
+    return reversed;
+}
+reverse(&#39;abc&#39;)
+</code></pre>
+
+<p>We can use ES6 syntax,such as &quot;for of&quot;.</p>
+
+<pre><code>  function reverse(str){
+      let reversed = &#39;&#39;;
+    for(let s of str){
+      console.log (s)
+      reversed = s + reversed;
+    }
+    return reversed;
+}
+reverse(&#39;abc&#39;)
+</code></pre>
+
+<h3>2.reverse() method for arrays</h3>
+
+<pre><code>function reverse(str) {
+  return  str.split(&#39;&#39;).reverse().join(&#39;&#39;);
+}
+</code></pre>
+
+<p>ES6 syntax.</p>
+
+<pre><code>function reverse(str) {
+  return  [...str].reverse().join(&#39;&#39;);
+}
+</code></pre>
+
+<h3>3. reduce() method for arrays</h3>
+
+<pre><code>function reverse(str){
+  return str.split(&quot;&quot;).reduce((rev, char)=&gt; char + rev, &#39;&#39;); 
+}
+</code></pre>
+
+<h3>4.recursion</h3>
+
+<pre><code>function  reverse(){
+  return str ? reverse(str.substr(1))  + str[0] : str; 
+}
+</code></pre>
+]]></description><guid isPermaLink="true">https://nerrol.com/post/jsReverse</guid><pubDate>Fri, 10 May 2019 16:38:16 GMT</pubDate></item><item><title>why Function and Object, instanceof each other ?</title><link>https://nerrol.com/post/JSPrototype</link><description><![CDATA[<h4>Object instanceof Function</h4>
+
+<blockquote>
+<p>Because Object is a function,thus Object is instanceof Function. In another word,Object is inherits from Function.prototype.</p>
+</blockquote>
+
+<p>The prototype chain is looks like: </p>
+
+<p>** Object-&gt;Function.prototype-&gt;Object.propotype-&gt;null</p>
+
+<h4>Function instanceof Object</h4>
+
+<blockquote>
+<p>Since Function.prototype is a function,and since every function is an Object.</p>
+</blockquote>
+
+<p>The prototype chain is looks like:</p>
+
+<p>** Function-&gt;Function.prototype--&gt;Object.prototype-&gt;null</p>
+
+<p><img src="https://ws2.sinaimg.cn/large/006tNc79ly1g2jmurhaivj31840b4q4q.jpg" alt=""></p>
+]]></description><guid isPermaLink="true">https://nerrol.com/post/JSPrototype</guid><pubDate>Mon, 29 Apr 2019 17:32:26 GMT</pubDate></item><item><title>Vue CLI 3 配置中的Modern mode</title><link>https://nerrol.com/post/vuecli3-modern mode</link><description><![CDATA[<p>背景：由于公司的技术栈由fisp向webpack迁移，使用了vue cli3来构建项目。线上发现一个现象：将ajax以最快的速度发出，但在chrome的devtools Network面板中出现了预料之外的请求排序，如下图所示。（使用ajax预加载我们的预想是cache-aixos是最早加载的）</p>
+
+<p><img src="https://wx3.sinaimg.cn/large/006tNc79ly1g1zny31zb6j30v60u07fn.jpg" alt=""></p>
+
+<p>切换到Elements面板，可以看到几个加载优先级比较高的资源的rel属性都被设置为modulepreload。</p>
+
+<p><img src="https://ws2.sinaimg.cn/large/006tNc79ly1g24gwc44k2j31700acgqz.jpg" alt=""></p>
+
+<h3>什么是modulepreload？</h3>
+
+<ul>
+<li><p>在支持原生 ES2015+ 的浏览器中，js会通过 <code>&lt;script type=&quot;module&quot;&gt;</code>加载，并且可以使用 <code>&lt;link rel=&quot;modulepreload&quot;&gt;</code> 预加载。</p></li>
+<li><p>在不支持的浏览器中使用<code>&lt;script nomodule&gt;</code>来加载编译版本，并且这会被支持ES模块的浏览器所忽略。</p></li>
+</ul>
+
+<p>vue cli3提供了Modern mode模式来自动构建出这种特性。感兴趣可以查看vue cli3的实现源码：<a href="https://github.com/vuejs/vue-cli/blob/3b2cc6bd305263f17a5d1d52d4bb03bf9025e9c3/packages/%40vue/babel-preset-app/index.js#L71">查看源码</a></p>
+
+<h3>Modern mode</h3>
+
+<blockquote>
+<p>使用 Babel 我们能够利用 ES2015 中最新的语言特性，但这也意味着必须通过转换和 添加 polyfille 来支持旧浏览器。这些转换后的代码通常比原生 ES2015+ 代码更冗长，并且解析和运行较慢。鉴于当今大多数现代浏览器对原生 ES2015+ 有着不错的支持，而我们不得不将数据量更大和效率底下的代码发送给浏览器，因为我们必须支持那些旧的浏览器。</p>
+</blockquote>
+
+<p>启用该模式会自动构建两个版本的 js 包，针对支持现代浏览器的原生 ES2015+ 包，和针对其他旧浏览器的包，生成的 HTML 会通过 <code>&lt;script type=&quot;module&quot;&gt;</code> 和 <code>&lt;script nomodule&gt;</code>进行自动降级，不需要任何特殊部署配置。原生 ES2015 包几乎不需要任何 polyfill 和编译，代码尺寸更小，现代浏览器 parse 和运行也更快。</p>
+
+<hr>
+
+<p>注：<code>&lt;link rel=&quot;modulepreload&quot;&gt;</code> 是<code>&lt;link rel=&quot;preload&quot;&gt;</code> 的特定模块版本，解决了后者的一些问题。</p>
+
+<h3>区分Preload，Prefetch</h3>
+
+<p>了解了Modern mode，但是关于资源的加载顺序依然会有些疑惑：为什么css文件的优先级会比js文件的优先级要高？我们先来了解下Preload和Prefetch的区别。</p>
+
+<blockquote>
+<p>Prefetch 提示浏览器这个资源将来可能需要，但是把决定是否和什么时间加载这个资源的决定权交给浏览器。
+Preload对浏览器指示预先请求当前页需要的资源（关键的脚本，字体，主要图片），并且Preload不会对load事件造成阻塞。</p>
+
+<p>Preload is also different since it has a functional onload event (which, at least in Chrome, wasn’t working for the other two rel values).
+On top of that, preload does not block the window’s onload event, unless the resource is also requested by a resource that blocks that event.</p>
+</blockquote>
+
+<p>上述来自 Yoav Weiss 的文章<a href="https://www.smashingmagazine.com/2016/02/preload-what-is-it-good-for/">Preload: What Is It Good For?</a></p>
+
+<h3>Preload，Prefetch的缓存行为</h3>
+
+<p>Chrome的四种缓存：</p>
+
+<ul>
+<li>HTTP 缓存；</li>
+<li>内存缓存；</li>
+<li>Service Worker 缓存；</li>
+<li>Push 缓存。</li>
+</ul>
+
+<p>当一个资源被 preload 或者 prefetch 获取后，如果资源可以被缓存（比如说存在有效的cache-control 和 max-age），它被存储在 HTTP 缓存中可以被现在或将来的任务使用，如果资源不能被缓存在 HTTP 缓存中，作为代替，它被放在内存缓存中直到被使用。</p>
+
+<h3>Preload，Prefetch在Chrome中的优先级</h3>
+
+<p>下图是 Blink 内核的 Chrome 46 及更高版本中不同资源的加载优先级情况：</p>
+
+<p><img src="https://ws4.sinaimg.cn/large/006tNc79ly1g25gscgg8uj30u00v2wz1.jpg" alt=""></p>
+
+<blockquote>
+<p>preload 用 “as” 或者用 “type” 属性来表示他们请求资源的优先级，preload 使用 as=&quot;style&quot; 属性将获得最高的优先级，会获得与资源 “type” 属性所拥有的相同的优先级。preload as=&quot;style&quot; 将会获得比 as=“script” 更高的优先级。没有 “as” 属性的将被看作异步请求，“Early”意味着在所有未被预加载的图片请求之前被请求（“late”意味着之后）。</p>
+</blockquote>
+
+<p>优先级信息可以从开发者工具的 Timeline/Performance 区域的 Network 区域都能看到相关信息。</p>
+
+<p><img src="https://ws1.sinaimg.cn/large/006tNc79ly1g25hipptqoj315e0awwi3.jpg" alt=""></p>
+]]></description><guid isPermaLink="true">https://nerrol.com/post/vuecli3-modern mode</guid><pubDate>Tue, 16 Apr 2019 17:07:11 GMT</pubDate></item><item><title>Event loop</title><link>https://nerrol.com/post/js-eventloop</link><description><![CDATA[<p>我们先来看一道题目：</p>
+
+<pre><code>console.log(&#39;1&#39;);
+setTimeout(function() {
+    console.log(&#39;2&#39;);
+    process.nextTick(function() {
+        console.log(&#39;3&#39;);
+    })
+    new Promise(function(resolve) {
+        console.log(&#39;4&#39;);
+        resolve();
+    }).then(function() {
+        console.log(&#39;5&#39;)
+    })
+})
+process.nextTick(function() {
+    console.log(&#39;6&#39;);
+})
+new Promise(function(resolve) {
+    console.log(&#39;7&#39;);
+    resolve();
+}).then(function() {
+    console.log(&#39;8&#39;)
+})
+
+setTimeout(function() {
+    console.log(&#39;9&#39;);
+    process.nextTick(function() {
+        console.log(&#39;10&#39;);
+    })
+    new Promise(function(resolve) {
+        console.log(&#39;11&#39;);
+        resolve();
+    }).then(function() {
+        console.log(&#39;12&#39;)
+    })
+})
+</code></pre>
+
+<p>要解出这道题需要了解一些基本的概念，首先我们从进程和线程开始：</p>
+
+<h3>进程与线程</h3>
+
+<ul>
+<li>进程(Process)是计算机中的程序关于某数据集合上的一次运⾏活动，是系统进⾏资源分配和调度的基本单位。</li>
+<li>线程(thread)是操作系统能够进⾏运算调度的最⼩单位。它被包含在进程之中，是进程中的实际运作单位。</li>
+</ul>
+
+<h3>浏览器常驻线程</h3>
+
+<ul>
+<li>GUI 渲染线程；</li>
+<li>JavaScript引擎线程；</li>
+<li>定时触发器器线程；</li>
+<li>事件触发线程；</li>
+<li>异步http请求线程；</li>
+</ul>
+
+<p>** 可以知道，javaScript是单线程的语言，在一段时间内只能做一件事。</p>
+
+<h3>执行栈</h3>
+
+<p>可以认为执行栈是一个存储函数调用的栈结构，遵循先进后出的原则。当开始执行javaScript代码时，会先将main()函数压入栈中，然后再执行我们的代码。</p>
+
+<pre><code>function a() {
+  console.log(&#39;a&#39;);
+}
+function b() {
+  a();
+}
+b()
+</code></pre>
+
+<p>这段代码中执行栈如下图：</p>
+
+<p><img src="https://ws2.sinaimg.cn/large/006tKfTcly1g1bn5r49tfj30fi0ngwex.jpg" alt=""></p>
+
+<p>了解完执行栈的概念，接下来我们来看同步任务和异步任务：</p>
+
+<h3>同步任务和异步任务</h3>
+
+<p>我们可以通过下图来具体看javaScript引擎对于同步和异步任务的处理：</p>
+
+<ul>
+<li>首先同步任务和异步任务被放入两个不同的栈中；同步任务会直接进入主线程，而异步任务会进入一个叫做Event Table中并注册回调函数；</li>
+<li>异步任务注册的回调函数会放入Event Queue队列中，待主线程内的任务执行完毕为空时，会去Event Queue中拿出响应的函数放入主线程栈中执行；</li>
+<li>以上过程会不断地重复，也就是Event Loop。</li>
+<li>javaScript引擎存在monitoring process进程，会轮询检查主线程执行栈是否为空，一旦为空，就会去Event Queue检查是否有等待被调用的函数。</li>
+</ul>
+
+<p><img src="https://ws2.sinaimg.cn/large/006tKfTcly1g1g8xdbqclj30yf0u0nll.jpg" alt=""></p>
+
+<p>不同的异步任务源也会也会进入不同的队列中，异步任务源又可以分为宏任务（macrotask）和微任务（microtask）。</p>
+
+<h3>宏任务和微任务</h3>
+
+<h4>宏任务</h4>
+
+<ul>
+<li> script；</li>
+<li> setTimeout；</li>
+<li> setInterval；</li>
+<li> setImmediate；</li>
+<li> UI rendering；</li>
+<li> I/0（Node中）；</li>
+</ul>
+
+<h4>微任务</h4>
+
+<ul>
+<li>原生Promise(有些实现的promise将then方法放到了宏任务中)；</li>
+<li>process.nextTick（ Node中）；</li>
+<li>MutationObserver；</li>
+</ul>
+
+<p><img src="https://ws2.sinaimg.cn/large/006tKfTcly1g1g9gjxvj3j30zk0u017x.jpg" alt=""></p>
+
+<p><strong>这里很多人会有个误区，认为微任务快于宏任务，其实是错误的。因为宏任务中包括了 script ，浏览器会先执行一个宏任务，接下来有异步代码的话才会先执行微任务。</strong></p>
+
+<hr>
+
+<ol>
+<li> 回到开头的代码上，按照上面我们的步骤，会先执行一个宏任务，执行同步代码，输出1。</li>
+<li>接着遇到setTimeout，我们将它放入宏任务queue中先不管；</li>
+<li>然后process.nextTick被推入微任务queue中；</li>
+<li>遇到new Promise会直接执行，输出7。接着回调函数then被推入微任务queue中；</li>
+<li>最后的setTimeout放入宏任务queue中。</li>
+</ol>
+
+<table>
+<thead>
+<tr>
+<th>宏任务</th>
+<th>微任务</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td>setTimeout1</td>
+<td>process1</td>
+</tr>
+<tr>
+<td>setTimeout2</td>
+<td>then1</td>
+</tr>
+</tbody>
+</table>
+
+<ol>
+<li>检查到Event Queue中有微任务；</li>
+<li>执行process1，输出6；</li>
+<li>执行then1，输出8；</li>
+</ol>
+
+<p>** 此时第一轮宏任务执行完成，输出1、7、6、8。开始第二轮：**</p>
+
+<ol>
+<li>执行宏任务setTimeout1，输出2，将process.nextTick推入微任务queue中；</li>
+<li>new Promise直接执行，输出4，回调函数then被推入微任务queue中；</li>
+</ol>
+
+<table>
+<thead>
+<tr>
+<th>宏任务</th>
+<th>微任务</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td>setTimeout2</td>
+<td>process2</td>
+</tr>
+<tr>
+<td></td>
+<td>then2</td>
+</tr>
+</tbody>
+</table>
+
+<ol>
+<li>检查到Event Queue中有微任务；</li>
+<li>执行process2，输出3；</li>
+<li>执行then2，输出5； </li>
+</ol>
+
+<p>** 此时第二轮宏任务执行完成，输出1、7、6、8、2、4、3、5。开始第三轮：**</p>
+
+<ol>
+<li>执行宏任务setTimeout2，输出9，将process.nextTick推入微任务queue中；</li>
+<li>new Promise直接执行，输出11，回调函数then被推入微任务queue中；</li>
+</ol>
+
+<table>
+<thead>
+<tr>
+<th>宏任务</th>
+<th>微任务</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td></td>
+<td>process3</td>
+</tr>
+<tr>
+<td></td>
+<td>then3</td>
+</tr>
+</tbody>
+</table>
+
+<ol>
+<li>检查到Event Queue中有微任务；</li>
+<li>执行process3，输出10；</li>
+<li>执行then3，输出12； </li>
+</ol>
+
+<p>** 此时第三轮宏任务执行完成，输出1、7、6、8、2、4、3、5、9、11、10、12。（node环境下的事件监听依赖libuv与前端环境不完全相同，输出顺序可能会有误差）。**</p>
+]]></description><guid isPermaLink="true">https://nerrol.com/post/js-eventloop</guid><pubDate>Thu, 21 Mar 2019 20:32:48 GMT</pubDate></item><item><title>算法解析</title><link>https://nerrol.com/post/JS-Arithmetic1-repeat</link><description><![CDATA[<h2>排序算法</h2>
+
+<h3>冒泡、插入、选择排序</h3>
+
+<ul>
+<li>时间复杂度都为O(n²)；</li>
+<li>都为原地排序算法；</li>
+</ul>
+
+<h5>冒泡排序</h5>
+
+<ul>
+<li>依次比较相邻的两个值，如果后面的比前面的小，则将小的元素排到前面。依照这个规则进行多次并且递减的迭代，直到顺序正确。</li>
+<li>本质在于不断向上进行比较交换，一次循环进行可能多次交换；</li>
+<li>稳定的排序算法；</li>
+</ul>
+
+<pre><code>//未优化的冒泡排序
+function bubbleArith(arr){
+  for(var i=0;i&lt;arr.length;i++){
+      for(var j=arr.length-1;j&gt;i;j--){
+          if(arr[j]&lt;arr[j-1]){
+              var temp = arr[j];
+                arr[j] = arr[j-1];
+                arr[j-1] = temp;
+            }
+        }
+    }
+     console.log(arr);
+}
+
+var arr = [2,37,3,6,5,23,77,8];
+bubbleArith(arr); //[2, 3, 5, 6, 8, 23, 37, 77]
+</code></pre>
+
+<p>//优化过后的冒泡排序：已经是顺序序列的数组位置无需再次进行比较；</p>
+
+<pre><code>function opBubbleArith(arr){
+var count = 0;
+  for(var i=count;i&lt;arr.length;i++){
+      for(var j=arr.length-1;j&gt;i;j--){
+          if(arr[j]&lt;arr[j-1]){
+             count = j-1;
+              var temp = arr[j];
+                arr[j] = arr[j-1];
+                arr[j-1] = temp;
+            }
+        }
+    }
+     console.log(arr);
+}
+
+var arr = [2,37,3,6,5,23,77,8];
+opBubbleArith(arr); //[2, 3, 5, 6, 8, 23, 37, 77]
+</code></pre>
+
+<p>变量count用于记录内层循环中最后进行交换过的位置；</p>
+
+<h5>简单选择排序</h5>
+
+<ul>
+<li>依次比较初始位的值与其他位的值，确定出最小值，将这个最小值排到最前面,重复n-1轮；</li>
+<li>每次循环只进行一次交换；</li>
+<li>性能会略优于冒泡排序；</li>
+<li>整个数组分为两个部分：有序部分和无序部分（已排部分和待排部分）。从无序部分中选择最小值与无序部分的第一项交换，然后有序部分扩大；</li>
+<li>不稳定的排序算法；</li>
+</ul>
+
+<pre><code>function chooseArith(arr){
+  var min;
+  for(var i=0;i&lt;arr.length;i++){
+    min = i;
+        //内层循环实质在于筛选产生最小值将其排到数组前面的位置；
+        //min始终保存着最小值的位置的索引，随着i的自增，遍历的数组长度越来越短，直到完成排序。
+    for(var j=i+1;j&lt;arr.length;j++){
+      if(arr[min]&gt;arr[j]){
+        min = j;
+      }
+    }
+    var temp = arr[min];
+    arr[min] = arr[i];
+    arr[i] = temp;
+  }
+  console.log(arr);
+}
+var arr = [2,37,3,6,5,23,77,8];
+chooseArith(arr);
+</code></pre>
+
+<h5>直接插入排序</h5>
+
+<ul>
+<li>一个数组分为有序和无序部分（已排序和待排序部分），将无序部分的第一项插入到有序部分中合理的位置（与有序部分每一项做对比），有序部分扩大。</li>
+<li>稳定的排序算法；</li>
+</ul>
+
+<pre><code>function sort(arr){
+  for(var i=0;i&lt;arr.length;i++){
+    if(arr[i+1]&lt;arr[i]){
+      var temp = arr[i+1];
+      var j=i;
+      while(j&gt;=0 &amp;&amp; arr[j]&gt;temp){
+        arr[j+1] = arr[j];
+        j--;
+      }
+      arr[j+1] = temp;
+    }
+  }
+  console.log(arr)
+}
+var arr = [1,30,5,21,7,6]
+sort(arr)
+</code></pre>
+
+<p><br></p>
+
+<h3>快速排序、归并排序</h3>
+
+<ul>
+<li>时间复杂度都为O(nlogn)；</li>
+</ul>
+
+<h5>快速排序</h5>
+
+<ul>
+<li>从数组中选定一个基数，然后把数组中的每一项与此基数做比较，小的放入一个新数组，大的放入另外一个新数组。然后再采用这样的方法操作新数组。通过递归直到所有子集只剩下一个元素，排序完成；</li>
+<li>不稳定的排序算法；</li>
+</ul>
+
+<pre><code>//非原地排序代码实现
+function fastSort(arr){
+  if(arr.length&lt;2){
+        return arr;
+    }
+  var leftArr = [];
+  var rightArr = [];
+  var pivotIndex = Math.floor(arr.length/2);
+  var pivotItem = arr.splice(pivotIndex,1)[0];
+  for(var i=0;i&lt;arr.length;i++){
+    if(arr[i]&lt;pivotItem){
+      leftArr.push(arr[i])
+    }else{
+      rightArr.push(arr[i])
+    }
+  };
+  return fastSort(leftArr).concat([pivotItem],fastSort(rightArr));
+}
+var newArr = [3,7,10,1,32,4,57,9,40,30];
+console.log(fastSort(newArr))
+</code></pre>
+
+<pre><code>function quickSort(arr, begin, end) {
+           //递归出口
+           if(begin &gt;= end)
+               return;
+           var l = begin; // 左指针
+           var r = end; //右指针
+           var temp = arr[begin]; //基准数，这里取数组第一个数
+           //左右指针相遇的时候退出扫描循环
+           while(l &lt; r) {
+               //右指针从右向左扫描，碰到第一个小于基准数的时候停住
+               while(l &lt; r &amp;&amp; arr[r] &gt;= temp)
+                 r --;
+               //左指针从左向右扫描，碰到第一个大于基准数的时候停住
+               while(l &lt; r &amp;&amp; arr[l] &lt;= temp)
+                 l ++;
+               //交换左右指针所停位置的数
+               [arr[l], arr[r]] = [arr[r], arr[l]];
+           }
+           //最后交换基准数与指针相遇位置的数
+           [arr[begin], arr[l]] = [arr[l], arr[begin]];
+           //递归处理左右数组
+           quickSort(arr, begin, l - 1);
+           quickSort(arr, l + 1, end);
+       }
+
+       var arr = [2,3,4,1,5,6]
+       quickSort(arr, 0, 5);
+       console.log(arr)
+
+</code></pre>
+
+<h5>归并排序</h5>
+
+<ul>
+<li>递归实现；</li>
+<li>分治思想；</li>
+<li>稳定的排序算法；</li>
+<li>会占用额外的内存空间；</li>
+</ul>
+
+<pre><code>function mergeSort(arr){
+  var pivotIndex = arr.length &gt;&gt; 1;
+  var left = arr.slice(0,pivotIndex);
+  var right = arr.slice(pivotIndex);
+  return merge(mergeSort(left),mergeSort(right))
+}
+function merge(left,right){
+  var arr = [];
+  while(left.length &amp;&amp; right.length){
+    if(left[0] &gt; right[0]){
+      arr.push(right.shift())
+    }else{
+      arr.push(left.shift())
+    }
+  }
+  return arr.concat(left,right)
+}
+var arr = [2,1,7,3,5,4];
+console.log(mergeSort(arr))
+</code></pre>
+
+<p><br></p>
+
+<h3>桶、计数、基数</h3>
+
+<ul>
+<li>线性排序；（不涉及元素之间的比较操作）</li>
+<li>是稳定的排序算法；</li>
+<li>非原地排序算法；</li>
+</ul>
+
+<h5>桶排序</h5>
+
+<ul>
+<li>时间复杂度为O(n)；</li>
+<li>适合于外部排序中；</li>
+<li>适用场景比较特殊，外部桶的排序是有限的分类，内部做完排序后，外部无需再进行排序；</li>
+<li>结合快排、归并等排序算法进行桶内排序；</li>
+</ul>
+
+<h2>查找算法</h2>
+
+<h4>二分查找法</h4>
+
+<ul>
+<li>时间复杂度为O(logn)；</li>
+<li>依赖有序数组；</li>
+<li>不适合数据量过小的场景；</li>
+<li>也不适合数据量过大的场景；（要求内存中找到连续的内存空间）</li>
+</ul>
+
+<pre><code>//普通方式
+function binarySearch(arr,value){
+   var low = 0,
+   high = arr.length - 1;
+   while(low &lt;= high){
+       var mid = low+((high - low) &gt;&gt; 1);
+        if(value == arr[mid]){
+             return  mid;
+         }else if(value &gt; arr[mid]){
+             low = mid + 1;
+         }else if(value &lt; arr[mid]){
+             high = mid -1;
+         }else{
+            return -1;
+            }
+      }
+}
+</code></pre>
+
+<pre><code>//递归方式
+function binarySearch(arr,value,low,high){
+  if(low&gt;high) return -1;
+  var mid = low+((high-low)&gt;&gt;1);
+  if(arr[mid]===value){
+    return mid;
+  }else if(arr[mid]&lt;value){
+    return binarySearch(arr,value,mid+1,high);
+  }else{
+    return binarySearch(arr,value,low,mid-1);
+  }
+}
+
+</code></pre>
+]]></description><guid isPermaLink="true">https://nerrol.com/post/JS-Arithmetic1-repeat</guid><pubDate>Thu, 06 Dec 2018 22:04:22 GMT</pubDate></item><item><title>读《你不知道的JavaScript》</title><link>https://nerrol.com/post/readNote-1</link><description><![CDATA[<h4>一、作用域和闭包</h4>
+
+<ol>
+<li>ReferenceError同作用域判别失败相关，而TypeError则代表作用域判别成功了，但是对结果的操作是非法或不合理的。</li>
+<li>不成功的RHS引用会导致抛出ReferenceError异常。不成功的LHS引用会导致自动隐式地创建一个全局变量（非严格模式下），该变量使用LHS引用的目标作为标识符，或者抛出ReferenceError异常（严格模式下）。</li>
+</ol>
+
+<h4>二、匿名和具名函数</h4>
+
+<p><strong>匿名函数的缺点：</strong></p>
+
+<ol>
+<li>函数在栈追踪中不会显示出有意义的函数名，使调试困难；</li>
+<li>如果没有函数名，当函数需要引用自身时只能使用已经过期的arguments.callee引用；</li>
+<li>匿名函数省略了对于代码可读性、可理解性很重要的函数名；</li>
+</ol>
+
+<p><strong>why arguments.callee is deprecated？</strong></p>
+
+<ol>
+<li>EcmaScript3 允许有名字的函数表达式；</li>
+<li>会改变this的指向；</li>
+<li>访问arguments对象是很昂贵的操作；（每次递归调用需要重新创建）</li>
+<li>影响浏览器性能，解析器不能将这类函数当做内联函数处理；</li>
+</ol>
+]]></description><guid isPermaLink="true">https://nerrol.com/post/readNote-1</guid><pubDate>Tue, 18 Sep 2018 17:47:01 GMT</pubDate></item><item><title>页面性能优化</title><link>https://nerrol.com/post/page-optimization</link><description><![CDATA[<p>性能优化是构建移动端页面必要的一环。下面记录了我优化页面的几个步骤：</p>
+
+<h4>step1：  css、js文件压缩合并</h4>
+
+<p><strong>这一步是为了有效减少http请求。</strong>
+压缩合并的方式有很多，可以利用gulp，webpack，fisp等构建工具，因为项目原因我选用fisp对css及js文件进行合并。以下是相关的配置代码：</p>
+
+<pre><code>fis.config.merge({
+  namespace: &#39;yike-sell-app&#39;,
+  project: {
+    exclude: /(?:\.(tar|rar|psd|jar|pdf)$|\/output)/i,    // 排除某些后缀，svn相关的默认即排除；排除 output 目录。
+    fileType: {
+      image: &#39;woff2, otf&#39;
+    }
+  },
+  roadmap: {
+    path: [],
+    domain: &#39;&#39;    // 静态文件域名。
+  },
+  settings: {
+    spriter: {
+      csssprites: {
+        layout: &#39;matrix&#39;,    // 按照“矩阵”方式排列图片，可使产出图片体积更小；要求：用于平铺的背景图不可以(MUST NOT)进行 css sprite 处理。
+        margin: 5            // 图片间的间距。
+      }
+    },
+    optimizer: {
+      &#39;html-compress&#39;: {
+        level: &#39;strip_comment&#39;    // 对模板仅去注释，不压缩空白(压缩空白可能引起 class 类名连缀在一起)。
+      }
+    }
+  },
+  modules: {
+    parser: {
+      less: &#39;zuoye-less&#39;    // less 文件使用自定义解析器 zuoye-less 解析。
+    }
+  },
+  pack: {
+    //压缩及合并css js 文件
+    &#39;/pkg/a.js&#39;: [
+      &#39;/widget/folder/**.js&#39;
+    ],
+    &#39;/pkg/a.css&#39;: [
+      &#39;/page/folder/*.less&#39;,
+      &#39;/widget/folder/**.less&#39;,
+    ],
+
+  },
+  deploy: {
+    local: {
+      to: &#39;./output&#39;
+    }
+  }
+});
+</code></pre>
+
+<h4>step2：  对静态资源图片的压缩</h4>
+
+<p><strong>这一步是为了减少资源体积</strong>
+压缩的方式有很多种，我使用一个很好用的小工具：<a href="https://tinypng.com/">tinyPng</a>，目前发现这个工具的弊端在于：需要手动拖拽，替换文件。但压缩图片效果比gulp要好很多，5k的小图标可以被压缩到1k左右。</p>
+
+<hr>
+
+<p>第二种方式可以用base64格式，我个人不是很喜欢用这种格式，性价比很低。列出一些base64格式的缺点：</p>
+
+<ol>
+<li> base64 编码后比原图要大；</li>
+<li> 尽管图片请求少了，但是 HTML 文件本身尺寸会变大，会影响首屏加载，所以要权衡；</li>
+<li> 如果把大图片编码到 html / css 中，会造成后者体积明显增加，明显影响网页的打开速度。</li>
+<li> 使用 base64 的另外一个弊端是 IE 的兼容性问题。IE 8 以下不支持 data url，IE 8 开始支持 data url，却有大小限制，32k（未测试）。</li>
+<li> 还有一个问题是，如果构建工具比较落后（或者没有构建工具），手动插入 base64 是很蛋疼的，编辑器会卡到哭。</li>
+<li> 代码看起来会有点丑，大量编码字符（当然也可以通过构建工具动态插入）;</li>
+<li> base64 无法缓存，要缓存只能缓存包含 base64 的文件，比如 HTML 或者 CSS，这相比直接缓存图片要弱很多，一般 HTML 会改动频繁，所以等同于得不到缓存效益；</li>
+</ol>
+
+<hr>
+
+<p>顺便提一下人类之光webp格式，但是这种格式有个致命弱点：兼容性问题。
+（除了chrome支持其他浏览器基本全红。。）
+<img src="https://s1.ax1x.com/2018/08/15/PRAZjO.png" alt=""></p>
+
+<h4>step3： 开启浏览器缓存</h4>
+
+<p><strong>这一步是为了加速二次加载页面</strong></p>
+
+<h4>step4： 减少重排与重绘</h4>
+
+<p><strong>这一步是为了加速渲染</strong></p>
+
+<ol>
+<li>CSS属性读写分离：浏览器没次对元素样式进行读操作时，都必须进行一次重新渲染（重排 + 重绘），所以我们在使用JS对元素样式进行读写操作时，最好将两者分离开，先读后写，避免出现两者交叉使用的情况。最最最客观的解决方案，就是不用JS去操作元素样式；</li>
+<li>通过切换class或者style.csstext属性去批量操作元素样式；</li>
+<li>DOM元素离线更新：当对DOM进行相关操作时，例如innerHTML、appendChild等都可以使用Document Fragment对象进行离线操作，带元素“组装”完成后再一次插入页面，或者使用display:none 对元素隐藏，在元素“消失”后进行相关操作；</li>
+<li>将没用的元素设为不可见：visibility: hidden，这样可以减小重绘的压力，必要的时候再将元素显示；</li>
+<li>压缩DOM的深度，一个渲染层内不要有过深的子元素，少用DOM完成页面样式，多使用伪元素或者box-shadow取代；</li>
+<li>图片在渲染前指定大小：因为img元素是内联元素，所以在加载图片后会改变宽高，严重的情况会导致整个页面重排，所以最好在渲染前就指定其大小，或者让其脱离文档流；</li>
+<li>对页面中可能发生大量重排重绘的元素单独触发渲染层，使用GPU分担CPU压力。（这项策略需要慎用，得着重考量以牺牲GPU占用率能否换来可期的性能优化，毕竟页面中存在太多的渲染层对与GPU而言也是一种不必要的压力，通常情况下，我们会对动画元素采取硬件加速。</li>
+</ol>
+]]></description><guid isPermaLink="true">https://nerrol.com/post/page-optimization</guid><pubDate>Wed, 15 Aug 2018 15:14:38 GMT</pubDate></item><item><title>关于移动端的一些坑和总结</title><link>https://nerrol.com/post/about-mobile-summary</link><description><![CDATA[<p>最近一直在接触移动端的项目重构，遇到许多问题，记录下来。</p>
+
+<h4>一、关于在移动端0.01rem某些机型识别不出的问题</h4>
+
+<p>问题描述：在写某些边框和分割线的过程中，我首先选用了<code>&lt;span&gt;</code>标签来写一些分隔线，但在某些手机上会有几根线展示不出来。然后我使用border来写分隔线，不会出现这个问题。</p>
+
+<p>解决方案：需要注意的是border必须使用1px来解决0.01rem在某些机型识别不出的问题，这里可以跟ui协调调整分隔线的颜色。</p>
+
+<h4>二、关于position:fixed在ios系统的问题</h4>
+
+<p>问题描述：在ios系统的h5页面中使用此样式的元素在滚动过程中，会出现短暂性的无法显示，停止滚动恢复显示。</p>
+
+<p>解决方案：这个坑在写一些滚动锚点导航很是头疼，为此在写头尾固定，中间自适应的布局时，可以使用flex布局，或者position:absolute来模拟。</p>
+
+<hr>
+
+<pre><code class="language-CSS">//父容器
+.father {
+  display: flex;
+  flex-direction: column;
+}
+//局部滚动区域
+.child {
+  -webkit-box-flex: 1;
+  -webkit-flex: 1;
+  flex: 1;
+  -webkit-overflow-scrolling: touch;
+  overflow-y: scroll;
+}
+</code></pre>
+
+<h4>三、关于内滚动布局的问题</h4>
+
+<p>关于第二个问题的布局方式其实就是典型的内滚动布局，这种布局方式可能会在ios机型的webview中出现一些页面卡死的问题，目前还没有找到有效的解决方式</p>
+
+<h4>四、border-radius在Android的一些问题</h4>
+
+<p>通常我们实现一个正圆只需要border-radius: 50%即可，大致代码如下：</p>
+
+<pre><code class="language-css">.circle {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    border: 1px solid blue;
+}
+
+
+然而 Android 2.3 是不支持百分比的，要兼容我们只能使用一个较大值，比如border-radius: 999px;
+
+
+#### 五、font-weight的问题
+不同机型的字体匹配算法在识别非常规字重时（如600），表现会不一致。具体可看凹凸实验室关于font-weight的科普文：[深入了解font-weight](https://aotu.io/notes/2016/11/08/css3fontweight/index.html)
+
+#### 六、关于ios下弹层穿透问题
+一般来说我们只要给body及html标签设置了如下css即可解决弹层穿透问题。（会造成滚动进度丢失）
+
+```css
+.overflow {
+  width: 100vw;
+  height: 100vh;
+  overflow-y: hidden;
+}
+</code></pre>
+
+<p>但这仅限于整个页面滚动的情况。在上述内滚动布局的情况下时，需要将.overflow添加到内滚动的div上。由于内滚动的div本身所附带的css也就是：<code>overflow-y:scroll</code>会与.overflow中的css <code>overflow-y:hidden</code> 产生冲突，因此需要增加权重来使禁用滚动的css生效。IOS下会因为这个属性造成闪动，目前的解决方法是：通过touchstart事件来监听滚动，滚动时给div添加.overflow。（此方式只能延缓，并不能真正解决闪动）</p>
+]]></description><guid isPermaLink="true">https://nerrol.com/post/about-mobile-summary</guid><pubDate>Mon, 13 Aug 2018 00:17:06 GMT</pubDate></item><item><title>vue使用过程中的一些TIPS</title><link>https://nerrol.com/post/VUENotes-2-repeat</link><description><![CDATA[<h4>一、关于methods钩子中的axios回调函数中的this指向</h4>
+
+<p>代码一：此时axios的回调中this的指向是window,而不是vm实例；</p>
+
+<pre><code>methods:{
+   getData: function () {
+      axios
+        .get(&#39;url&#39;)
+        .then(function(res){
+          console.log(this);//window
+        })
+    }
+}
+ 
+</code></pre>
+
+<p>为了避免这种情况，可以在函数内部首先保存当前this的引用，防止this指向丢失。</p>
+
+<pre><code>methods:{
+   getData: function () {
+      var self = this;
+      axios
+        .get(&#39;url&#39;)
+        .then(function(res){
+          console.log(this);//vm
+        })
+    }
+}
+</code></pre>
+
+<p>其实这种情况类似于我们平时写js代码中的一个经典问题：</p>
+
+<pre><code>        var name = &#39;b&#39;;
+        var obj = {
+            name: &#39;a&#39;,
+            fun: function () {
+                console.log(this);//obj
+                return function () {
+                    console.log(this);//window
+                    console.log(this.name);//b
+                }
+            }
+        }
+        var fun = obj.fun();
+        fun();
+</code></pre>
+
+<p>PS:这种this指向丢失的问题其实不仅仅存在于axios的回调中，在钩子函数中声明的函数的回调产生这种情况；因此我们的解决方案有两种：</p>
+
+<ul>
+<li>声明一个变量保存当前this指向；（上述例子）</li>
+<li>使用es6箭头函数；</li>
+</ul>
+
+<h4>二、关于axios的get方式调用接口</h4>
+
+<p>官方文档有给出正确的调用方式：<a href="https://www.kancloud.cn/yunye/axios/234845">axios</a></p>
+
+<pre><code>axios.get(&#39;/user&#39;, {
+    params: {
+      ID: 12345
+    }
+  })
+  .then(function (response) {
+    console.log(response);
+  })
+  .catch(function (error) {
+    console.log(error);
+  });
+</code></pre>
+
+<p>这里要注意的点是：发送给server的data（查询字符串）需要有params这个key值，才能够被server正确接受！！！！！（联调时候的坑啊啊啊）</p>
+
+<h4>三、关于vue中无需事件触发的函数</h4>
+
+<p>场景是：想在页面初始化的时候就直接调用这个函数（函数可以是计算功能等等），比如我们想在页面初始化的时候给div一个style样式，这个样式是经过计算后渲染的，那么这时我们可以在模板里这样写：</p>
+
+<pre><code>//item是v-for出来的单个数据
+&lt;span :style=&quot;changeWidth(item)&quot;&gt;
+</code></pre>
+
+<p>js中声明这个方法，并return出想要的结果</p>
+
+<pre><code>methods: {
+  changeWidth: function (item) {
+        return  {
+          width: item.cnt/ this.answerCnt * 100 + &#39;%&#39;
+        }
+      }
+}
+</code></pre>
+
+<p>（算是一个小技巧~~）</p>
+
+<h4>四、关于vue中在数组中判断是否包含某数组的某项</h4>
+
+<p>标题看起来很啰嗦，其实就是一个类似于判断正确答案的应用场景。详细描述一下场景：总选项数组arrA，用户选项数组arrB，判断arrA中是否含有arrB的某项，渲染不同的答案样式。</p>
+
+<ol>
+<li>在computed钩子中创建一个对象C，并返回这个对象；</li>
+<li>遍历数组B，将数组B遍历后的结果在对象C中设置value值（值随意）；</li>
+<li>接下来就可以在模板中通过v-for遍历数组A，通过obj[item]的判断方式添加样式；</li>
+</ol>
+
+<p>代码见下方：</p>
+
+<pre><code>&lt;template&gt;
+  &lt;div&gt;
+       &lt;ul&gt;
+           &lt;li v-for=&quot;item in arrB&quot; :class=&quot;[{&#39;style1&#39;:obj[item]}]&quot;&gt;&lt;/li&gt;
+         &lt;/ul&gt;
+    &lt;/div&gt;
+&lt;/template&gt;
+&lt;script&gt;
+  export default {
+      computed: {
+          obj () {
+              for(let i=0;i&lt;arrB.length;i++){
+                  obj[arrB[i]] = true
+                }
+                return obj;
+            }
+        }
+    }
+&lt;/script&gt;
+</code></pre>
+
+<h4>五、关于v-for后的数组动态绑定ref</h4>
+
+<p>v-for后的项动态绑定ref生成的是一个数组，因此直接对ref进行操作将不会取到相应的数值。</p>
+
+<pre><code>&lt;li v-for=&quot;(item,i) in teacherList&quot;  :ref=&quot;&#39;item&#39;+i&quot;&gt;
+&lt;/li&gt;
+</code></pre>
+
+<p>此时若想获取单个li的width需要：
+<code>
+self.$refs.item0[0].offsetWidth
+</code></p>
+
+<h4>六、异步渲染刷新或者加载出现闪烁</h4>
+
+<p>异步接口在页面初始化取数据时可能会出现直接渲染Mustache 语法（{{}}）再编译，这种情况是因为编译还未结束，使用v-cloak来解决，这个指令的作用是：保持在元素上直到关联实例结束编译。配合css使用</p>
+
+<pre><code>&lt;div v-cloak&gt;
+{{message}}
+&lt;/div&gt;
+
+[v-cloak] {
+  display: none;
+}
+</code></pre>
+]]></description><guid isPermaLink="true">https://nerrol.com/post/VUENotes-2-repeat</guid><pubDate>Wed, 04 Jul 2018 16:11:30 GMT</pubDate></item><item><title>关于cookie</title><link>https://nerrol.com/post/JScookie-NOTE1</link><description><![CDATA[<p>在这里记录一个使用cookie的小需求~
+<br/>
+场景是：用户在网站每日点击的第一次弹出一个悬浮框。说到每日更新就会想到使用缓存来做这件事，缓存有cookie，localstorage，sessionstorage。但是这个业务场景我选择了使用cookie，原因是cookie可以设置过期时间。为此我封装了一个cookie的自定义对象：</p>
+
+<pre><code>//自定义cookie对象
+var cookie = {
+  &quot;setCookie&quot;: function(name, value) {
+      var curDate = new Date();
+      //当前时间戳  
+      var curTamp = curDate.getTime();
+      //当前日期
+      var curDay = curDate.toLocaleDateString().replace(/年|月|日/g,&#39;/&#39;);
+      var curWeeHours = new Date(curDay).getTime() + (8 * 60 * 60 * 1000) - 1;
+      //当日已经过去的时间（毫秒）  
+      var passedTamp = curTamp - curWeeHours;
+      //当日剩余时间  
+      var leftTamp = 24 * 60 * 60 * 1000 - passedTamp;
+      var leftTime = new Date();
+      leftTime.setTime(leftTamp + curTamp);
+      document.cookie = name + &quot;=&quot; + value + &quot;;expires=&quot; + leftTime.toGMTString() + &quot;;path=/&quot;;
+  },
+  &quot;getCookie&quot;: function(name) {
+      //name 为想要取到的键值的键名
+      var reg = /\s/g;
+      var result = document.cookie.replace(reg, &quot;&quot;);
+      var resultArr = result.split(&quot;;&quot;);
+      for (var i = 0; i &lt; resultArr.length; i++) {
+          var nameArr = resultArr[i].split(&quot;=&quot;);
+          if (nameArr[0] == name) {
+              return nameArr[1];
+          }
+      }
+  },
+  &quot;removeCookie&quot;: function(name) {
+      //name为想要删除的Cookie的键名
+      var oDate = new Date(); //时间对象
+      oDate.setDate(new Date().getDate() - 1);
+      document.cookie = name + &quot;=123;expires=&quot; + oDate + &quot;;path=/&quot;;
+  }
+}
+
+</code></pre>
+
+<p>TIPS：这里有一个坑（= =），就是在变量curWeeHours的计算时使用了toLocaleDateString()这个方法。这个方法是获取当前的日期，但是在IE和chrome下的表现是不同的。IE会输出：xxxx年xx月xx日；Chrome则是输出：xxxx/xx/xx；因此这里我使用了正则替换。（使用debug发现这个问题，debug真乃神器啊！！！）</p>
+
+<hr>
+
+<p>接着在做点击事件之前获取当前点击次数，在点击事件回调函数中设置一个点击次数的cookie，具体代码如下：</p>
+
+<pre><code>//从cookie里获取点击次数，因为设置了过期时间，第二天cookie被销毁，此时点击次数置空为0
+var clickcount = cookie.getCookie(&quot;clickcount&quot;)?cookie.getCookie(&quot;clickcount&quot;):0;
+ ($btn.on(&#39;click&#39;,function(){
+ //当前点击次数做一个累计
+  clickcount++;
+  console.log(clickcount);
+    //把点击次数存入cookie
+  cookie.setCookie(&quot;clickcount&quot;,clickcount)
+  if(clickcount === 1){
+    //业务代码（弹出悬浮框什么的都可以啦）
+  }else{    
+   //除去第一次点击的其他情况
+});
+
+</code></pre>
+]]></description><guid isPermaLink="true">https://nerrol.com/post/JScookie-NOTE1</guid><pubDate>Fri, 08 Jun 2018 15:00:26 GMT</pubDate></item><item><title>Vue导航切换的几种方式</title><link>https://nerrol.com/post/VUENotes-2</link><description><![CDATA[<p>总结一下vue导航切换的一些方法~</p>
+
+<hr>
+
+<h4>数据驱动的导航切换</h4>
+
+<p>通过变更每个导航内容页的数据来渲染整个区块。</p>
+
+<pre><code>&lt;template&gt;
+  &lt;li @click=&quot;switchTab&quot; &gt;&lt;/li&gt;
+&lt;/template&gt;
+&lt;template&gt;
+export default {
+   data(){
+         return {
+             }
+     },
+     methods:{
+       switchTab(e){
+           var currentKey = e.getAttribute(&quot;data-id&quot;);
+      this.curListData = this.listData[currentKey];
+         }
+     }
+}
+&lt;/template&gt;
+</code></pre>
+
+<p>这里的思路是通过给每个导航tab添加一个data-id，并添加点击事件处理函数switchTab,取event参数，获取当前点击tab的data-id，从而通过对应的数据键值更新数据源；此时的数据格式为：</p>
+
+<pre><code>{
+ &quot;list1&quot;:{
+ },
+ &quot;list2&quot;:{
+ }
+}
+</code></pre>
+
+<p>使用这种方式一定要跟后台对好结构，不然就会GG（接口数据以键值对的形式）</p>
+
+<hr>
+
+<h4>动态组件的导航切换</h4>
+
+<p>这里vue官方文档有给出一个很有代表性的例子：</p>
+
+<pre><code>&lt;div id=&quot;counter-event-example&quot;&gt;
+    &lt;button v-for=&quot;tab in tabs&quot; v-bind:key=&quot;tab&quot; v-bind:class=&quot;[&#39;tab-button&#39;, { active: currentTab === tab }]&quot; v-on:click=&quot;currentTab = tab&quot;&gt;{{ tab }}&lt;/button&gt;
+    &lt;keep-alive&gt;
+      &lt;component v-bind:is=&quot;currentTabComponent&quot; class=&quot;tab&quot;&gt;&lt;/component&gt;
+    &lt;/keep-alive&gt;
+  &lt;/div&gt;
+    &lt;script&gt;
+  Vue.component(&#39;tab-posts&#39;, {
+    data: function() {
+      return {
+        posts: [{
+            id: 1,
+            title: &#39;Tab1&#39;,
+            content: &#39;&lt;p&gt;Conten1&lt;/p&gt;&#39;
+          },
+          {
+            id: 2,
+            title: &#39;Tab2&#39;,
+            content: &#39;&lt;p&gt;Conten2&lt;/p&gt;&#39;
+          },
+          {
+            id: 3,
+            title: &#39;Tab3&#39;,
+            content: &#39;&lt;p&gt;Conten3&lt;/p&gt;&#39;
+          }
+        ],
+        selectedPost: null
+      }
+    },
+    
+  template: `
+        &lt;div class=&quot;posts-tab&quot;&gt;
+      &lt;ul class=&quot;posts-sidebar&quot;&gt;
+        &lt;li
+          v-for=&quot;post in posts&quot;
+          v-bind:key=&quot;post.id&quot;
+          v-bind:class=&quot;{ selected: post === selectedPost }&quot;
+          v-on:click=&quot;selectedPost = post&quot;
+        &gt;
+          {{ post.title }}
+        &lt;/li&gt;
+      &lt;/ul&gt;
+      &lt;div class=&quot;selected-post-container&quot;&gt;
+        &lt;div 
+          v-if=&quot;selectedPost&quot;
+          class=&quot;selected-post&quot;
+        &gt;
+          &lt;h3&gt;{{ selectedPost.title }}&lt;/h3&gt;
+          &lt;div v-html=&quot;selectedPost.content&quot;&gt;&lt;/div&gt;
+        &lt;/div&gt;
+        &lt;strong v-else&gt;
+          Click on a blog title to the left to view it.
+        &lt;/strong&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+      `
+  });
+  Vue.component(&quot;tab-archive&quot;, {
+    template: `
+      &lt;div&gt;Archive component&lt;/div&gt;
+    `
+  });
+  var vm = new Vue({
+    el: &#39;#counter-event-example&#39;,
+    data: function() {
+      return {
+        currentTab: &#39;Posts&#39;,
+        tabs: [&#39;Posts&#39;, &#39;Archive&#39;]
+      }
+
+    },
+    computed: {
+      currentTabComponent: function() {
+        return &#39;tab-&#39; + this.currentTab.toLowerCase()
+      }
+    },
+    watch: {
+
+    },
+    methods: {
+
+    }
+  });
+  &lt;/script&gt;
+</code></pre>
+
+<p>激活active状态使用了点击tab将当前tab赋值给currentTab，然后进行判断是否相等。（一般都是使用这个方法），例子详细可见官方文档：<a href="https://cn.vuejs.org/v2/guide/components-dynamic-async.html">动态组件</a></p>
+
+<hr>
+
+<h4>基于router-lilnk的导航切换</h4>
+
+<pre><code>//通过配置to跳转到不同的路由
+&lt;router-link tag=&quot;div&quot; class=&quot;tab-item&quot; to=&quot;/recommend&quot;&gt;
+     &lt;span&gt;推荐&lt;/span&gt;
+&lt;/router-link&gt;
+&lt;router-link tag=&quot;div&quot; class=&quot;tab-item&quot; to=&quot;/rank&quot;&gt;
+     &lt;span&gt;排行&lt;/span&gt;
+&lt;/router-link&gt;
+&lt;router-link tag=&quot;div&quot; class=&quot;tab-item&quot; to=&quot;/singer&quot;&gt;
+     &lt;span&gt;歌手&lt;/span&gt;
+&lt;/router-link&gt;
+</code></pre>
+
+<p>Tips：router-link有个active状态下的类名.router-link-active。这个类名是可配置的（这个方法真的是太方便了啊啊啊啊啊！！！少写了几行判断）
+关于这里的详细解释可以看官方文档：<a href="https://router.vuejs.org/zh/api/#active-class">router-link</a></p>
+]]></description><guid isPermaLink="true">https://nerrol.com/post/VUENotes-2</guid><pubDate>Thu, 31 May 2018 16:24:39 GMT</pubDate></item><item><title>关于Promise</title><link>https://nerrol.com/post/ECMAScript-promise</link><description><![CDATA[<h4>一、什么是Promise？</h4>
+
+<p>在Chrome控制台中可以用console.dir()这个命令打印一下，结果如下图：
+<img src="http://i4.bvimg.com/647446/21c73a246ac81ef9.png" alt="promise">
+可以清楚的看到：Promise是一个构造函数，有reject()、resolve()、all()、race()等方法，在它的原型上有then()、catch()这些比较常用的方法。</p>
+
+<pre><code> const promise = new Promise (function(resolve,reject){
+        setTimeout(function(){
+            resolve(&quot;数据1&quot;);
+        },2000)
+      })
+</code></pre>
+
+<p>以上是一个生成promise实例的过程，promise构造函数接收两个参数：resolve,reject。</p>
+
+<ul>
+<li>resolve的作用是将Promise对象的状态从“未完成”变成“成功”（pending--&gt;fulfilled）；</li>
+<li>reject的作用是将Promise对象的状态从“未完成”变成“失败”（pending--&gt;reject）；</li>
+</ul>
+
+<p>（就我个人的理解来说，resolve和reject是两种情况成功&amp;失败对应的状态，成功的情况resolve()，失败的话reject()）</p>
+
+<h4>二、Promise的特点</h4>
+
+<ul>
+<li>对象状态不受外界影响：
+三种状态：pending（进行中）、fulfilled（已成功）、rejected（已失败），
+    只有异步操作的结果可以决定当前是哪一种状态，任何其他操作都不可以改变；</li>
+<li>一旦状态改变就不会再变化，也就是说状态只有可能从pending变为fulfilled和从pending变为rejected，这两种状态的任意一种一旦发生就已经不会再做变更。</li>
+<li>缺点：一旦建立就会立即执行，无法中途取消；（一般放在函数中新建，最后再返回Promis对象，见下述示例一）</li>
+</ul>
+
+<pre><code>//示例一
+function runAsync() {
+      const promise = new Promise (function(resolve,reject){
+        setTimeout(function(){
+            resolve(&quot;数据1&quot;);
+        },2000)
+      })
+      return promise;
+    }
+</code></pre>
+
+<h4>三、Promise原型函数（实例函数）</h4>
+
+<p>上文有提到：Promise原型对象上有then()，catch()等函数，于是我们可以在示例一的基础上继续写：</p>
+
+<pre><code>//示例二
+runAsync()
+ .then(function(data){
+   console.log(data);
+     //打印出：“数据1”
+ })
+</code></pre>
+
+<p>then()函数中接收到的参数就是resolve传入的数据；then()的效果就类似于回调函数，与普通回调函数不同的是，它可以解决多重回调的问题。</p>
+
+<h4>四、链式操作</h4>
+
+<p>以下是一个应用promise正确的场景：</p>
+
+<pre><code>//示例三
+runAsync1()
+  .then(function(data){
+        console.log(data);
+        return runAsync2();
+      })
+  .then(function(data){
+        console.log(data);
+        return runAsync3();
+      })
+  .then(function(data){
+        console.log(data);
+      });
+            
+    function runAsync1() {
+      var p = new Promise (function(resolve,reject){
+        setTimeout(function(){
+          console.log(&quot;异步任务1执行完成&quot;);
+          resolve(&quot;数据1&quot;)
+        },2000)
+      })
+      return p;
+    }
+
+    function runAsync2() {
+      var p = new Promise (function(resolve,reject){
+        setTimeout(function(){
+          console.log(&quot;异步任务2执行完成&quot;);
+          resolve(&quot;数据2&quot;)
+        },2000)
+      })
+      return p;
+    }
+
+    function runAsync3() {
+      var p = new Promise (function(resolve,reject){
+        setTimeout(function(){
+          console.log(&quot;异步任务3执行完成&quot;);
+          resolve(&quot;数据3&quot;)
+        },2000)
+      })
+      return p;
+    }
+</code></pre>
+
+<p>结果按顺序每隔2s依次打印：
+<img src="http://i2.bvimg.com/647446/b094bac7d0716204.png" alt="链式操作">
+当然也可以在then()函数中直接return一个数据，这样在下一个then()中会获取到这个数据；</p>
+
+<h4>五、reject用法</h4>
+
+<p>reject是一种当promise状态为失败时的一种状态，可以在then()和catch()中被捕获：</p>
+
+<ul>
+<li>在then()方法中传入方法的第二个参数即为捕获reject情况的回调，见示例四；</li>
+<li>在catch()方法中与then()方法的第二个参数作用相同，指定reject的回调，但是它与then()有一个不同点在于：如果在执行then()第一个参数方法时抛出异常，那么js不会报错被卡死，而是会进入catch()方法中，类似于try catch语句。见示例五；</li>
+</ul>
+
+<pre><code>//示例四
+ runAsync1()
+    .then(function(data) {
+      console.log(data);
+      return runAsync2();
+    })
+    .catch(function(reason) {
+      console.log(&quot;reject&quot;);
+      console.log(reason);
+      return runAsync2();
+    })
+    .then(function(data) {
+      console.log(data);
+      return runAsync3();
+    })
+    .then(function(data) {
+      console.log(data);
+    })
+
+  function runAsync1() {
+    var p = new Promise(function(resolve, reject) {
+      setTimeout(function() {
+        var num = Math.ceil(Math.random() * 10);
+        if (num &lt;= 8) {
+          resolve(num);
+        } else {
+          reject(&quot;数字过大&quot;)
+        }
+        console.log(&quot;异步任务1执行完成&quot;);
+      }, 2000)
+    })
+    return p;
+  }
+
+  function runAsync2() {
+    var p = new Promise(function(resolve, reject) {
+      setTimeout(function() {
+        console.log(&quot;异步任务2执行完成&quot;);
+        resolve(&quot;数据2&quot;)
+      }, 2000)
+    })
+    return p;
+  }
+
+  function runAsync3() {
+    var p = new Promise(function(resolve, reject) {
+      setTimeout(function() {
+        console.log(&quot;异步任务3执行完成&quot;);
+        resolve(&quot;数据3&quot;)
+      }, 2000)
+    })
+    return p;
+  }
+</code></pre>
+
+<p>这里runAsync1()随机生成的数字如果小于8，结果为：
+<img src="http://i1.bvimg.com/647446/2ff36a77fb13fe3b.png" alt="catch">
+如果大于8,结果为：
+<img src="http://i1.bvimg.com/647446/a7f18890b47bbb54.png" alt="catch"></p>
+
+<p><br>
+<br>
+<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+本文内容根据<a href="https://www.cnblogs.com/lvdabao/p/es6-promise-1.html#undefined">吕大豹的博客</a>整理</p>
+]]></description><guid isPermaLink="true">https://nerrol.com/post/ECMAScript-promise</guid><pubDate>Mon, 28 May 2018 16:27:58 GMT</pubDate></item><item><title>一道关于JS运行机制的小题目</title><link>https://nerrol.com/post/JSNote-runMethods</link><description><![CDATA[<pre><code> setTimeout(function() {
+        console.log(1)
+    }, 0);
+    console.log(6);
+    new Promise(function executor(resolve) {
+        console.log(2);
+        for (var i = 0; i &lt; 10000; i++) {
+            i == 9999 &amp;&amp; resolve();
+        }
+        console.log(3);
+    }).then(function() {
+        console.log(4);
+    });
+    console.log(5);
+    //6,2,3,5,4,1
+</code></pre>
+
+<ol>
+<li>首先看setTimeout是异步任务，跳过；</li>
+<li>然后直接输出6；</li>
+<li>接着遇到promise，立即执行：输出2,3；</li>
+<li>这里因为then方法指定的回调函数，将在当前脚本的所有同步任务执行完以后才会执行，所以先执行之后的同步任务输出5，再执行then的回调函数输出4;</li>
+<li>最后再执行setTimeout，输出1。</li>
+</ol>
+]]></description><guid isPermaLink="true">https://nerrol.com/post/JSNote-runMethods</guid><pubDate>Thu, 24 May 2018 20:12:50 GMT</pubDate></item><item><title>JavaScript各种数据结构之间的转化方法</title><link>https://nerrol.com/post/JSMethods-1</link><description><![CDATA[<h4>1、嵌套对象数据格式转化单层对象数据格式</h4>
+
+<pre><code>var showList = {
+    &quot;第一&quot;: {
+      &quot;11&quot;: &quot;一年级&quot;,
+      &quot;12&quot;: &quot;二年级&quot;,
+      &quot;13&quot;: &quot;三年级&quot;,
+      &quot;14&quot;: &quot;四年级&quot;,
+      &quot;15&quot;: &quot;五年级&quot;,
+      &quot;16&quot;: &quot;六年级&quot;
+    },
+    &quot;第二&quot;: {
+      &quot;2&quot;: &quot;初一&quot;,
+      &quot;3&quot;: &quot;初二&quot;,
+      &quot;4&quot;: &quot;初三&quot;
+    },
+    &quot;第三&quot;: {
+      &quot;5&quot;: &quot;高一&quot;,
+      &quot;6&quot;: &quot;高二&quot;,
+      &quot;7&quot;: &quot;高三&quot;
+    }
+  
+    //处理
+    function formatObj (originObj) {
+        var obj = {};
+        for (let key in originObj) {
+          for (let index in originObj[key]) {
+            obj[index] = originObj[key][index]
+          }
+        }
+        // console.log(obj);
+        return obj;
+      }
+  console.log(obj)
+    formatObj(showList);
+</code></pre>
+
+<p>结果为：<br>
+<img src="https://s1.ax1x.com/2018/05/16/CyDK6x.png" alt=""></p>
+]]></description><guid isPermaLink="true">https://nerrol.com/post/JSMethods-1</guid><pubDate>Wed, 16 May 2018 18:24:31 GMT</pubDate></item><item><title>关于css原生滚动条</title><link>https://nerrol.com/post/css-scroll</link><description><![CDATA[<h4>webkit内核的浏览器滚动条</h4>
+
+<pre><code>    ::-webkit-scrollbar              { /* 1 */ }
+    ::-webkit-scrollbar-button       { /* 2 */ }
+    ::-webkit-scrollbar-track        { /* 3 */ }
+    ::-webkit-scrollbar-track-piece  { /* 4 */ }
+    ::-webkit-scrollbar-thumb        { /* 5 */ }
+    ::-webkit-scrollbar-corner       { /* 6 */ }
+    ::-webkit-resizer                { /* 7 */ }
+</code></pre>
+
+<p><img src="https://img.lyblog.net/usr/uploads/2013/07/scrollbarparts_thumb.png" alt="对应关系"></p>
+
+<p>PS：对以上各个部分定义width,height时。有如下功能：若是水平滚动条，则width属性不起作用，height属性用来控制滚动条相应部分竖直方向高度；若是竖直滚动条，则height属性不起作用，width属性用来控制相应部分的宽度。</p>
+
+<hr>
+
+<p>再来一个关于滚动条的干货~<a href="https://www.lyblog.net/detail/314.html">滚动条相关</a></p>
+
+<hr>
+
+<p>其实webkit内核的浏览器滚动条就样式来说已经可以满足大部分项目的需求，但是这里存在一个问题。滚动条的存在会引起页面“跳动”的问题。这样说可能不够形象，这里说一个实际的例子：假设我们有一个导航栏，当导航栏对应的列表展开时滚动条显示，这时滚动条存在与不存在的情况下，导致导航栏缩小和变大，这时就会引起页面跳动；</p>
+
+<h4>解决：</h4>
+
+<p>这时可以使用单位vw来解决这个问题：将外层容器的width设置为100vw；
+<br/>
+关于视口单位vw的定义及使用场景可以参考以下博文：
+<a href="http://www.zhangxinxu.com/wordpress/2012/09/new-viewport-relative-units-vw-vh-vm-vmin/">视口单位vw</a></p>
+
+<p><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+<em>这里是一个碎碎念：
+很久没写博文。。最近比较忙，代码写的还是比较垃圾，= =可能是思路问题。。。写代码总依赖后期优化，前期就应该有个明确的思路再动手。代码应该精简且明晰！能写一行就不要冗余两行。。。可以用CSS写就不要用JS造成不必要的性能问题！！！希望自己能快点成长！！！</em></p>
+]]></description><guid isPermaLink="true">https://nerrol.com/post/css-scroll</guid><pubDate>Mon, 07 May 2018 20:02:58 GMT</pubDate></item><item><title>关于Smarty使用过程中的小tips</title><link>https://nerrol.com/post/SmartyNotes-1</link><description><![CDATA[<h4>循环数组中存在空数组项</h4>
+
+<p>在使用smarty的过程中，循环遍历数组时，会遇到数组项为空的情况，例如：<code>var arr = [&quot;a&quot;,&quot;b&quot;,&quot;&quot;,&quot;d&quot;];</code>，这里的数据项没有值，smarty在循环这样的数组时会默认将其跳过，也就是说，这个空的数据项没有匹配的索引。如果我们在操作数组的过程中并不想跳过这一项的索引，那么可以使用内置函数foreach的@iteration项，它代表循环次数。下面会给出一个例子说明这个小问题。</p>
+
+<pre><code>{%foreach $arr as $item%}
+       {%$item@iteration%}
+{%/foreach%}
+//此时会输出1,2,3,4
+</code></pre>
+
+<p>PS：需要注意的是，@iteration是从1开始的，而@index是从0开始的。（个人觉得这个@iteration简直太好用了）</p>
+
+<hr>
+
+<h4>遍历数组获取数组项index的两种写法</h4>
+
+<p>写法一：</p>
+
+<pre><code>{%foreach $arr as $item%}
+       {%$item@index%}
+{%/foreach%}
+</code></pre>
+
+<p>写法二：</p>
+
+<pre><code>{%foreach $arr as $index =&gt; $item%}
+       {% $index%}
+{%/foreach%}
+//$item为数组项，$index为数组项的索引，位置不可互换
+</code></pre>
+
+<p>（两种写法我个人使用起来觉得差不多，没有什么区别= =！）</p>
+
+<hr>
+
+<h4>select标签中设置默认的显示项</h4>
+
+<p>在数据是循环后台返回的值时，可以用在option标签加{%if $value eq x%}select{%/if%}，来进行设置。</p>
+]]></description><guid isPermaLink="true">https://nerrol.com/post/SmartyNotes-1</guid><pubDate>Tue, 24 Apr 2018 17:47:27 GMT</pubDate></item><item><title>Vue组件通信</title><link>https://nerrol.com/post/VUENotes-1</link><description><![CDATA[<p>在一开始接触vue的时候，总是对组件通信感觉到困惑。对于组件化模式来说，组件间的通信显然是必不可少的。下面将会给出几种组件之间通信的方式：
+<img src="https://camo.githubusercontent.com/f6777ebb146f024efe3ab7562e048935fdc73ff1/687474703a2f2f76756566652e636e2f696d616765732f70726f70732d6576656e74732e706e67" alt="父子组件通信"></p>
+
+<p><br></p>
+
+<h4>父子组件，父-&gt;子</h4>
+
+<hr>
+
+<p>在子组件需要使用到父组件中的数据时：</p>
+
+<ul>
+<li>父组件需要通过在自定义标签（子组件）中绑定自定义属性传递数据；</li>
+<li>子组件需要通过props属性接收数据；</li>
+</ul>
+
+<p>通过官网的示例可以明确这种关系，详见示例一；
+示例二为传入时进行props验证的情况；</p>
+
+<pre><code>//示例一：无props验证的情况
+&lt;body&gt;
+    &lt;!-- 父组件 --&gt;
+    &lt;div id=&quot;app&quot;&gt;
+        &lt;ul&gt;
+            &lt;!-- 子组件 --&gt;
+            &lt;todo-item v-for=&quot;item in gro&quot; :todo=&quot;item&quot;&gt;&lt;/todo-item&gt;
+        &lt;/ul&gt;
+    &lt;/div&gt;
+    &lt;script&gt;
+        // 子组件
+        Vue.component(&#39;todo-item&#39;,{
+            props:[&#39;todo&#39;],
+            template:&#39;&lt;li&gt;{{todo.text}}&lt;/li&gt;&#39;
+        })
+        // 父组件
+        var app = new Vue({
+            el: &#39;#app&#39;,
+            data: {
+                gro:[
+                    {text:&quot;x&quot;},
+                    {text:&quot;a&quot;},
+                    {text:&quot;b&quot;}
+                ]
+            }
+        })
+    &lt;/script&gt;
+&lt;/body&gt;
+</code></pre>
+
+<p>在这里控制台会输出一个提示：
+<img src="https://i.loli.net/2018/04/17/5ad56b7b9d6ca.jpg" alt="">
+在v-for渲染出的组件列表中需要绑定一个明确的key值，这里可以在自定义标签中写入<code>:key=&quot;item.id&quot;</code>即可，注意data中的数据也需要更新相应的数据；</p>
+
+<pre><code>//示例二：进行传入props数据类型的验证，以及无数据时，默认数据填充的情况
+&lt;body&gt;
+    &lt;!-- 父组件 --&gt;
+    &lt;div id=&quot;app&quot;&gt;
+        &lt;ul&gt;
+            &lt;!-- 子组件 --&gt;
+            &lt;todo-item  :todo=&quot;msg&quot;&gt;&lt;/todo-item&gt;
+        &lt;/ul&gt;
+    &lt;/div&gt;
+    &lt;script&gt;
+        // 子组件
+        Vue.component(&#39;todo-item&#39;,{
+            //写法三：限制传入类型及默认的值
+            props:{
+                msg:{
+                    type: String,
+                    default:&quot;hello&quot;
+                }
+            },
+            template:&#39;&lt;span&gt;{{msg}}&lt;/span&gt;&#39;
+        })
+        // 父组件
+        var app = new Vue({
+            el: &#39;#app&#39;,
+            data: {
+                msg: &quot;&quot;
+            }
+        })
+    &lt;/script&gt;
+&lt;/body&gt;
+</code></pre>
+
+<p>PS ：这里的数据类型（type），可以是：</p>
+
+<ul>
+<li>String</li>
+<li>Number</li>
+<li>Boolean</li>
+<li>Function</li>
+<li>Object</li>
+<li>Array</li>
+<li>Symbol</li>
+</ul>
+
+<blockquote>
+<p>当 prop 验证失败，Vue 会抛出警告 (如果使用的是开发版本)。注意 prop 会在组件实例创建之前进行校验，所以在 default 或 validator 函数里，诸如 data、computed 或 methods 等实例属性还无法使用。</p>
+</blockquote>
+
+<p><br></p>
+
+<h4>父子组件：子-&gt;父</h4>
+
+<hr>
+
+<p>在父组件需要使用到子组件中的数据时：</p>
+
+<ul>
+<li>父组件需要在自定义标签中v-on监听事件；</li>
+<li>子组件需要使用$emit触发事件；（一句话来说就是，子组件报告自己的内部事件，父组件进行监听这个事件，监听到以后可以执行一些动作，或者直接获取到子组件携带的数据）</li>
+<li>如果父组件做监听时想直接在组件上对数据做处理，可以使用$event访问这个被抛出的值；</li>
+</ul>
+
+<pre><code>&lt;body&gt;
+    &lt;div id=&quot;counter-event-example&quot;&gt;
+        &lt;p&gt;{{ total }}&lt;/p&gt;
+        &lt;button-counter @increment=&quot;incrementTotal&quot;&gt;&lt;/button-counter&gt;
+    &lt;/div&gt;
+    &lt;script&gt;
+    Vue.component(&#39;button-counter&#39;, {
+        template: &#39;&lt;button @click=&quot;incrementCounter&quot;&gt;{{ childMsg }}&lt;/button&gt;&#39;,
+        data: function() {
+            return {
+                childMsg: &quot;显示&quot;
+            }
+        },
+        methods: {
+            incrementCounter: function() {
+                        //第二个参数可以传递数据
+                this.$emit(&#39;increment&#39;,&quot;信息&quot;)
+            }
+        },
+    })
+
+    new Vue({
+        el: &#39;#counter-event-example&#39;,
+        data: {
+            total: 0
+        },
+        methods: {
+                //父组件方法可以接收子组件传递的数据（第一个参数）
+            incrementTotal: function(msg) {
+                this.total = msg;
+            }
+        }
+    })
+    &lt;/script&gt;
+&lt;/body&gt;
+</code></pre>
+
+<p><br></p>
+
+<h4>非父子组件间的通信：bus中央事件总线</h4>
+
+<hr>
+
+<ul>
+<li>使用一个新的vue实例作为通信桥梁，也就是事件总线；</li>
+<li>需要传值给别的组件的组件中，使用bus.$emit触发一个自定义事件，并传递数据；</li>
+<li>需要接收数据的组件中用bus.$on监听自定义组件，在回调函数中处理传递过来的参数；</li>
+</ul>
+
+<pre><code>&lt;body&gt;
+//父组件
+    &lt;div id=&quot;counter-event-example&quot;&gt;
+        //子组件A
+        &lt;one&gt;&lt;/one&gt;
+        //子组件B
+        &lt;two&gt;&lt;/two&gt;
+    &lt;/div&gt;
+    &lt;script&gt;
+        //事件总线
+    var bus = new Vue();
+    //子组件A
+    Vue.component(&#39;one&#39;, {
+        template: &#39;&lt;button @click=&quot;incrementCounter&quot;&gt;{{ childMsg }}&lt;/button&gt;&#39;,
+        data: function() {
+            return {
+                childMsg: &quot;显示&quot;
+            }
+        },
+        methods: {
+            incrementCounter: function() {
+                bus.$emit(&quot;increment&quot;,&quot;我是组件one&quot;)
+            }
+        },
+        
+    })
+        //子组件B
+    Vue.component(&#39;two&#39;,{
+        template:&#39;&lt;p&gt;{{ wordMsg }}&lt;/p&gt;&#39;,
+        data: function(){
+           return {
+              wordMsg: &quot;我是组件two&quot;
+           }
+        },
+        mounted:function() {
+            bus.$on(&quot;increment&quot;,function(msg){
+                console.log(msg);
+                wordMsg = msg;
+            })
+
+        }
+    })
+
+    new Vue({
+        el: &#39;#counter-event-example&#39;,
+        methods: {
+        }
+    })
+    &lt;/script&gt;
+&lt;/body&gt;
+</code></pre>
+]]></description><guid isPermaLink="true">https://nerrol.com/post/VUENotes-1</guid><pubDate>Tue, 17 Apr 2018 11:39:05 GMT</pubDate></item><item><title>解决text-overflow:ellipsis不生效的问题</title><link>https://nerrol.com/post/CSSNotes-1</link><description><![CDATA[<p>text-overflow:ellipsis这个属性生效的前提是：</p>
+
+<ul>
+<li>固定的宽度;</li>
+<li>white-space: nowrap; </li>
+<li>overflow: hidden;</li>
+<li>text-overflow:ellipsis</li>
+</ul>
+
+<p>在表格中，使用以上属性依然不生效，需要在table中添加：table-layout:fixed; </p>
+
+<hr>
+
+<p><br>
+原文：<a href="https://blog.csdn.net/zhangchen124/article/details/79634842">tea_year</a></p>
+]]></description><guid isPermaLink="true">https://nerrol.com/post/CSSNotes-1</guid><pubDate>Mon, 16 Apr 2018 16:59:19 GMT</pubDate></item><item><title>Useful JavaScript Fragment</title><link>https://nerrol.com/post/JSNotes-8</link><description><![CDATA[<h4>数组</h4>
+
+<hr>
+
+<h5>返回数组中的最大值</h5>
+
+<pre><code>const arrayMax = arr =&gt; Math.max(...arr);
+console.log(arrayMax([10, 1, 5]));//10
+</code></pre>
+
+<p><br></p>
+
+<h5>返回数组中的最小值</h5>
+
+<pre><code>const arrayMin = arr =&gt; Math.min(...arr);
+console.log(arrayMin([10, 1, 5]));//10
+</code></pre>
+
+<p><br><br><br>
+注：本文转载于：
+链接:<a href="http://caibaojian.com/30-seconds-of-code.html">http://caibaojian.com/30-seconds-of-code.html</a>
+来源:<a href="http://caibaojian.com">http://caibaojian.com</a>
+原文：<a href="https://github.com/Chalarangelo/30-seconds-of-code">https://github.com/Chalarangelo/30-seconds-of-code</a>
+作者：Chalarangelo
+翻译：<a href="https://github.com/kujian/30-seconds-of-code">https://github.com/kujian/30-seconds-of-code</a></p>
+]]></description><guid isPermaLink="true">https://nerrol.com/post/JSNotes-8</guid><pubDate>Thu, 12 Apr 2018 21:19:30 GMT</pubDate></item><item><title>关于img的error事件与页面中的load事件的加载关系</title><link>https://nerrol.com/post/JSNote-7</link><description><![CDATA[<p>在看这个问题之前，首先需要明确的是：<br>
+<strong>页面中的load事件和DOMContentLoad事件的区别？</strong></p>
+
+<hr>
+
+<h4>页面中的load事件</h4>
+
+<ul>
+<li>也就是我们平时在代码中写的<code>window.onload = function(){}</code>；</li>
+<li>这个事件仅仅在DOM和所有的相关资源全部加载完之后才会被触发；</li>
+<li>因此在load事件中无法触发img标签的error事件，可见示例一中的代码；</li>
+</ul>
+
+<pre><code> window.onload = function(){
+          $(&quot;img&quot;).on(&quot;error&quot;,function(){
+            console.log(&quot;window.onload可以触发img的error事件&quot;)
+          })
+  }
+    //当html中img标签的src属性无效时，控制台不会输出任何结果
+</code></pre>
+
+<hr>
+
+<h4>DOMContentLoad事件</h4>
+
+<ul>
+<li>dom内容加载完毕，无需等待图片等其他资源加载完成就会被触发，会在页面的load事件加载完之前被触发；</li>
+<li>JQ中的$(function(){})，或$(document).ready(function(){})，监听的就是DOMContentLoaded事件；</li>
+<li>一般将函数写在ready方法内，当页面被解析后就可以访问dom元素，缩短页面交互时间，提高体验；</li>
+<li>img的error事件可被触发，可见示例二代码；</li>
+</ul>
+
+<pre><code>$(function(){
+          $(&quot;img&quot;).on(&quot;error&quot;,function(){
+                console.log(&quot;DOMContentLoaded事件可以触发img的error事件&quot;)
+           })
+    })
+    //当html中img标签的src属性无效时，触发error事件，控制台输出&quot;DOMContentLoaded事件可以触发img的error事件&quot;
+</code></pre>
+
+<hr>
+
+<h4>一些注意事项</h4>
+
+<ul>
+<li>onload事件不需要做兼容；</li>
+<li>DOMContentLoaded事件需要做兼容；</li>
+</ul>
+]]></description><guid isPermaLink="true">https://nerrol.com/post/JSNote-7</guid><pubDate>Thu, 12 Apr 2018 15:26:57 GMT</pubDate></item><item><title>fisp学习笔记</title><link>https://nerrol.com/post/fisplus-Note2</link><description><![CDATA[<h5>关于运行fisp项目的必要环境配置，可查看以往文章<a href="https://nerrol.com/post/fisplus-Note1/">fisp环境构建</a>。</h5>
+
+<hr>
+
+<h4>发布及预览</h4>
+
+<ul>
+<li>step1：进入到具体的fisp项目文件夹；</li>
+<li>step2： fisp release -r xxx ;</li>
+<li>step3：fisp server start;(启动服务器并预览)</li>
+<li>step4： fisp release -wc;(实时编译预览)</li>
+</ul>
+
+<h4>本地测试数据</h4>
+
+<ul>
+<li><p>step1：新建浏览器书签，内容为以下：</p>
+
+<pre><code>//新建浏览器书签，网址为以下内容
+javascript:void function(){var d=new Date();d.setFullYear(d.getFullYear()+1);document.cookie=&#39;FIS_DEBUG=YlwtSmt;path=/;expires=&#39;+d.toGMTString()+&#39;&#39;;document.cookie=&#39;FIS_DEBUG_EDIT=1;path=/;expires=&#39;+d.toGMTString()+&#39;&#39;;document.cookie=&#39;LITE_DEBUG=model;expires=&#39;+new(Date)(+new(Date)+1000).toGMTString();location.reload();}();
+</code></pre></li>
+<li><p>step2：在已经可以预览到本地页面之后，点击保存的书签，选择格式进行数据渲染；</p></li>
+<li><p>PS：<strong>test中的测试数据遵循同名依赖原则，同名tpl文件直接寻找test下其同名的测试数据文件进行渲染；而server.conf中配置的则是tpl文件中异步请求接口路径对应的测试数据文件。（测试数据需要放在test文件下的同名文件下）</strong></p></li>
+</ul>
+
+<h4>测试数据</h4>
+
+<ul>
+<li>step1：新建浏览器书签，内容为以下：</li>
+</ul>
+
+<pre><code>javascript:void function(){var d=new Date();d.setFullYear(d.getFullYear()+1);document.cookie=&#39;FIS_DEBUG=YlwtSmt;path=/;expires=&#39;+d.toGMTString()+&#39;&#39;;document.cookie=&#39;FIS_DEBUG_EDIT=1;path=/;expires=&#39;+d.toGMTString()+&#39;&#39;;location.reload();}();
+</code></pre>
+
+<ul>
+<li> step2：在已经可以预览到本地页面之后，点击保存的书签，选择格式进行数据渲染；</li>
+<li> step3：使用fisp release -wcd xxx推送到远程测试机；(xxx为测试机号，可以在fis-conf.js中进行配置)；</li>
+</ul>
+]]></description><guid isPermaLink="true">https://nerrol.com/post/fisplus-Note2</guid><pubDate>Wed, 11 Apr 2018 11:25:29 GMT</pubDate></item><item><title>一些jQuery函数</title><link>https://nerrol.com/post/jQuery-Notes1</link><description><![CDATA[<p>最近在熟悉项目的过程中，看到一些没有接触过jQuery函数，记录下来。</p>
+
+<hr>
+
+<h4>closest()</h4>
+
+<ul>
+<li>说明：遍历方法。从当前元素开始，沿着DOM树向上遍历，获得匹配选择器的第一个祖先元素。</li>
+<li>语法：
+    (1)$(selector).closest(filter)；
+    (2)$(selector).closest(filter,context);
+    filter：缩小祖先元素范围的选择器表达式；
+    context：可选，在其内可以找到匹配元素的DOM元素；</li>
+<li>用法示例：通过closest()完成事件委托：（详见示例一）</li>
+</ul>
+
+<pre><code>//示例一：点击元素切换活动状态
+$( document ).bind(&quot;click&quot;, function( e ) {
+    $( e.target ).closest(&quot;li&quot;).toggleClass(&quot;hilight&quot;).siblings(&quot;li&quot;).removeClass(&quot;hilight&quot;);
+  });
+</code></pre>
+
+<hr>
+
+<h4>inArray()</h4>
+
+<ul>
+<li>说明：在数组中查找指定值并返回它的索引，如果没有找到则返回-1。</li>
+<li>语法：$.inArray(value,array,fromIndex)；
+    value：要查找的值；
+    array：一个数组，通过它来查找；
+    fromIndex：数组索引值，表示从哪里开始查找；（默认为0，查找整个数组）</li>
+<li><p>用法示例：（详见示例二）</p>
+
+<pre><code>//示例二：值之间严格比较，代码返回-1
+$.inArray( 5 + 5, [ &quot;8&quot;, &quot;9&quot;, &quot;10&quot;, 10 + &quot;&quot; ] );
+</code></pre></li>
+</ul>
+
+<p>PS：类似于JS原生方法indexOf()，不过后者应用于字符串。</p>
+
+<hr>
+
+<h4>getQuery()</h4>
+
+<ul>
+<li>说明：返回URL中的查询部分</li>
+<li>语法：n=URL.getQuery(url)；</li>
+<li>用法示例：（详见示例三）</li>
+</ul>
+
+<pre><code>//示例三
+var a=URL.getQuery(&quot;http://example.com/go.asp?name=bill&quot;);
+var b=URL.getQuery(&quot;http://example.com&quot;);
+//a=&quot;bill&quot;
+//b=&quot;&quot;
+</code></pre>
+
+<hr>
+
+<h4>getJSON()</h4>
+
+<ul>
+<li>说明：使用一个HTTP GET请求从服务器加载JSON编码的数据。</li>
+<li>语法：$.getJSON(url,data,callback)；
+            url:发送请求的url字符串;
+                            data:普通的对象或字符串，用来发送请求给服务器；
+                            callback:请求成功后的回调函数；</li>
+<li>用法示例：（详见示例七）</li>
+</ul>
+
+<pre><code>//示例七：
+$.getJSON(&#39;ajax/test.json&#39;, function(data) {
+  var items = [];
+ 
+  $.each(data, function(key, val) {
+    items.push(&#39;&lt;li id=&quot;&#39; + key + &#39;&quot;&gt;&#39; + val + &#39;&lt;/li&gt;&#39;);
+  });
+ 
+  $(&#39;&lt;ul/&gt;&#39;, {
+    &#39;class&#39;: &#39;my-new-list&#39;,
+    html: items.join(&#39;&#39;)
+  }).appendTo(&#39;body&#39;);
+});
+</code></pre>
+
+<hr>
+
+<h4>extend()</h4>
+
+<ul>
+<li>说明：将obj1及之后的对象的所有属性添加到目标对象，并返回目标对象。</li>
+<li>语法：$.extend({},obj1,obj2)；</li>
+<li>用法示例：（详见示例四、示例五）</li>
+</ul>
+
+<pre><code>//示例四：第一个参数为true
+var object1 = {
+  apple: 0,
+  banana: { weight: 52, price: 100 },
+  cherry: 97
+};
+var object2 = {
+  banana: { price: 200 },
+  durian: 100
+};
+$.extend( true, object1, object2 );
+console.log(object1);
+/*[object Object] {
+  apple: 0,
+  banana: [object Object] {
+    price: 200,
+    weight: 52
+  },
+  cherry: 97,
+  durian: 100
+}*/
+</code></pre>
+
+<pre><code>//示例五：第一个参数为对象，返回这个对象
+var object1 = {
+  apple: 0,
+  banana: { weight: 52, price: 100 },
+  cherry: 97
+};
+var object2 = {
+  banana: { price: 200 },
+  durian: 100
+};
+$.extend( {}, object1, object2 );
+console.log($.extend( {}, object1, object2 ));
+/*[object Object] {
+  apple: 0,
+  banana: [object Object] {
+    price: 200
+  },
+  cherry: 97,
+  durian: 100
+}*/
+</code></pre>
+
+<hr>
+
+<h4>replaceWith()</h4>
+
+<ul>
+<li>说明：将参数内容替换集合中所有匹配的元素，并返回被删除元素的集合。</li>
+<li>语法：$dom1.replaceWith($dom2)；</li>
+<li>用法示例：（详见示例六）</li>
+</ul>
+
+<pre><code>//示例六：
+$(&#39;div.second&#39;).replaceWith(&#39;&lt;h2&gt;New heading&lt;/h2&gt;&#39;);
+</code></pre>
+
+<hr>
+
+<h4>serializeArray()</h4>
+
+<ul>
+<li>说明：将用作提交的表单元素的值编译成拥有name和value对象组成的数组。</li>
+<li>语法：$(&quot;:input&quot;).serializeArray()；</li>
+<li>PS：该方法不接受任何参数；</li>
+<li>用法示例：（详见示例八）</li>
+</ul>
+
+<pre><code>$(&#39;form&#39;).submit(function() {
+  console.log($(this).serializeArray());
+});
+</code></pre>
+]]></description><guid isPermaLink="true">https://nerrol.com/post/jQuery-Notes1</guid><pubDate>Sun, 25 Mar 2018 21:26:48 GMT</pubDate></item><item><title>FisPlus环境构建</title><link>https://nerrol.com/post/fisplus-Note1</link><description><![CDATA[<p>对于环境的要求：<br></p>
+
+<ul>
+<li>操作系统：任何能安装 nodejs 的操作系统</li>
+<li>node版本：&gt;= v0.8.0</li>
+<li>jdk版本：&gt;= v1.5.0 （测试v1.8版本一下有效）</li>
+<li>php-cgi版本：&gt;= v5.0.0 （测试v5版本下有效）
+（注：使用cnpm淘宝镜像装fis-plus同样有效）</li>
+</ul>
+
+<p><br>
+ 其余具体的安装过程参照<a href="http://fex-team.github.io/fis-plus/document.html">fisp官方文档</a>即可。</p>
+]]></description><guid isPermaLink="true">https://nerrol.com/post/fisplus-Note1</guid><pubDate>Wed, 21 Mar 2018 22:21:36 GMT</pubDate></item><item><title>JavaScript二分查找法</title><link>https://nerrol.com/post/JS-Arithmetic2</link><description><![CDATA[<h4>说明</h4>
+
+<p>二分法查找，也称折半查找，是一种在有序数组中查找特定元素的搜索算法。</p>
+
+<hr>
+
+<h4>原理</h4>
+
+<ol>
+<li>首先，从有序数组的中间的元素开始搜索，如果该元素正好是目标元素（即要查找的元素），则搜索过程结束，否则进行下一步。</li>
+<li>如果目标元素大于或者小于中间元素，则在数组大于或小于中间元素的那一半区域查找，然后重复第一步的操作。</li>
+<li>如果某一步数组为空，则表示找不到目标元素。
+***
+#### 实现代码</li>
+</ol>
+
+<pre><code>// 非递归算法
+        function binary_search(arr, key) {
+            var low = 0,
+                high = arr.length - 1;
+            while(low &lt;= high){
+                var mid = parseInt((high + low) / 2);
+                if(key == arr[mid]){
+                    return  mid;
+                }else if(key &gt; arr[mid]){
+                    low = mid + 1;
+                }else if(key &lt; arr[mid]){
+                    high = mid -1;
+                }else{
+                    return -1;
+                }
+            }
+        };
+        var arr = [1,2,3,4,5,6,7,8,9,10,11,23,44,86];
+        var result = binary_search(arr,10);
+        alert(result); // 9 返回目标元素的索引值       
+
+    // 递归算法
+        function binary_search(arr,low, high, key) {
+            if (low &gt; high){
+                return -1;
+            }
+            var mid = parseInt((high + low) / 2);
+            if(arr[mid] == key){
+                return mid;
+            }else if (arr[mid] &gt; key){
+                high = mid - 1;
+                return binary_search(arr, low, high, key);
+            }else if (arr[mid] &lt; key){
+                low = mid + 1;
+                return binary_search(arr, low, high, key);
+            }
+        };
+        var arr = [1,2,3,4,5,6,7,8,9,10,11,23,44,86];
+        var result = binary_search(arr, 0, 13, 10);
+        alert(result); // 9 返回目标元素的索引值  
+            ```
+</code></pre>
+]]></description><guid isPermaLink="true">https://nerrol.com/post/JS-Arithmetic2</guid><pubDate>Thu, 15 Mar 2018 21:30:44 GMT</pubDate></item><item><title>JavaScript常见排序算法</title><link>https://nerrol.com/post/JS-Arithmetic1</link><description><![CDATA[<blockquote>
+<h4>说明</h4>
+
+<ul>
+<li>时间复杂度指的是一个算法执行所耗费的时间</li>
+<li>空间复杂度指运行完一个程序所需内存的大小</li>
+<li>稳定指，如果a=b,a在b的前面，排序后a仍然在b的前面
+
+<ul>
+<li>不稳定指，如果a=b，a在b的前面，排序后可能会交换位置</li>
+</ul></li>
+</ul>
+</blockquote>
+
+<hr>
+
+<p><br></p>
+
+<h3>冒泡排序</h3>
+
+<hr>
+
+<h4>原理</h4>
+
+<p>依次比较相邻的两个值，如果后面的比前面的小，则将小的元素排到前面。依照这个规则进行多次并且递减的迭代，直到顺序正确。
+时间复杂度，空间复杂度，稳定性<br></p>
+
+<ul>
+<li>平均时间复杂度O(n*n)</li>
+<li>最好情况O(n)</li>
+<li>最差情况O(n*n)</li>
+<li>空间复杂度O(1)</li>
+<li>稳定性：稳定</li>
+</ul>
+
+<h4>代码实现</h4>
+
+<pre><code>var examplearr=[8,94,15,88,55,76,21,39];
+function sortarr(arr){
+    for(i=0;i&lt;arr.length-1;i++){
+        for(j=0;j&lt;arr.length-1-i;j++){
+            if(arr[j]&gt;arr[j+1]){
+                var temp=arr[j];
+                arr[j]=arr[j+1];
+                arr[j+1]=temp;
+            }
+        }
+    }
+    return arr;
+}
+sortarr(examplearr);
+console.log(examplearr);
+</code></pre>
+
+<h4>解析</h4>
+
+<ul>
+<li>当i=0的时候，里面的循环完整执行，从j=0执行到j=6,这也就是第一遍排序，结果是将最大的数排到了最后，这一遍循环结束后的结果应该是[8,15,88,55,76,21,39,94]</li>
+<li>当i=1的时候，里面的循环再次完整执行，由于最大的数已经在最后了，没有必要去比较数组的最后两项，这也是j&lt;arr.length-1-i的巧妙之处，结果是[8,15,55,76,21,39,88,94]</li>
+<li>（通过两个循环进行排序）</li>
+<li>说到这里，规律就清楚了，每次将剩下数组里面最大的一个数排到最后面，当第一个循环执行到最后的时候，也就是i=6,此时，j=0,只需要比较数组的第一和第二项，比较完毕，返回。</li>
+</ul>
+
+<p><br></p>
+
+<h3>选择排序</h3>
+
+<hr>
+
+<h4>原理</h4>
+
+<p>把每一个数都与第一个数比较，如果小于第一个数，就把它们交换位置；这样一轮下来，最小的数就排到了最前面；重复n-1轮，就实现了选择排序。</p>
+
+<ul>
+<li>平均时间复杂度O(n*n)</li>
+<li>最好情况O(n*n)</li>
+<li>最差情况O(n*n)</li>
+<li>空间复杂度O(1)</li>
+<li>稳定性：不稳定</li>
+</ul>
+
+<h4>代码实现</h4>
+
+<pre><code>//方法一：
+function selectSort(arr){
+      var len=arr.length;
+      var temp;
+      for(var i=0;i&lt;len-1;i++){
+          for(var j=i+1;j&lt;len;j++){
+              if(arr[j]&lt;arr[i]){
+                  temp=arr[j];
+                  arr[j]=arr[i];
+                  arr[i]=temp;
+              }
+          }
+      }
+      return arr;
+        }
+                
+                
+//方法二：
+  function selectSort(arr){
+          var len=arr.length;
+          var minIndex,temp;
+          console.time(&#39;选择排序耗时&#39;);
+          for(i=0;i&lt;len-1;i++){
+              minIndex=i;
+              for(j=i+1;j&lt;len;j++){
+                  if(arr[j]&lt;arr[minIndex]){
+                      minIndex=j;
+                  }
+              }
+          temp=arr[i];
+          arr[i]=arr[minIndex];
+          arr[minIndex]=temp;
+          }
+          console.timeEnd(&#39;选择排序耗时&#39;);
+          return arr;
+       }
+</code></pre>
+
+<h4>解析</h4>
+
+<p>minIndex始终保存着最小值的位置的索引，随着i的自增，遍历的数组长度越来越短，直到完成排序。</p>
+
+<p><br></p>
+
+<h3>快速排序</h3>
+
+<hr>
+
+<h4>原理</h4>
+
+<p>从数组中选定一个基数，然后把数组中的每一项与此基数做比较，小的放入一个新数组，大的放入另外一个新数组。然后再采用这样的方法操作新数组。直到所有子集只剩下一个元素，排序完成。</p>
+
+<ul>
+<li>平均时间复杂度O(nlogn)</li>
+<li>最好情况O(nlogn)</li>
+<li>最差情况O(n*n)</li>
+<li>空间复杂度O(logn)</li>
+<li>稳定性：不稳定</li>
+</ul>
+
+<h4>代码实现</h4>
+
+<pre><code>var examplearr=[8,94,15,88,55,76,21,39];
+function fastsort(arr){
+    if(arr.length&lt;2){
+        return arr;
+    }
+    var left=[];
+    var right=[];
+    var pivotIndex=Math.floor(arr.length/2);
+    var pivot=arr.splice(pivotIndex,1)[0];
+    for(i=0;i&lt;arr.length;i++){
+        if(arr[i]&lt;pivot){
+            left.push(arr[i]);
+        }else{
+            right.push(arr[i])
+        }
+    }
+    return fastsort(left).concat([pivot],fastsort(right));
+}
+console.log(fastsort(examplearr));
+</code></pre>
+
+<h4>解析</h4>
+
+<ol>
+<li>pivotIndex是将数组的长度除2向下取整得到的一个数值，数组的长度是不断减半的，所以最后它的值为0</li>
+<li>pivot是利用splice方法从数组里获取一个基数</li>
+</ol>
+]]></description><guid isPermaLink="true">https://nerrol.com/post/JS-Arithmetic1</guid><pubDate>Thu, 15 Mar 2018 20:24:57 GMT</pubDate></item><item><title> CSS 动画和 JavaScript 动画的优缺点</title><link>https://nerrol.com/post/animation-note1</link><description><![CDATA[<p>我们经常面临一个抉择：到底使用JavaScript还是CSS动画，下面做一下对比。<br></p>
+
+<h3>JavaScript动画</h3>
+
+<h5>缺点：</h5>
+
+<ul>
+<li>JavaScript在浏览器的主线程中运行，而主线程中还有其它需要运行的JavaScript脚本、样式计算、布局、绘制任务等,对其干扰导致线程可能出现阻塞，从而造成丢帧的情况；</li>
+<li>代码的复杂度高于CSS动画；</li>
+</ul>
+
+<h5>优点</h5>
+
+<ul>
+<li>JavaScript动画控制能力很强, 可以在动画播放过程中对动画进行控制：开始、暂停、回放、终止、取消都是可以做到的；</li>
+<li>动画效果比css3动画丰富,有些动画效果，比如曲线运动,冲击闪烁,视差滚动效果，只有JavaScript动画才能完成；</li>
+<li>CSS3有兼容性问题，而JS大多时候没有兼容性问题；</li>
+</ul>
+
+<h3>CSS动画</h3>
+
+<h5>缺点：</h5>
+
+<ul>
+<li>运行过程控制较弱,无法附加事件绑定回调函数。CSS动画只能暂停,不能在动画中寻找一个特定的时间点，不能在半路反转动画，不能变换时间尺度，不能在特定的位置添加回调函数或是绑定回放事件,无进度报告；</li>
+<li>代码冗长。想用 CSS 实现稍微复杂一点动画,最后CSS代码都会变得非常笨重。</li>
+</ul>
+
+<h5>优点：</h5>
+
+<ul>
+<li><p>浏览器可以对动画进行优化。
+浏览器使用与 requestAnimationFrame 类似的机制，requestAnimationFrame比起setTimeout，setInterval设置动画的优势主要是:1)requestAnimationFrame 会把每一帧中的所有DOM操作集中起来，在一次重绘或回流中就完成,并且重绘或回流的时间间隔紧紧跟随浏览器的刷新频率,一般来说,这个频率为每秒60帧。2)在隐藏或不可见的元素中requestAnimationFrame不会进行重绘或回流，这当然就意味着更少的的cpu，gpu和内存使用量。
+强制使用硬件加速 （通过 GPU 来提高动画性能）</p></li>
+<li><p>CSS动画流畅
+渲染线程分为main thread(主线程)和compositor thread(合成器线程)。
+如果CSS动画只是改变transform和opacity，这时整个CSS动画得以在compositor thread完成（而JS动画则会在main thread执行，然后触发compositor进行下一步操作）
+在JS执行一些昂贵的任务时，main thread繁忙，CSS动画由于使用了compositor thread可以保持流畅，在主线程中，维护了一棵Layer树（LayerTreeHost），管理了TiledLayer，在compositor thread，维护了同样一颗LayerTreeHostImpl，管理了LayerImpl，这两棵树的内容是拷贝关系。因此可以彼此不干扰，当Javascript在main thread操作LayerTreeHost的同时，compositor thread可以用LayerTreeHostImpl做渲染。当Javascript繁忙导致主线程卡住时，合成到屏幕的过程也是流畅的。
+为了实现防假死，鼠标键盘消息会被首先分发到compositor thread，然后再到main thread。这样，当main thread繁忙时，compositor thread还是能够响应一部分消息，例如，鼠标滚动时，加入main thread繁忙，compositor thread也会处理滚动消息，滚动已经被提交的页面部分（未被提交的部分将被刷白）。</p></li>
+<li><p>CSS动画比JS流畅的前提：
+JS在执行一些昂贵的任务;<br>
+同时CSS动画不触发layout或paint;<br>
+在CSS动画或JS动画触发了paint或layout时，需要main thread进行Layer树的重计算，这时CSS动画或JS动画都会阻塞后续操作。<br>
+只有如下属性的修改才符合“仅触发Composite，不触发layout或paint”：<br></p></li>
+<li><p>backface-visibility</p></li>
+<li><p>opacity</p></li>
+<li><p>perspective</p></li>
+<li><p>perspective-origin</p></li>
+<li><p>transfrom
+(所以只有用上了3D加速或修改opacity时，css3动画的优势才会体现出来。)</p></li>
+<li><p>代码相对简单,性能调优方向固定</p></li>
+<li><p>对于帧速表现不好的低版本浏览器，CSS3可以做到自然降级，而JS则需要撰写额外代码</p></li>
+</ul>
+
+<h4>结论</h4>
+
+<p>如果动画只是简单的状态切换，不需要中间过程控制，在这种情况下，css动画是优选方案。它可以让你将动画逻辑放在样式文件里面，而不会让你的页面充斥 Javascript 库。然而如果你在设计很复杂的富客户端界面或者在开发一个有着复杂UI状态的 APP。那么你应该使用js动画，这样你的动画可以保持高效，并且你的工作流也更可控。所以，在实现一些小的交互动效的时候，就多考虑考虑CSS动画。对于一些复杂控制的动画，使用javascript比较可靠。</p>
+]]></description><guid isPermaLink="true">https://nerrol.com/post/animation-note1</guid><pubDate>Mon, 12 Mar 2018 11:50:19 GMT</pubDate></item><item><title>JavaScript性能</title><link>https://nerrol.com/post/JSNote-6</link><description><![CDATA[<h4>一、注意作用域</h4>
+
+<ul>
+<li>避免全局查找，将全局变量储存为本地局部变量（访问全局变量比局部变量慢，因为需要遍历作用域链）；</li>
+<li>避免with语句（with会创建自己的作用域，增加执行代码作用域链长度）</li>
+</ul>
+
+<h4>二、选择正确方法</h4>
+
+<ul>
+<li>避免不必要的属性查找，减少算法复杂度（使用变量和数组要比访问对象上的属性更有效率，属性查找越多，执行时间越长）；</li>
+<li>优化循环：<br>
+  （1）减值迭代：从最大值开始不断迭代减值；<br>
+  （2）简化终止条件：避免属性查找或其他O(n)操作；<br>
+  （3）简化循环体：确保循环体中没有某些可以被容易移出循环的密集计算；<br>
+    （4）使用后测试循环：避免最初终止条件的计算；<br></li>
+<li>展开循环：循环次数确定时，消除循环并使用多次函数调用更快（迭代次数不能事先确定时，使用Duff装置技术）；</li>
+<li>避免双重解释(<code>eval()</code>)；</li>
+<li>使用原生方法，而不是重新用JS写；</li>
+<li>使用switch语句而不是If-else；</li>
+<li>进行数学运算时位运算符比较快；</li>
+</ul>
+
+<h4>三、最小化语句数</h4>
+
+<ul>
+<li>使用一个var来进行多个变量声明；</li>
+<li><p>插入迭代值</p>
+
+<p>eg:<code>var name = values[i];i++</code>简写为一个语句：<code>var name = values[i++]</code>；</p></li>
+<li><p>使用数组和对象字面量方式；</p></li>
+</ul>
+
+<h4>四、优化DOM交互</h4>
+
+<ul>
+<li>最小化现场更新；</li>
+<li>使用文档片段；</li>
+<li>使用innerHTML；</li>
+<li>注意尽可能少访问HTMLCollection对象<br></li>
+</ul>
+
+<blockquote>
+<p>PS：何时返回HTMLCollection对象？<br>
+（1）进行对getElementsByTagName()的调用；<br>
+（2）获取了元素的childNodes属性；<br>
+（3）获取了元素的attributes属性；<br>
+（4）访问了特殊的集合，如document.forms、document.images等。<br></p>
+</blockquote>
+]]></description><guid isPermaLink="true">https://nerrol.com/post/JSNote-6</guid><pubDate>Tue, 27 Feb 2018 21:50:13 GMT</pubDate></item><item><title>JS高级程序设计笔记-高级函数</title><link>https://nerrol.com/post/JSNote-5</link><description><![CDATA[<h4>一、防篡改对象</h4>
+
+<p>1、不可扩展对象</p>
+
+<pre><code>var person = {name:&quot;nicholas&quot;};
+Object.preventExtensions(person);
+person.age = 12;
+console.log(person.age);//undefined
+delete person.name;
+console.log(person.name);//undefined
+</code></pre>
+
+<p>PS：设置为不可扩展对象无法给对象添加属性和方法；但是可以删除属性和方法；<br>
+<strong><em><code>Object.istExtensible()</code>方法</em></strong>：确定对象是否可以扩展；
+<br><br>
+2、密封的对象</p>
+
+<pre><code>var person = {name:&quot;nicholas&quot;};
+Object.seal(person);
+person.age = 12;
+console.log(person.age);//undefined
+delete person.name;
+console.log(person.name);//nicholas
+</code></pre>
+
+<p>PS：密封对象不可扩展，[[configurable]]特性将被设置为false，不能删除属性和方法，也不能添加属性和方法。<br>
+<strong><em><code>Object.isSealed()</code>方法</em></strong>：确定对象是否被密封，密封的对象同样不可扩展；
+<br><br>
+3、冻结的对象</p>
+
+<pre><code>var person = {name:&quot;nicholas&quot;};
+Object.freeze(person);
+person.age = 12;
+console.log(person.age);//undefined
+delete person.name;
+console.log(person.name);//nicholas
+person.name = &quot;Greg&quot;;
+console.log(person.name);//nicholas
+</code></pre>
+
+<p>PS：最严格的防篡改级别对象，冻结对象既不可扩展又是密封的，且对象的数据属性的[[Writable]]特性会被设置为false。<br>
+<strong><em><code>Object.isFrozen()</code>方法</em></strong>：检测冻结对象；</p>
+
+<h4>二、高级定时器</h4>
+
+<blockquote>
+<p>关于定时器，指定的时间间隔表示何时将定时器的代码添加到队列，而不是何时实际执行代码。
+<br>
+1、重复的定时器</p>
+</blockquote>
+
+<pre><code>//避免setInterval()的次重复定时器的缺点（某些间隔可能被跳过），可以使用链式setTimeout()调用
+setTimeout(function(){
+    //处理中
+    setTimeout(arguments.callee,interval);
+},interval)
+
+</code></pre>
+
+<p>2、数组分块技术
+在数据分块模式中，array变量的本质上就是一个“待办事宜”列表，包含了要处理的项目，使用shift()方法获取队列中的下一个要处理的项目，将其传递给某个函数。</p>
+
+<pre><code>//接受三个参数：要处理的项目的数组，用于处理项目的函数，以及可选的运行该函数的环境。
+function chunk(array,process,context){
+    setTimeout(function(){
+        var item = array.shift();
+        process.call(context,item);
+        if(array.length&gt;0){
+            setTimeout(arguments.callee,100);
+        }
+    },100)
+}
+</code></pre>
+
+<p>3、函数节流</p>
+
+<pre><code>//两个参数：要执行的函数，在哪个作用域中执行（定时器id储存在函数的tId属性中）
+function throttle(method,context){
+    clearTimeout(method.tId){
+        method.tId=setTimeout(function(){
+            method.call(context);
+        },100)
+    }
+}
+</code></pre>
+]]></description><guid isPermaLink="true">https://nerrol.com/post/JSNote-5</guid><pubDate>Mon, 26 Feb 2018 23:39:46 GMT</pubDate></item><item><title>window对象</title><link>https://nerrol.com/post/js-window</link><description><![CDATA[<blockquote>
+<p>由于window对象同事扮演者ECMAScript中的Global对象的角色，因此所有在全局作用域中声明的变量、函数都会变成window对象的属性和方法。</p>
+</blockquote>
+
+<h4>window.location 对象</h4>
+
+<ul>
+<li><p>window.location 对象用于获得当前页面的地址 (URL)，并把浏览器重定向到新的页面。window.location 对象在编写时可不使用 window 这个前缀。</p></li>
+<li><p>location.hostname 返回 web 主机的域名</p></li>
+<li><p>location.pathname 返回当前页面的路径和文件名</p></li>
+<li><p>location.port 返回 web 主机的端口 （80 或 443）</p></li>
+<li><p>location.protocol 返回所使用的 web 协议（http:// 或 https://）</p></li>
+<li><p>window.location.href= &quot;<a href="http://www.xxxxxxxx.net">http://www.xxxxxxxx.net</a>&quot; ; 跳转后有后退功能 </p></li>
+<li><p>window.location.replace(&quot;<a href="http://www.xxxxxxxx.net%22">http://www.xxxxxxxx.net&quot;</a>) ; 跳转后没有后退功能 </p></li>
+<li><p>window.open(&quot;<a href="http://www.xxxxxxxx.net%22">http://www.xxxxxxxx.net&quot;</a>);  在新的窗口打开链接，一般用于简单的弹出页面，现在基本上都被屏蔽掉　</p></li>
+<li><p>window.location.reload( ); 刷新当前页面.</p></li>
+<li><p>parent.location.reload( ); 刷新父亲对象（用于框架）</p></li>
+<li><p>opener.location.reload( ); 刷新父窗口对象（用于单开窗口）</p></li>
+<li><p>top.location.reload( ); 刷新最顶端对象（用于多开窗口）</p></li>
+</ul>
+
+<h4>window.history 对象</h4>
+
+<ul>
+<li><p>window.history 对象包含浏览器的历史。window.history对象在编写时可不使用 window 这个前缀。</p></li>
+<li><p>window.history.back() - 加载历史列表中的前一个 URL，与在浏览器点击后退按钮相同，</p></li>
+<li><p>window.history.forward() -加载历史列表中的下一个 URL。 与在浏览器中点击按钮向前相同</p></li>
+</ul>
+
+<h4>window.navigator 对象</h4>
+
+<ul>
+<li>window.navigator 对象包含有关访问者浏览器的信息，来自 navigator 对象的信息具有误导性，不应该被用于检测浏览器版本，这是因为：navigator 数据可被浏览器使用者更改，一些浏览器对测试站点会识别错误，浏览器无法报告晚于浏览器发布的新操作系统。
+　　</li>
+<li><p>window.navigator 对象在编写时可不使用 window 这个前缀。</p></li>
+<li><p>window.navigator.appCodeName返回浏览器的代码名。</p></li>
+<li><p>window.navigator.appName返回代表浏览器名的字符串。</p></li>
+<li><p>window.navigator.appMinorVersion返回浏览器的次版本号。该属性是一个只读的字符串。仅IE有效。</p></li>
+<li><p>window.navigator.userAgent返回代表浏览器名和版本号的字符串。</p></li>
+<li><p>window.navigator.platform返回浏览器平台的字符串（&quot;Win32&quot;, &quot;Win16&quot;, &quot;WinCE&quot;, &quot;Mac68k&quot;, &quot;MacPPC&quot;, &quot;HP-UX&quot;, &quot;SunOS&quot; 等）。</p></li>
+<li><p>window.navigator.cpuClass 返回CPU的信息（&quot;x86&quot;, &quot;68K&quot;, &quot;Alpha&quot;, &quot;PPC&quot; 等）。仅IE有效。</p></li>
+<li><p>window.navigator.browserLanguage返回浏览器的语言种类。仅IE有效。</p></li>
+<li><p>window.navigator.systemLanguage返回系统的语言种类。仅IE有效。</p></li>
+<li><p>window.navigator.userLanguage userLanguage 返回用户环境的语言种类。仅IE有效。</p></li>
+<li><p>window.navigator.cookieEnabled返回 cookie 是否可用的真伪值。</p></li>
+<li><p>window.navigator.onLine返回是否能连上网络的真伪值。</p></li>
+<li><p>window.navigator.javaEnabled()返回 Java 是否可用的真伪值。</p></li>
+<li><p>window.navigator.userProfile保存着用户信息的对象。拥有 addReadRequest() doReadRequest() getAttribute() clearRequest() 等方法。</p></li>
+<li><p>window.navigator.taintEnabled() 是否可以加密数据的真伪值。仅IE有效。</p></li>
+</ul>
+
+<h4>window对象的一些其它方法</h4>
+
+<ul>
+<li><p>setInterval() 和 setTimeout() 是 HTML DOM Window对象的两个方法。</p></li>
+<li><p>window.setInterval() - 间隔指定的毫秒数不停地执行指定的代码。</p></li>
+<li><p>window.setTimeout() - 暂停指定的毫秒数后执行指定的代码</p></li>
+<li><p>window.clearInterval() 方法用于停止 setInterval() 方法执行的函数代码。</p></li>
+<li><p>window.clearTimeout() 方法用于停止执行setTimeout()方法的函数代码。</p></li>
+<li><p>window.alert()- 警告框经常用于确保用户可以得到某些信息。当警告框出现后，用户需要点击确定按钮才能继续进行操作。</p></li>
+<li><p>window.prompt()- 确认框用于使用户可以验证或者接受某些信息。当确认框出现后，用户需要点击确定或者取消按钮才能继续进行操作。如果用户点击确认，那么返回值为 true。如果用户点击取消，那么返回值为 false。</p></li>
+<li><p>window.confirm()- 提示框经常用于提示用户在进入页面前输入某个值。当提示框出现后，用户需要输入某个值，然后点击确认或取消按钮才能继续操纵。如果用户点击确认，那么返回值为输入的值。如果用户点击取消，那么返回值为 null。</p></li>
+<li><p>window.open() - 打开新窗口</p></li>
+<li><p>window.close() - 关闭当前窗口</p></li>
+<li><p>window.moveTo() - 移动当前窗口</p></li>
+<li><p>window.resizeTo() - 调整当前窗口的尺寸</p></li>
+<li><p>window.frameElement 获取当前文档的宿主节点iframe元素</p></li>
+<li><p>window.execScript() execScript函数与eval的功能相同，不同的是eval函数执行后的脚本的作用域是当前执行上下文，而execScript则总是针对全局作用域。</p></li>
+</ul>
+]]></description><guid isPermaLink="true">https://nerrol.com/post/js-window</guid><pubDate>Sat, 24 Feb 2018 22:57:27 GMT</pubDate></item><item><title>style.width和offsetWidth的区别</title><link>https://nerrol.com/post/js-width</link><description><![CDATA[<h4>style：</h4>
+
+<ul>
+<li>会返回一个对象；</li>
+<li>只有在DOM元素上直接设置内联样式，才可以通过style元素获取；</li>
+<li>通过style对象设置的属性可读写；</li>
+<li>style.width返回值就是width属性的值；</li>
+<li>style.width的返回值是字符串，并且带有单位；</li>
+</ul>
+
+<h4>offsetWidth</h4>
+
+<ul>
+<li>offsetWidth是只读属性；</li>
+<li>offsetWidth属性可以返回对象的padding+border+width属性值之和；</li>
+<li>offsetWidth属性返回值是整数，如果元素的实际宽度为浮点数，则通过四舍五入获取整数；</li>
+</ul>
+]]></description><guid isPermaLink="true">https://nerrol.com/post/js-width</guid><pubDate>Fri, 23 Feb 2018 16:47:01 GMT</pubDate></item><item><title>JS高级程序设计笔记-表单</title><link>https://nerrol.com/post/JSNote-4</link><description><![CDATA[<h4>一、表单基础</h4>
+
+<p>1、特性：
+*  method
+*  action
+*  enctype
+*  accept
+*  <code>&lt;input/&gt;</code>：通过type特性判断是那种输入控件：text、radio、checkbox、file、password、  button、submit、reset、hidden、image
+*  <code>&lt;select/&gt;</code>：下拉列表框，里面的值由<code>&lt;option/&gt;</code>元素定义。
+*  <code>&lt;textarea/&gt;</code>：多行文本框，尺寸由rows和cols定义</p>
+
+<p>2、访问表单字段（按钮、文本框等）<br>
+* 通过elements集合访问：oForm.elements[0];
+* 通过name特性访问：oForm.textbox1;</p>
+
+<p>3、表单字段的共性
+* disabled：用来获取或设置表单控件是否被禁用（被禁用的控件不允许用户输入）
+* form：用来指向字段所在的表单
+* blur()：使表单字段失去焦点
+* focus()：使表单字段获取焦点</p>
+
+<p>4、聚焦于第一个字段</p>
+
+<pre><code>var FormUtil = new Object;
+FormUtil.focusOnFirst=function(){
+    if(document.forms.length&gt;0){
+        for(var i=0;i&lt;document.forms[0].elements.length;i++){
+            var oField = document.forms[0].elements[i];
+                if(oField.type != &quot;hidden&quot;){
+                    oField.focus();
+                    return ;
+                }
+            }
+    }
+}
+//使用这个方法时，要检查第一个字段中是否有值，有的话则不改变焦点，因为在加载很慢的页面中，用户有可能在页面完全在载入之前就开始进行输入，这时设置焦点会中断用户当前的输入。
+</code></pre>
+
+<p>5、提交表单</p>
+
+<p>（1）提交表单时，可以通过在action特性中加入警告来检测表单是否已经被提交。<br/>
+<code>&lt;form method=&quot;post&quot; action=&quot;javascript:alert(&quot;Submitted&quot;)&quot;&gt;</code><br/></p>
+
+<p>（2）方式
+*   通过type值为submit或image来提交表单
+*   通过submit()方法</p>
+
+<p>（3）onsubmit事件处理函数<br/>
+可以用来在提交过程前验证表单，仅限于使用提交按钮和图片按钮，如果使用的是submit()方法，不会触发submit事件。</p>
+
+<p>6、仅提交一次<br/>
+使用普通按钮，设置disabled属性为true。</p>
+
+<p>7、重置表单
+* reset按钮
+* reset()方法：会触发reset事件并执行onreset事件处理函数</p>
+
+<h4>二、文本框</h4>
+
+<p>1、<code>&lt;input type=&quot;text&quot;/&gt;</code>
+* size特性：指定文本框宽度（可见字符数目）；
+* value特性：文本框中初始内容；
+* maxlength特性：指定文本框中允许的最大字符数</p>
+
+<p>2、<code>&lt;textarea&gt;&lt;/textarea&gt;</code>
+* 初始值放在标签之间
+* 不能指定允许的最大字符数</p>
+
+<p>3、选择文本<br/>
+调用focus()，再调用select()</p>
+
+<p>4、文本框事件
+* blur
+* focus
+* change
+* select</p>
+
+<p>5、自动选择文本</p>
+
+<pre><code>FormUtil.setTextboxes = function(){
+    var colInputs = document.getElementsByTagName(&quot;input&quot;);
+    var colTextAreas = document.getElementsByTagName(&quot;textarea&quot;);
+    for(var i=0;i&lt;colInputs.length;i++){
+        if(colInputs[i].type == &quot;text&quot; || colInputs[i].type == &quot;password&quot;){
+            colInputs[i].onfocus = function(){
+                this.select();
+            }
+        }
+        }
+    for(var i=0;i&lt;colTextAreas.length;i++){
+            colTextArea[i].onfocus=function(){
+                this.select();
+            }
+    }
+}
+
+</code></pre>
+
+<p>6、自动切换到下一个<br/>
+PS:文本框必须上设置maxlength特性；</p>
+
+<pre><code>//参数为要检查的文本框
+FormUtil.tabForward = function(oTextbox){
+    var oForm = oTextbox.form;
+    //判断文本框不是表单中最后一个
+    if(oForm.elements[oForm.elements.length-1] != oTextbox &amp;&amp; oTextbox.value.length == oTextbox.getAttribute(&quot;maxlength&quot;)){
+        for(var i = 0;i&lt;oForm.elements.length;i++){
+            if(oForm.elements[i]==oTextbox){
+                for(var j=i+1;j&lt;oForm.elements.length;j++){
+                    if(oForm.elements[j].type != &quot;hidden&quot;){
+                        oForm.elements[j].focus();
+                        return;
+                    }
+                }
+                return;
+            }
+        }
+    }
+}
+</code></pre>
+
+<p>7、限制textarea的字符数</p>
+
+<pre><code>var TextUtil = new Object();
+TextUtil.isNotMax = function(){
+    return oTextArea.value.length != oTextArea.getAttribute(&quot;maxlength&quot;);
+    //maxlength并非textarea的有效HTML特性，仍然可以用getAttribute()来获取它的值
+}
+</code></pre>
+
+<p>8、允许/阻止文本框中的字符<br/>
+（1）阻止无效的字符
+* <code>&lt;input type=&quot;text&quot; invalidchars=&quot;0123456789&quot; /&gt;</code>
+* </p>
+
+<pre><code>TextUtil.blockChars = function(oTextbox,oEvent){
+    oEvent = EventUtil.formatEvent(oEvent);
+    var sInvalidChars = oTextbox.getAttribute(&quot;invalidchars&quot;);
+    var sChar = String.fromCharCode(oEvent.charCode);
+    var bIsValidChar = sInvalidChars.indexOf(sChar) == -1;
+    return bIsValidChar || oEvent.ctrlKey;
+}
+</code></pre>
+
+<p>（2）允许有效的字符
+* <code>&lt;input type=&quot;text&quot; validchars=&quot;0123456789&quot; /&gt;</code>
+*  </p>
+
+<pre><code>TextUtil.allowChars = function(oTextbox,oEvent){
+    oEvent = EventUtil.formatEvent(oEvent);
+    var sValidChars = oTextbox.getAttribute(&quot;validchars&quot;);
+    var sChar = String.fromCharCode(oEvent.charCode);
+    var bIsValidChar = sValidChars.indexOf(sChar) &gt; -1;
+    return bIsValidChar || oEvent.ctrlKey;
+}
+</code></pre>
+
+<p>（3）禁止粘贴<br/>
+* IE中paste事件：<code>&lt;input type=&quot;text&quot; validchars=&quot;0123456789&quot; onpaste=&quot;return false&quot; /&gt;</code><br/>
+*  其他浏览器：<br/>
+第一步：阻止上下文菜单：<code>&lt;input type=&quot;text&quot; validchars=&quot;0123456789&quot; oncontextmenu=&quot;return false&quot;/&gt;</code><br/>
+第二步：阻止用户按下ctrl+v：</p>
+
+<pre><code>//重写以上方法，阻止文本框粘贴，将bBlockPaste参数设置为true
+TextUtil.blockChars = function(oTextbox,oEvent,bBlockPaste){
+    var sInvalidChars = oTextbox.getAttribute(&quot;invalidchars&quot;);
+    var sChar = String.fromCharCode(oEvent.keyCode).toLowerCase();
+    var bIsValidChar = sInvalidChars.indexOf(sChar) == -1;
+    if(bBlockPaste){
+        var result = bIsValidChar &amp;&amp; !(oEvent.ctrlKey &amp;&amp; sChar == &quot;v&quot;)
+        return  result;
+    }else{
+        return bIsValidChar || oEvent.ctrlKey;
+    }
+}
+TextUtil.allowChars = function(oTextbox,oEvent,bBlockPaste){
+    var sValidChars = oTextbox.getAttribute(&quot;validchars&quot;);
+    var sChar = String.fromCharCode(oEvent.charCode).toLowerCase();
+    var bIsValidChar = sValidChars.indexOf(sChar) &gt; -1;
+    if(bBlockPaste){
+        var result = bIsValidChar &amp;&amp; !(oEvent.ctrlKey &amp;&amp; sChar == &quot;v&quot;)
+        return  result;
+    }else{
+        return bIsValidChar || oEvent.ctrlKey;
+    }
+}
+
+</code></pre>
+
+<p><strong>注意：ctrlKey属性只有在onkeydown事件处理程序才能被触发，onkeypress不能。</strong></p>
+
+<p>（4）失去焦点时验证</p>
+
+<pre><code>TextUtil.blurBlock = function(oTextbox){
+    var sInvalidChars = oTextbox.getAttribute(&quot;invalidchars&quot;);
+    var arrInvalidChars = sInvalidChars.split(&quot;&quot;);
+    for(var i=0;i&lt;arrInvalidChars.length;i++){
+        if(oTextbox.value.indexOf(arrInvalidChars[i])&gt;-1){
+            oTextbox.focus();
+            oTextbox.select();
+            return;
+        }
+    }
+}
+//此方法要插入到onblur事件处理函数中
+</code></pre>
+
+<h4>三、列表框和组合框</h4>
+
+<ul>
+<li><code>&lt;option/&gt;</code>的value特性：用来确定空间所有可能的值；</li>
+<li><code>&lt;select/&gt;</code>得size特性：用来指示同时可见的条目的个数；</li>
+</ul>
+
+<p>1、访问选项<br/>
+* 显示文本：dom.options[1].text<br/>
+* 显示value：dom.options[1].value<br/>
+* 在集合中的位置：dom.options[1].index<br/>
+* 选中某一项：dom.value = xx<br/>
+2、获取/更改选中项<br/>
+（1）目前选中的选项的索引：<code>&lt;select/&gt;</code>的selectedIndex特性；（未找到则返回-1）<br/>
+（2）选中多个选项：<code>&lt;select/&gt;</code>的multiple特性设置为“multiple”<br/>
+（3）获取所有选中选项索引的方式<br/></p>
+
+<pre><code>ListUtil.getSelectedIndexes = function(oListbox){
+    var arrIndexes = [];
+    for(var i=0;i&lt;oListbox.options.length;i++){
+        if(oListbox.options[i].selected){
+            arrIndexes.push(i);
+        }
+    }
+    return arrIndexes;
+}
+</code></pre>
+
+<p>3、删除选项
+* dom.options[1] = null;（BOM的功能）
+* dom.remove(index);（index为要删除的选项的索引）
+ps:dom为<code>&lt;select/&gt;</code>元素<br/></p>
+
+<pre><code>//删除所有选项时，需要对每个选项调用remove()方法，逆序删除，因为删除一个选项以后Index特性会被重置。
+ListUtil.clear = function(oListbox){
+    for(var i=oListbox.options.length-1;i&gt;=0;i--){
+        oListbox.remove(i);
+    }
+}
+</code></pre>
+
+<p>4、移动选项</p>
+
+<pre><code>//参数为当前选项长春村在的列表、要移入的列表、要移动的选项的索引
+ListUtil.move = function (oListboxFrom,oListboxTo,index){
+    var oOption = oListboxFrom.options[iIndex];
+    if(oOption != null){
+        oListboxTo.appendChild(oOption);
+    }
+}
+</code></pre>
+
+<p>5、添加选项</p>
+
+<pre><code>//参数为：要处理的列表框、要添加的选项名称、要添加的选项的值
+ListUtil.add = function(oListbox,sName,sValue){
+    var oOption = document.createElement(&quot;option&quot;);
+    oOption,appendChild(document.createTextNode(sName));
+    if(arguments.length==3){
+        oOption.setAttribute(&quot;value&quot;,sValue);
+    }
+    oListbox.appendChild(oOption);
+}
+</code></pre>
+
+<h4>四、创建自动提示的文本框</h4>
+
+<pre><code>//参数：要匹配的文本以及要进行匹配的数组
+TextUtil.autosuggestMatch = function(sText,arrValues){
+    var arrResult = [];
+    if(sText != &quot;&quot;){
+        for(var i=0;i&lt;arrValues.length;i++){
+            if(arrValues[i].indexOf(sText) == 0){
+                arrResult.push(arrValues[i]);
+            }
+        }
+    }
+    return arrResult;
+}
+//参数为：要处理的文本框，可能值的数组，所要显示候选项的列表框的ID
+TextUtil.autosuggest = function(oTextbox,arrValues,sListboxId){
+    var oListbox = document.getElementById(sListboxId);
+    ListUtil.clear(oListbox);
+    var arrMatches = TextUtil.autosuggestMatch(oTextbox.value,arrValues);
+    for(var i=0;i&lt;arrMatches.length;i++){
+        ListUtil.add(oListbox,arrMatches[i])
+    }
+    
+}
+
+</code></pre>
+
+<pre><code>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+    &lt;title&gt;style example&lt;/title&gt;
+    &lt;script type=&quot;text/javascript&quot; src=&quot;listutil.js&quot;&gt;&lt;/script&gt;
+    &lt;script type=&quot;text/javascript&quot; src=&quot;textutil.js&quot;&gt;&lt;/script&gt;
+    &lt;script type=&quot;text/javascript&quot;&gt;
+        var arrColors = [&#39;red&#39;,&#39;orange&#39;,&#39;yellow&#39;,&#39;green&#39;,&#39;blue&#39;,&#39;indigo&#39;,&#39;violet&#39;,&#39;brown&#39;,&#39;black&#39;,&#39;tan&#39;,&#39;ivory&#39;,&#39;navy&#39;,&#39;aqua&#39;,&#39;white&#39;,&#39;purple&#39;,&#39;pink&#39;,&#39;gray&#39;,&#39;silver&#39;];
+        arrColors.sort();
+        function setText(oListbox,sTextboxId){
+            var oTextbox = document.getElementById(sTextboxId);
+            if(oListbox.selectedIndex &gt; -1){
+                oTextbox.value = oListbox.options[oListbox.selectedIndex].text;
+            }
+        }
+    &lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;input type=&quot;text&quot; value=&quot;&quot; id=&quot;txtColor&quot; onkeyup=&quot;TextUtil.autosuggest(this,arrColors,&#39;lstColors&#39;)&quot;&gt;&lt;br/&gt;
+&lt;select id=&quot;lstColors&quot; size=&quot;5&quot; style=&quot;width: 200px&quot; onclick=&quot;setText(this,&#39;txtColor&#39;)&quot;&gt;
+&lt;/select&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+]]></description><guid isPermaLink="true">https://nerrol.com/post/JSNote-4</guid><pubDate>Thu, 22 Feb 2018 21:48:09 GMT</pubDate></item><item><title>webpack+vuecli打包生成资源相对引用路径与背景图片的正确引用</title><link>https://nerrol.com/post/vue-item1</link><description><![CDATA[<h4>资源相对引用路径</h4>
+
+<h5>问题描述：</h5>
+
+<p>一般情况下，通过webpack+vuecli默认打包的css、js等资源，路径都是绝对的。<br>
+但当部署到带有文件夹的项目中，这种绝对路径就会出现问题，因为把配置的static文件夹当成了根路径，那么要解决这种问题，就得引用相对路径。<br></p>
+
+<h5>解决办法：</h5>
+
+<ul>
+<li>打开webpack.prod.conf.js</li>
+<li>找到output：增加 publicPath: &#39;./&#39;, 即可，如图。</li>
+</ul>
+
+<p><img src="https://i.loli.net/2018/02/21/5a8d8e12d4a56.png" alt=""></p>
+
+<p>PS:当然在config文件夹下的index.js中修改 assetsPublicPath: &#39;./&#39;同样也可以达到资源的相对引用。</p>
+
+<h4>背景图片引用路径</h4>
+
+<h5>问题描述：</h5>
+
+<p>资源里面的背景图片，不像index.html中加载资源一样，通过./static/js/app.js引用可以正常加载，图片资源是通过css加载的，如 background: url(&quot;../../assets/images/logo-index.png&quot;) no-repeat;被相对打包后变成了url(static/img/logo-index.2f00bf2.png) no-repeat所以我们要保留css引用图片的正常路径，即：<br>
+<code>url(../../static/img/logo-index.2f00bf2.png) no-repeat</code> <br></p>
+
+<p>那么就需要修改build文件夹下的utils.js代码，如图。</p>
+
+<p><img src="https://i.loli.net/2018/02/21/5a8d8e1fac6d3.png" alt=""></p>
+
+<p>添加如图所示的一行代码，这样不论是字体还是图片的引用问题都能解决。<br></p>
+
+<p><br>
+<br>
+<br>
+<br></p>
+
+<p><em>本文引用自<a href="https://www.cnblogs.com/moqiutao/p/7496718.html">风雨后见彩虹的博客</a></em></p>
+]]></description><guid isPermaLink="true">https://nerrol.com/post/vue-item1</guid><pubDate>Wed, 21 Feb 2018 23:09:56 GMT</pubDate></item><item><title>JS高级程序设计笔记-事件</title><link>https://nerrol.com/post/JSNote-3</link><description><![CDATA[<h4>一、 鼠标事件</h4>
+
+<ol>
+<li>click、dbclick、mousedown、mouseout、mouseover、mouseup、mousemove<br></li>
+<li>事件属性（event对象的属性）：<br>
+（1）坐标属性；<br>
+（2）type属性；<br>
+（3）target（DOM）/srcElement（IE）属性；<br>
+（4）shiftKey、ctrlKey、altKey、metaKey（DOM）属性；<br>
+（5）button属性；<br></li>
+</ol>
+
+<h4>二、 键盘事件</h4>
+
+<ol>
+<li>keydown、keypress、keyup<br>
+2.事件属性<br>
+（1）keyCode属性；<br>
+（2）charCode属性（仅DOM）；<br>
+（3）target（DOM）或者srcElement（IE）属性；<br>
+（4）shiftKey、ctrlKey、altKey、metaKey（DOM）属性；<br></li>
+</ol>
+
+<h4>三、HTML事件</h4>
+
+<p>1、load事件（window对象）：在页面全部载入完之前，任何DOM操作都不能发生；<br>
+            unload事件（window对象）：从一个页面浏览到了另外一个页面时（通过点击一个链接或者使用前进/后退按钮）或者关闭浏览器窗口时触发；<br>
+            PS：使用onunload的最佳方式是取消该页面上的对象引用；<br>
+2、resize事件（window对象）：浏览器的大小发生改变时触发；<br>
+PS：最大化最小化窗口时都会触发；<br>
+3、scroll事件<br>
+eg:<br></p>
+
+<pre><code>//将div块固定在页面固定位置
+window.onscroll = function(){
+            var oWatermark = document.getElementById(&quot;divWatermark&quot;);
+            var st = document.body.scrollTop || document.documentElement.scrollTop;
+            oWatermark.style.top = st +&quot;px&quot;;
+        }
+</code></pre>
+
+<p>4、abort事件、error事件、select事件、change事件、submit事件、reset事件、focus事件、blur事件；</p>
+
+<h4>四、 突变事件</h4>
+]]></description><guid isPermaLink="true">https://nerrol.com/post/JSNote-3</guid><pubDate>Wed, 21 Feb 2018 15:16:27 GMT</pubDate></item><item><title>JS高级程序设计笔记-ECMA基础</title><link>https://nerrol.com/post/JSNote-1</link><description><![CDATA[<h4>一、原始值和引用值</h4>
+
+<p>原始值：存储在栈（stack）中的简单数据段，它们的值直接存储在变量访问的位置。<br></p>
+
+<p>引用值：存储在堆（heap）中的对象，存储在变量处的值是一个指针，指向存储对象的内存处。<br></p>
+
+<h4>二、原始类型：（基本数据类型）</h4>
+
+<blockquote>
+<p>undefined、null、boolean、number、string<br></p>
+</blockquote>
+
+<h4>三、typeof运算符（判断基本数据类型）</h4>
+
+<p>输出结果：undefined、boolean、number、string、object<br></p>
+
+<p>1、undefined<br></p>
+
+<p>当一个未声明的变量和一个声明但并未初始化的变量使用typeof都会输出undefined，如下代码所示：<br>
+var value1;<br>
+//var value2<br>
+console.log(typeof value1);//undefined<br>
+console.log(typeof value2);//undefined<br>
+PS：当函数无明确返回值时，返回的也是undefined。<br></p>
+
+<p>2、null类型<br></p>
+
+<p>undefined派生自null。null表示尚未存在的对象。<br></p>
+
+<p>3、number类型<br></p>
+
+<p>（1）八进制：首数字为0；<br></p>
+
+<p>（2）十六进制：首数字为0x；<br></p>
+
+<p>（3）ECMAScript默认把6个或6个以上的前导0的浮点数转换为科学计数法；<br></p>
+
+<p>（4）几个被定义为Number类型的特殊值：<br></p>
+
+<p>Number.MAX_VALUE<br></p>
+
+<p>Number.MIN_VALUE<br></p>
+
+<p>（5）isFinit()方法：确定该数不是无穷大<br></p>
+
+<p>（6） NaN （非数），特性：不能用于算数计算；<br></p>
+
+<p>　　　　　　　　　　　　    与自身不相等；<br></p>
+
+<p>（7）　isNaN()方法：确定是否为NaN；<br></p>
+
+<p>4、String类型<br></p>
+
+<p>首字符从位置0开始，字符串最后一个字符的位置是字符串的长度减1；<br></p>
+
+<h4>四、转换</h4>
+
+<p>1、转换成字符串：toString()方法<br></p>
+
+<p>Boolean类型：输出“true”或“false”<br></p>
+
+<p>Number类型：根据两种模式：<br></p>
+
+<p>　　　　　　　默认模式：相应数字值得字符串输出；<br></p>
+
+<p>　　　　　　　基模式：输出不同进制形式数字对应的字符串；<br></p>
+
+<p>2、转换成数字<br></p>
+
+<p>只有对string类型调用这些方法才能正确运行，对其他类型返回NaN;</p>
+
+<p>parseInt()：<br></p>
+
+<p>运行机制：从位置0开始查找判断是否为有效数字，如果不是返回NaN，如果是则继续向后查找，直到找到非有效数字，将之前的字符串转换为数字。<br></p>
+
+<p>PS：parseInt()方法有基模式，将二进制、八进制、十六进制的字符串转化为整数，由第二个参数指定。<br></p>
+
+<p>parseFloat()：<br></p>
+
+<p>运行机制：从位置0开始查找每个字符，直到出现第一个非有效字符，将之前的字符串转化为数字。第一个出现的小数点是有效字符，第二个是无效的。<br></p>
+
+<p>PS：字符串必须以十进制形式表示浮点数，不能用八进制或十六进制形式，没有基模式。<br></p>
+
+<p>3、强制类型转换<br></p>
+
+<p>Boolean(value)：<br></p>
+
+<p>（1）转换成Boolean类型；<br></p>
+
+<p>（2）转换的值至少是有一个字符的字符串、非0数字或对象时，返回true；<br></p>
+
+<p>（3）转换的值为空字符串、数字0、undefined、Null，返回false；<br></p>
+
+<p>Number(value)：转换成数字；<br></p>
+
+<p>（1）与parseInt(),parseFloat类似，但转化的是整个值，不是部分值。如果字符串值能完整的被转换，Number()将判断调用parseInt()还是parseFloat()。<br></p>
+
+<p>String(value)：将任何值转换成字符串；<br></p>
+
+<h4>五、引用类型</h4>
+
+<p>1、Object类<br></p>
+
+<p>2、Boolean类<br></p>
+
+<p>3、Number类<br></p>
+
+<p>（1）toFixed()方法：返回具有指定位数小数的数字的字符串表示，参数是几说明了应该显示几位小数。<br></p>
+
+<p>　　  toExponential()方法：返回科学计数法表示的数字的字符串形式。参数是指定要输出的小数的位数。<br></p>
+
+<p>　　  toPrecision()方法：参数表示数的数字总数，不包括指数。<br></p>
+
+<p>PS：这些方法都会进行舍入操作。<br></p>
+
+<p>4、String类<br></p>
+
+<p>（1）valueOf()和toString()方法都会返回string类型的原始值；<br></p>
+
+<pre><code>var oStr = new String(&quot;hello&quot;);
+console.log(oStr.valueOf() === oStr.toString()) //true
+</code></pre>
+
+<p>（2）length属性<br></p>
+
+<p>（3）charAt()：返回包含指定位置处的字符的字符串；<br></p>
+
+<p>　　  charCodeAt()：返回包含指定位置处的字符的字符代码；<br></p>
+
+<p>　　  concat()：将一个或多个字符串连接到String对象的原始值上，该方法会保持原始的String对象不变；<br></p>
+
+<p>（4）indexOf()：从位置0开始检索，返回指定的子串在另一个字符串中的位置。（-1表示没有找到）<br></p>
+
+<p>　　  lastIndexOf()：从字符串结尾开始检索，返回指定的子串在另一个字符串中的位置。（-1表示没有找到）<br></p>
+
+<p>（5）localeCompare()：对字符串值进行排序，参数是要进行比较的字符串；<br></p>
+
+<p>（6）slice()：第一个参数是要获取的子串的起始位置，第二个参数是要获取子串终止前的位置，省略的话就默认为字符串的长度。<br></p>
+
+<p>　　  substring()：同上；<br></p>
+
+<p>PS：当两者参数为负数时有些不同；slice()会用字符串长度加参数，substring将其作为0处理（忽略）；<br></p>
+
+<p>（7）toLowerCase()：字符串转换为全小写；<br></p>
+
+<p>　　  toUpperCase()：转化成全大写；<br></p>
+
+<p>5、instanceof运算符<br></p>
+
+<p>xxx instanceof Object(Object/Array/Date/Function)；<br></p>
+
+<h4>六、运算符</h4>
+
+<p>1、delete：删除对以前定义的对象属性或方法的引用<br></p>
+
+<pre><code>var o =new Object();
+o.name = &quot;coco&quot;;
+ console.log(o.name);//coco
+delete o.name;
+console.log(o.name);//undefined
+ ```
+ 
+PS：不能删除开发者未定义的属性和方法，如原始的ECMAScript方法。&lt;br&gt;
+
+2、void：对任何值都返回undefined，通常用于避免输出不应该输出的值。&lt;br&gt;
+
+`&lt;a href=&quot;javascript:void(window.open(&#39;about:blank&#39;))&quot;&gt;click&lt;/a&gt;`
+
+3、（1）前增量运算符：（++num,--num）&lt;br&gt;
+
+ 先加减后运算；&lt;br&gt;
+
+（2）后增量运算符：（num++,num--）&lt;br&gt;
+
+先运算后加减；&lt;br&gt;
+
+4、一元运算符&lt;br&gt;
+
+5、位运算符&lt;br&gt;
+
+（1）位运算NOT（~）&lt;br&gt;
+
+（2）位运算AND（&amp;）&lt;br&gt;
+
+（3）位运算OR（|）&lt;br&gt;
+
+（4）位运算XOR（^）&lt;br&gt;
+
+（5）左移运算（&lt;&lt;）&lt;br&gt;
+
+（6）有符号右移运算（&gt;&gt;）&lt;br&gt;
+
+（7）无符号右移运算（&gt;&gt;&gt;）&lt;br&gt;
+
+6、Boolean运算符&lt;br&gt;
+
+（1）逻辑NOT（！）&lt;br&gt;
+
+PS：两个！！给出变量真正的boolean值；&lt;br&gt;
+
+（2）逻辑AND（&amp;&amp;）&lt;br&gt;
+
+PS：如果第一个运算数是false，则不再计算第二个运算数，结果为false。&lt;br&gt;
+
+（3）逻辑OR（||）&lt;br&gt;
+
+PS：如果第一个运算数是true，则不再计算第二个运算数，结果为true。&lt;br&gt;
+
+7、乘性运算符&lt;br&gt;
+
+（1）乘法运算符（*）&lt;br&gt;
+
+（2）除法运算符（/）&lt;br&gt;
+
+（3）取模运算符（%）&lt;br&gt;
+
+8、加性运算符&lt;br&gt;
+
+（1）加法运算符（+）&lt;br&gt;
+
+（2）减法运算符（-）&lt;br&gt;
+
+ 9、关系运算符&lt;br&gt;
+
+10、等性运算符&lt;br&gt;
+
+（1）等号（==）和非等号（!=）&lt;br&gt;
+
+如果一个运算数是Boolean值，在检查相等性之前，将它转换成数字值；false-&gt;0；true-&gt;1；&lt;br&gt;
+
+如果一个运算数是字符串，另一个是数字，在检查相等性之前，尝试将字符串转换成数字；&lt;br&gt;
+
+null与undefined相等；&lt;br&gt;
+
+不能将null和undefined转换成其他值；&lt;br&gt;
+
+（2）全等号（===）和非全等号（!==）&lt;br&gt;
+
+只有在无需类型转换运算数就相等的情况下才返回true；&lt;br&gt;
+
+11、条件运算符（三元）&lt;br&gt;
+
+12、赋值运算符（=、+=、-=、*=、/=、%=、&gt;&gt;=、&lt;&lt;=）&lt;br&gt;
+
+#### 七、语句
+
+1、if语句&lt;br&gt;
+2、迭代语句&lt;br&gt;
+（1）do-while语句：计算表达式之前至少会执行循环主体一次；&lt;br&gt;
+（2）while语句&lt;br&gt;
+（3）for语句&lt;br&gt;
+（4）for-in语句：遍历对象的可枚举属性；&lt;br&gt;
+（5）break语句：立即退出循环；&lt;br&gt;
+　　  continue语句：退出当前循环，进行下一次循环；&lt;br&gt;
+（6）with语句&lt;br&gt;
+（7）switch语句&lt;br&gt;
+
+#### 八、函数
+
+1、无重载&lt;br&gt;
+2、arguments&lt;br&gt;
+            length属性&lt;br&gt;
+3、Function类&lt;br&gt;
+4、闭包&lt;br&gt;
+
+ 
+</code></pre>
+]]></description><guid isPermaLink="true">https://nerrol.com/post/JSNote-1</guid><pubDate>Wed, 21 Feb 2018 13:36:01 GMT</pubDate></item><item><title>如何使CSS中height:100% 起作用</title><link>https://nerrol.com/post/css-height</link><description><![CDATA[<p>1、按照w3c中的width和height属性，可以明确%设定宽高是根据父元素的宽高来的；</p>
+
+<p>2、Web浏览器在计算有效宽度时会考虑浏览器窗口的打开宽度。如果你不给宽度设定任何缺省值，那浏览器会自动将页面内容平铺填满整个横向宽度。即我们不设置宽，会自动填满整个横向宽度，因为页面并没有缺省的高度值，所以，当你让一个元素的高度设定为百分比高度时，无法根据获取父元素的高度，也就无法计算自己的高度。</p>
+
+<p>解决方案：</p>
+
+<pre><code>  html,body{
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+</code></pre>
+]]></description><guid isPermaLink="true">https://nerrol.com/post/css-height</guid><pubDate>Wed, 21 Feb 2018 13:28:39 GMT</pubDate></item><item><title>jq 使用load()方法加载文件中元素事件绑定失效的问题</title><link>https://nerrol.com/post/jq-load</link><description><![CDATA[<p>1、load()方法：</p>
+
+<p>$(selector).load(URL,data,callback)；</p>
+
+<p>selector：页面中需要加载外部文件的DOM节点；</p>
+
+<p>URL：外部文件地址；</p>
+
+<p>data：请求一同发送的查询字符串集合；</p>
+
+<p>callback：load()方法完成后所执行的函数；</p>
+
+<p>2、问题：被加载页面中的JavaScript代码失效，这是因为load加载的外部文件会把Script部分删除掉。</p>
+
+<p>解决：使用load方法中的回调函数加载绑定事件；</p>
+]]></description><guid isPermaLink="true">https://nerrol.com/post/jq-load</guid><pubDate>Wed, 21 Feb 2018 13:27:18 GMT</pubDate></item><item><title>关于移动端页面在苹果手机上的一些问题</title><link>https://nerrol.com/post/Mobile-iphone-issue</link><description><![CDATA[<h4>1、解决苹果手机点击后失灵问题：</h4>
+
+<p>（1）css中cursor:pointer;<br>
+（2）js中使用touchstart事件<br></p>
+
+<h4>2、解决苹果手机中点击标签后背景闪屏问题：</h4>
+
+<p>html{-webkit-tap-highlight-color:none}<br>
+或者<br>
+html{-webkit-tap-highlight-color:transparent;}<br></p>
+]]></description><guid isPermaLink="true">https://nerrol.com/post/Mobile-iphone-issue</guid><pubDate>Wed, 14 Feb 2018 23:28:26 GMT</pubDate></item><item><title>关于html5存储localStorage,sessionStorage以及Cookie</title><link>https://nerrol.com/post/html5-storage</link><description><![CDATA[<h4>LocalStorage</h4>
+
+<ul>
+<li>是对Cookie的优化</li>
+<li>没有时间限制的数据存储</li>
+<li>在隐私模式下不可读取</li>
+<li>大小限制在500万字符左右，各个浏览器不一致</li>
+<li>localStorage的大小一般限定为4M左右</li>
+<li>在所有同源窗口中都是共享的</li>
+<li>本质是在读写文件，数据多的话会比较卡（firefox会一次性将数据导入内存）</li>
+<li>不能被爬虫爬取，不要用它完全取代URL传参</li>
+<li>IE７及以下不支持外，其他标准浏览器都完全支持</li>
+<li>如果有一些数据，服务器难以承载其压力，但又要与用户的信息绑定的话，可以使用localStorage存储一些状态，这样即能缓解服务端压力，也可以存储用户的数据</li>
+<li>存储的值需要是字符串类型，没法直接存储对象，但是可以将对象序列化为字符串再存入。</li>
+</ul>
+
+<blockquote>
+<p>获取键值：localStorage.getItem(“key”)<br>
+设置键值：localStorage.setItem(“key”,”value”)<br>
+清除键值：localStorage.removeItem(“key”)<br>
+清除所有键值：localStorage.clear()<br>
+获取键值2：localStorage.keyName<br>
+设置键值2：localStorage.keyName = “value”<br></p>
+
+<p>JQ下的操作方法：<br>
+获取键值：window.localStorage.getItem(“key”)<br>
+设置键值：window.localStorage.setItem(“key”,”value”)<br>
+清除键值：window.localStorage.removeItem(“key”)<br>
+清除所有键值：window.localStorage.clear()<br>
+获取键值2：window.localStorage.keyName<br>
+设置键值2：window.localStorage.keyName = “value”<br>
+　　</p>
+</blockquote>
+
+<h4>SessionStorage</h4>
+
+<ul>
+<li>针对一个 session 的数据存储</li>
+<li>大小限制在5M左右，各个浏览器不一致</li>
+<li>仅在当前浏览器窗口关闭前有效（适合会话验证）</li>
+<li>不在不同的浏览器窗口中共享，即使是同一个页面</li>
+<li>建议存储一些当前页面刷新需要存储，且不需要在tab关闭时候留下的信息。</li>
+</ul>
+
+<h4>Cookie</h4>
+
+<ul>
+<li>cookie机制将信息存储于用户硬盘，因此可以作为全局变量</li>
+<li>现代浏览器cookie个数不要超过50条，大小不能超过4KB，4095字节；</li>
+<li>cookie不要保存机密信息，让服务端来确保用户信息安全。</li>
+<li>cookie每次随HTTP请求一起发送，浪费宽带，移动端推荐使用localStorage。</li>
+<li>每个域最多在一台用户对的机器上存储20个cookie；</li>
+<li>建议存储一些同步访问页面的时候必须要被带到服务端的信息。</li>
+</ul>
+
+<pre><code>$.cookie = {
+    set: function(name, value, exp) {
+        var Days = 30;
+        var _exp = new Date();
+        _exp.setTime(_exp.getTime() + Days * 24 * 60 * 60 * 1000);
+        document.cookie = name + &quot;=&quot; + escape(value) + &quot;;expires=&quot; +
+            (exp || _exp).toGMTString();
+    },
+    get: function(name) {
+        var arr, reg = new RegExp(&quot;(^| )&quot; + name + &quot;=([^;]*)(;|$)&quot;);
+        if (arr = document.cookie.match(reg))
+            return unescape(arr[2]);
+        else
+            return null;
+    },
+    del: function(name) {
+        var exp = new Date();
+        exp.setTime(exp.getTime() - 1);
+        var cval = this.get(name);
+        if (cval != null)
+            document.cookie = name + &quot;=&quot; + cval + &quot;;expires=&quot; + exp.toGMTString();
+    }
+};
+</code></pre>
+
+<p><img src="https://i.loli.net/2018/02/24/5a9119988132b.png" alt=""></p>
+]]></description><guid isPermaLink="true">https://nerrol.com/post/html5-storage</guid><pubDate>Wed, 14 Feb 2018 23:24:45 GMT</pubDate></item><item><title>JavaScript对象及数组遍历方法</title><link>https://nerrol.com/post/js-180214</link><description><![CDATA[<h3>for in</h3>
+
+<ul>
+<li>一般用于遍历对象的属性；</li>
+<li>作用于数组的for in除了会遍历数组元素外，还会遍历自定义可枚举的属性，以及原型链上可枚举的属性；</li>
+<li>因为会遍历到原型链上的属性，所以使用前需要加入obj.hasOwnProperty(property)检查；</li>
+<li>作用于数组的for in的遍历结果是数组的索引，且都为字符串型，不能用于运算；</li>
+<li>某些情况下，可能按照随机顺序遍历数组元素；</li>
+</ul>
+
+<pre><code>Array.prototype.sayLength = function(){
+console.log(this.length);
+}
+let arr = [&#39;a&#39;,&#39;b&#39;,&#39;c&#39;,&#39;d&#39;];
+arr.name = &#39;数组&#39;;
+Object.defineProperties(arr,{
+type:{
+value:true,
+writable:true,
+enumerable:true
+}
+});
+for(let i in arr){
+console.log(i);//0,1,2,3,name,type,sayLength
+}
+</code></pre>
+
+<h4>Object.keys()</h4>
+
+<ul>
+<li>一般用于遍历对象的属性；</li>
+<li>遍历结果为由对象自身可枚举属性组成的数组;</li>
+<li>数组中的属性名排列顺序与使用for in循环遍历该对象时返回的顺序一致；</li>
+<li>与for in区别在于不能遍历出原型链上的属性；</li>
+</ul>
+
+<pre><code>Array.prototype.sayLength = function(){
+console.log(this.length);
+}
+let arr = [&#39;a&#39;,&#39;b&#39;,&#39;c&#39;,&#39;d&#39;];
+arr.name = &#39;数组&#39;;
+Object.defineProperties(arr,{
+type:{
+value:true,
+writable:true,
+enumerable:true
+}
+});
+var keys = Object.keys(arr);
+console.log(keys);//[&quot;0&quot;, &quot;1&quot;, &quot;2&quot;, &quot;3&quot;, &quot;name&quot;, &quot;type&quot;]
+</code></pre>
+
+<h4>for of</h4>
+
+<ul>
+<li>ES6中添加的循环语法；</li>
+<li>一般用于遍历数组；</li>
+<li>for of支持遍历数组、类对象（例如DOM NodeList对象）、字符串、Map对象、Set对象；</li>
+<li>for of不支持遍历普通对象，可通过与Object.keys()搭配使用遍历；（见示例二）</li>
+<li>for of遍历后的输出结果为数组元素的值；</li>
+<li>搭配实例方法entries()，同时输出数组内容和索引；（见示例三）</li>
+</ul>
+
+<p>示例一：</p>
+
+<pre><code>Array.prototype.sayLength = function(){
+console.log(this.length);
+}
+let arr = [&#39;a&#39;,&#39;b&#39;,&#39;c&#39;,&#39;d&#39;];
+arr.name = &#39;数组&#39;;
+Object.defineProperties(arr,{
+type:{
+value:true,
+writable:true,
+enumerable:true
+}
+});
+for(let i of arr){
+console.log(i);//a,b,c,d
+}
+</code></pre>
+
+<p>示例二：</p>
+
+<pre><code class="language-javascript">var person={
+name:&#39;coco&#39;,
+age:22,
+locate:{
+country:&#39;China&#39;,
+city:&#39;beijing&#39;,
+}
+}
+for(var key of Object.keys(person)){
+//使用Object.keys()方法获取对象key的数组
+console.log(key+&quot;: &quot;+person[key]);//name: coco,age: 22,locate: [object Object]
+}
+</code></pre>
+
+<p>示例三：</p>
+
+<pre><code class="language-javascript">  let arr3 = [&#39;a&#39;, &#39;b&#39;, &#39;c&#39;];
+       for (let [index, val] of arr3.entries()) {
+             console.log(index + &#39;:&#39; + val);//0:a 1:b 2:c
+        }
+</code></pre>
+
+<p>PS：让jquery对象支持for of遍历</p>
+
+<p>// 因为jQuery对象与数组相似 <br>
+// 可以为其添加与数组一致的迭代器方法</p>
+
+<p><code>jQuery.prototype[Symbol.iterator] = Array.prototype[Symbol.iterator];</code><br></p>
+
+<p>####  forEach</p>
+
+<ul>
+<li> 遍历数组中的元素；</li>
+<li>为每个元素执行回调；</li>
+<li><p>无返回值； </p>
+
+<pre><code>const arr = [&#39;a&#39;, &#39;b&#39;, &#39;c&#39;];
+arr.forEach(function(element) {
+console.log(element);
+});//a,b,c
+</code></pre></li>
+</ul>
+
+<h4>map</h4>
+
+<ul>
+<li>遍历数组中的元素；</li>
+<li>通过对每个元素调用函数，将每个元素“映射（map）到一个新元素，从而创建一个新数组；</li>
+<li>将会创建一个新数组；</li>
+<li>想得到一个结果，但不想改变原始数组，用.map()。如果你只需要在数组上做迭代修改，用forEach。</li>
+</ul>
+
+<pre><code>const arr2 = [1,2,3];
+let arr3 = arr2.map(ele=&gt;{
+    return ele*2;
+})
+console.log(arr3);//[2,4,6]
+</code></pre>
+
+<p><em>注：本文部分内容来自以下链接内容<br>
+MDN web docs<br>
+深入浅出ES6（二）<br>
+杜培东的博客</em><br></p>
+]]></description><guid isPermaLink="true">https://nerrol.com/post/js-180214</guid><pubDate>Wed, 14 Feb 2018 23:07:45 GMT</pubDate></item><item><title>animate.css+wow.js页面滚动即时显示动画</title><link>https://nerrol.com/post/css-anime-plugins1</link><description><![CDATA[<h4>1、地址引入</h4>
+
+<pre><code>&lt;link href=&quot;css/animate.min.css&quot; rel=&quot;stylesheet&quot; type=&quot;text/css&quot;&gt;
+&lt;script src=&quot;js/wow.min.js&quot; type=&quot;text/javascript&quot;&gt;&lt;/script&gt;
+</code></pre>
+
+<h4>2、HTML部分</h4>
+
+<p><code>&lt;div class=&quot;animated bounceInRight wow&quot; data-wow-delay=&quot;0.4s&quot; style=&quot;visibility: visible;animation-delay: 0.4s&quot;&gt;&lt;/div&gt;</code></p>
+
+<p>注：bounceInRight为animate.css中的动画方式，具体可见官方API给出的示例：<a href="https://daneden.github.io/animate.css">https://daneden.github.io/animate.css</a></p>
+
+<h4>3、wow.js初始化代码</h4>
+
+<pre><code>&lt;script type=&quot;text/javascript&quot;&gt;
+    new WOW().init();
+&lt;/script&gt;
+</code></pre>
+
+<p>注：以下是一些自定义配置：
+<code>
+var wow = new WOW({  
+    boxClass: &#39;wow&#39;,  
+    animateClass: &#39;animated&#39;,  
+    offset: 0,  
+    mobile: true,  
+    live: true  
+});  
+wow.init(); 
+</code></p>
+]]></description><guid isPermaLink="true">https://nerrol.com/post/css-anime-plugins1</guid><pubDate>Wed, 14 Feb 2018 22:54:42 GMT</pubDate></item><item><title>网站性能优化</title><link>https://nerrol.com/post/web-optimization</link><description><![CDATA[<h4>1、资源压缩合并</h4>
+
+<p>（1）图片：雪碧图<br>
+（2）JS、CSS合并：利用项目构建工具webpack、grunt、gulp等。</p>
+
+<h4>2、加快渲染</h4>
+
+<p>CSS前置</p>
+
+<h4>3、减少DOM操作</h4>
+
+<p>（1）将DOM节点放入局部变量<br>
+（2）内存中操作元素，使用文档片段：document.createDocumentFragment()<br>
+PS：这样做的优点是只会触发一次回流<br>
+（3）一次性DOM节点生成：通过innerHTML属性一次性生成节点，使用字符串拼接的方式，先生成相应的HTML字符串，再一次性写入innerHTML中。<br>
+（4）通过类来修改样式<br>
+（5） 使用事件代理<br></p>
+
+<h4>4、减少HTTP请求</h4>
+
+<p>（1）keep-Alive模式（持久连接）<br>
+每个请求，应答客户和服务器都要新建一个连接，完成后立刻断开，持久连接模式使客户端到浏览器的连接持续有效，后续请求时避免了建立或者重新建立连接。<br>
+PS：HTTP1.1版本支持<br></p>
+
+<p>（2）管线化<br>
+在持久连接的前提下，通过将请求一次性打包发出，有效减少HTTP请求。<br>
+PS：a)只有GET和HEAD请求可以实现管线化，POST有一定的限制；<br>
+        b)初次进行请求时不应该启动管线机制，因为服务器不一定支持HTTP1.1版本。<br></p>
+
+<h4>5、非核心代码异步加载</h4>
+
+<p>（1）<code>&lt;script&gt;</code>标签，动态脚本加载，不等待后续载入的恩党员苏，读到就加载并执行。<br>
+（2）<code>&lt;script defer&gt;</code><br>
+异步加载，后续文档元素和脚本文件同时加载，js脚本的执行要等到文档所有元素加载完后执行<br>
+PS：IE只支持defer<br>
+（3）<code>&lt;script async&gt;</code><br>
+异步加载，后续文档元素和脚本文件同时加载（异步），加载完后自动执行js脚本。<br></p>
+
+<h4>6、利用浏览器缓存</h4>
+
+<p>（1）强缓存<br>
+不请求服务器直接读取文件。<br>
+HTTP 1.0 采用Expires头指定资源过期时间；<br>
+HTTP 1.1 采用Cache-Control指定资源被缓存多久；<br></p>
+
+<p>（2）协商缓存<br>
+向服务器发起请求，如果资源并未更新，response响应码为304，随后从浏览器缓存中下载该文件。<br>
+HTTP 1.0 采用Last-Modified和If-Modified-Since来指定资源过期时间；<br>
+HTTP 1.1 采用E-Tag和If-None-Match来确定该资源是否过期；<br></p>
+
+<h4>7、使用CDN加速资源</h4>
+
+<p>在页面第一次打开时缓存没有作用，使用CDN可以加速资源。</p>
+
+<h4>8、DNS预解析</h4>
+
+<p>（1）页面中所有a标签在浏览器中默认打开dns，如果页面为https，很多浏览器默认关闭dns，使用标签强制打开dns：<br>
+<code>&lt;meta http-equiv=&quot;x-dns-prefetch&quot; href=&quot; &quot;&gt;</code><br></p>
+
+<p>（2）预解析<br>
+<code>&lt;link rel=&quot;dns-prefetch&quot; href=&quot; &quot;&gt;</code></p>
+]]></description><guid isPermaLink="true">https://nerrol.com/post/web-optimization</guid><pubDate>Wed, 14 Feb 2018 22:46:31 GMT</pubDate></item><item><title>CSS3渐变相关</title><link>https://nerrol.com/post/css-gradient</link><description><![CDATA[<h4>背景渐变</h4>
+
+<blockquote>
+<p>background: -moz-linear-gradient( top,#f24652,#da2c3c);</p>
+
+<p>background: -o-linear-gradient(top,#f24652,#da2c3c);</p>
+
+<p>background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#f24652),to(#da2c3c));</p>
+
+<p>或</p>
+
+<p>background: -webkit-linear-gradient(top, #f8ca99,#c28c6a);</p>
+</blockquote>
+
+<h4>文字渐变</h4>
+
+<blockquote>
+<p>background-image: -webkit-gradient(linear, 0 0, 0 bottom, from(#fe7579), to(#e93849));</p>
+
+<p>-webkit-background-clip: text;</p>
+
+<p>-webkit-text-fill-color: transparent;</p>
+
+<p>background-image: -moz-linear-gradient( top,#fe7579,#e93849);</p>
+
+<p>-moz-background-clip: text;</p>
+
+<p>-moz-text-fill-color: transparent;</p>
+
+<p>background-image: -o-linear-gradient( top,#fe7579,#e93849);</p>
+
+<p>-o-background-clip: text;</p>
+
+<p>-o-text-fill-color: transparent;</p>
+
+<p>background-image: -ms-gradient(linear, 0 0, 0 bottom, from(#fe7579), to(#e93849));</p>
+
+<p>-ms-background-clip: text;</p>
+
+<p>-ms-text-fill-color: transparent;</p>
+</blockquote>
+
+<h4>mask方法:</h4>
+
+<blockquote>
+<p>-webkit-mask-image: -webkit-gradient(linear, left top, left bottom, from(#f8ffcb), to(#fcea94)));</p>
+</blockquote>
+]]></description><guid isPermaLink="true">https://nerrol.com/post/css-gradient</guid><pubDate>Wed, 14 Feb 2018 22:43:38 GMT</pubDate></item><item><title>margin相关</title><link>https://nerrol.com/post/css-margin</link><description><![CDATA[<h4>图片与文字对齐问题</h4>
+
+<p>如果图片和文字差不多大时，使用兼容性强的margin负值方法。</p>
+
+<p><em>方法：img{margin:0 3px -3px 0;}</em>
+<br></p>
+
+<h4>div嵌套后margin出现失效（转移）问题</h4>
+
+<p>原因：盒子没有获得haslayout造成margin-top无效（关于hasLayout会在下文给出解释）<br></p>
+
+<p>方法：（1）父层div设置：{overflow:hidden;}<br></p>
+
+<p>　　　（2）父层div设置：{padding-top:1px;}<br></p>
+
+<p>　　　（3）父元素生成BFC;<br></p>
+
+<p>　　    （4）当前元素margin-top外边距转化为padding-top;<br>
+<br></p>
+
+<h4>IE双边距问题</h4>
+
+<p>产生条件：block元素+浮动+margin</p>
+
+<p>原因：inline元素或inline-block不存在双边距问题</p>
+
+<p><em>方法：使用display:inline；</em>
+<br></p>
+
+<h4>hasLayout详解</h4>
+
+<p><strong>定义</strong>：<br>
+haslayout是IE7-浏览器的特有属性。hasLayout是一种只读属性，有两种状态：true或false。当其为true时，代表该元素有自己的布局，否则代表该元素的布局继承于父元素。<br>
+PS：通过element.currentStyle.hasLayout可以得出当前元素的hasLayout情况（仅在IE下）<br></p>
+
+<p>** 触发**<br></p>
+
+<p>HTML标签触发：<br></p>
+
+<ul>
+<li>html,body</li>
+<li>table,tr,th,td</li>
+<li>img</li>
+<li>hr</li>
+<li>input,button,select,textarea,fieldset</li>
+<li>frameset,frame,iframe</li>
+</ul>
+
+<p><strong>CSS触发：</strong><br></p>
+
+<ul>
+<li>display:inline-block</li>
+<li>height/width:除了auto</li>
+<li>float:left/right</li>
+<li>position:absolute</li>
+<li>border:不为none</li>
+<li>writing-mode(IE专有属性，设置文本的垂直显示):tb-rl</li>
+<li>zoom(IE专有属性，设置或检索对象的缩放比例):除了normal</li>
+</ul>
+
+<p><strong>IE7下触发：</strong><br></p>
+
+<ul>
+<li>min-height/max-height/min-width/max-width:除none</li>
+<li>overflow\overflow-x\overflow-y:除visible</li>
+<li>position:fixed</li>
+</ul>
+]]></description><guid isPermaLink="true">https://nerrol.com/post/css-margin</guid><pubDate>Wed, 14 Feb 2018 22:41:37 GMT</pubDate></item></channel></rss>

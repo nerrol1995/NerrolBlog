@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="renderer" content="webkit">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>关于html5存储localStorage,sessionStorage以及Cookie</title>
+    <meta name="description" content="LocalStorage 是对Cookie的优化 没有时间限制的数据存储 在隐私模式下不可读取 大小限制在500万字符左右，各个浏览器不一致 localStorage的大小一般限定为4M左右 在所有同源窗口中都是共享的 本质是在读写文件，数据多的话会比较卡（firefox会一次性将数据导入内存）">
+    <link rel="shortcut icon" href="https://nerrol.com/static/user_file/favicon.ico">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@9.13.1/styles/github.css">
+    <link rel="stylesheet" href="/static/casper/css/screen.css">
+    
+</head>
+<body class="post-template nav-closed">
+<div class="nav">
+    <h3 class="nav-title">Menu</h3>
+    <a href="#" class="nav-close">
+        <span class="hidden">关闭</span>
+    </a>
+    <ul>
+        <li><a class="nav-" role="presentation" href="/">Index</a></li></ul>
+    <a class="subscribe-button icon-feed" href="/rss">Feed</a>
+</div>
+<span class="nav-cover"></span>
+<div class="site-wrapper">
+    <header class="main-header post-head no-cover">
+        <nav class="main-nav clearfix">
+            <a class="menu-button icon-menu" href="#"><span class="word">Menu</span></a>
+        </nav>
+    </header>
+
+    <main class="content" role="main">
+        <article class="post">
+
+            <header class="post-header">
+                <h1 class="post-title">关于html5存储localStorage,sessionStorage以及Cookie</h1>
+                <section class="post-meta">
+                    <time class="post-date" datetime="2018-02-14">2018-02-14</time>
+                </section>
+            </header>
+
+            <section class="post-content">
+                <h4>LocalStorage</h4>
+
+<ul>
+<li>是对Cookie的优化</li>
+<li>没有时间限制的数据存储</li>
+<li>在隐私模式下不可读取</li>
+<li>大小限制在500万字符左右，各个浏览器不一致</li>
+<li>localStorage的大小一般限定为4M左右</li>
+<li>在所有同源窗口中都是共享的</li>
+<li>本质是在读写文件，数据多的话会比较卡（firefox会一次性将数据导入内存）</li>
+<li>不能被爬虫爬取，不要用它完全取代URL传参</li>
+<li>IE７及以下不支持外，其他标准浏览器都完全支持</li>
+<li>如果有一些数据，服务器难以承载其压力，但又要与用户的信息绑定的话，可以使用localStorage存储一些状态，这样即能缓解服务端压力，也可以存储用户的数据</li>
+<li>存储的值需要是字符串类型，没法直接存储对象，但是可以将对象序列化为字符串再存入。</li>
+</ul>
+
+<blockquote>
+<p>获取键值：localStorage.getItem(“key”)<br>
+设置键值：localStorage.setItem(“key”,”value”)<br>
+清除键值：localStorage.removeItem(“key”)<br>
+清除所有键值：localStorage.clear()<br>
+获取键值2：localStorage.keyName<br>
+设置键值2：localStorage.keyName = “value”<br></p>
+
+<p>JQ下的操作方法：<br>
+获取键值：window.localStorage.getItem(“key”)<br>
+设置键值：window.localStorage.setItem(“key”,”value”)<br>
+清除键值：window.localStorage.removeItem(“key”)<br>
+清除所有键值：window.localStorage.clear()<br>
+获取键值2：window.localStorage.keyName<br>
+设置键值2：window.localStorage.keyName = “value”<br>
+　　</p>
+</blockquote>
+
+<h4>SessionStorage</h4>
+
+<ul>
+<li>针对一个 session 的数据存储</li>
+<li>大小限制在5M左右，各个浏览器不一致</li>
+<li>仅在当前浏览器窗口关闭前有效（适合会话验证）</li>
+<li>不在不同的浏览器窗口中共享，即使是同一个页面</li>
+<li>建议存储一些当前页面刷新需要存储，且不需要在tab关闭时候留下的信息。</li>
+</ul>
+
+<h4>Cookie</h4>
+
+<ul>
+<li>cookie机制将信息存储于用户硬盘，因此可以作为全局变量</li>
+<li>现代浏览器cookie个数不要超过50条，大小不能超过4KB，4095字节；</li>
+<li>cookie不要保存机密信息，让服务端来确保用户信息安全。</li>
+<li>cookie每次随HTTP请求一起发送，浪费宽带，移动端推荐使用localStorage。</li>
+<li>每个域最多在一台用户对的机器上存储20个cookie；</li>
+<li>建议存储一些同步访问页面的时候必须要被带到服务端的信息。</li>
+</ul>
+
+<pre><code>$.cookie = {
+    set: function(name, value, exp) {
+        var Days = 30;
+        var _exp = new Date();
+        _exp.setTime(_exp.getTime() + Days * 24 * 60 * 60 * 1000);
+        document.cookie = name + &quot;=&quot; + escape(value) + &quot;;expires=&quot; +
+            (exp || _exp).toGMTString();
+    },
+    get: function(name) {
+        var arr, reg = new RegExp(&quot;(^| )&quot; + name + &quot;=([^;]*)(;|$)&quot;);
+        if (arr = document.cookie.match(reg))
+            return unescape(arr[2]);
+        else
+            return null;
+    },
+    del: function(name) {
+        var exp = new Date();
+        exp.setTime(exp.getTime() - 1);
+        var cval = this.get(name);
+        if (cval != null)
+            document.cookie = name + &quot;=&quot; + cval + &quot;;expires=&quot; + exp.toGMTString();
+    }
+};
+</code></pre>
+
+<p><img src="https://i.loli.net/2018/02/24/5a9119988132b.png" alt=""></p>
+
+            </section>
+
+            <footer class="post-footer">
+
+                <figure class="author-image">
+                    <img class="img" src="https://i.loli.net/2018/02/14/5a843d9dc3706.jpg" alt="author" lazyload="on">
+                </figure>
+
+                <section class="author">
+                    <center><h4><a href="/">nerrol</a></h4></center>
+                    <p></p>
+                </section>
+
+                
+
+            </footer>
+
+        </article>
+    </main>
+
+<footer class="site-footer clearfix">
+    <section class="copyright"><a href="/">Nerrol</a> &copy; 2020</section>
+    <section class="poweredby">Powered by <a href="https://silverblog.org">SilverBlog</a> , Theme By Casper</section>
+    
+</footer>
+</div>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/highlight.js@9.13.1/lib/highlight.min.js"></script>
+<script type="text/javascript" src="/static/casper/js/index.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bplayer@1.0.7/dist/bplayer.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bplayer@1.0.7/dist/bp_init.js"></script>
+
+</body>
+</html>

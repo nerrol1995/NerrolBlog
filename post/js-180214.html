@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="renderer" content="webkit">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>JavaScript对象及数组遍历方法</title>
+    <meta name="description" content="for in 一般用于遍历对象的属性； 作用于数组的for in除了会遍历数组元素外，还会遍历自定义可枚举的属性，以及原型链上可枚举的属性； 因为会遍历到原型链上的属性，所以使用前需要加入obj.hasOwnProperty(property)检查； 作用于数组的for in的遍历结果是数组的索引，且都为字符串型，不能用于运算；">
+    <link rel="shortcut icon" href="https://nerrol.com/static/user_file/favicon.ico">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@9.13.1/styles/github.css">
+    <link rel="stylesheet" href="/static/casper/css/screen.css">
+    
+</head>
+<body class="post-template nav-closed">
+<div class="nav">
+    <h3 class="nav-title">Menu</h3>
+    <a href="#" class="nav-close">
+        <span class="hidden">关闭</span>
+    </a>
+    <ul>
+        <li><a class="nav-" role="presentation" href="/">Index</a></li></ul>
+    <a class="subscribe-button icon-feed" href="/rss">Feed</a>
+</div>
+<span class="nav-cover"></span>
+<div class="site-wrapper">
+    <header class="main-header post-head no-cover">
+        <nav class="main-nav clearfix">
+            <a class="menu-button icon-menu" href="#"><span class="word">Menu</span></a>
+        </nav>
+    </header>
+
+    <main class="content" role="main">
+        <article class="post">
+
+            <header class="post-header">
+                <h1 class="post-title">JavaScript对象及数组遍历方法</h1>
+                <section class="post-meta">
+                    <time class="post-date" datetime="2018-02-14">2018-02-14</time>
+                </section>
+            </header>
+
+            <section class="post-content">
+                <h3>for in</h3>
+
+<ul>
+<li>一般用于遍历对象的属性；</li>
+<li>作用于数组的for in除了会遍历数组元素外，还会遍历自定义可枚举的属性，以及原型链上可枚举的属性；</li>
+<li>因为会遍历到原型链上的属性，所以使用前需要加入obj.hasOwnProperty(property)检查；</li>
+<li>作用于数组的for in的遍历结果是数组的索引，且都为字符串型，不能用于运算；</li>
+<li>某些情况下，可能按照随机顺序遍历数组元素；</li>
+</ul>
+
+<pre><code>Array.prototype.sayLength = function(){
+console.log(this.length);
+}
+let arr = [&#39;a&#39;,&#39;b&#39;,&#39;c&#39;,&#39;d&#39;];
+arr.name = &#39;数组&#39;;
+Object.defineProperties(arr,{
+type:{
+value:true,
+writable:true,
+enumerable:true
+}
+});
+for(let i in arr){
+console.log(i);//0,1,2,3,name,type,sayLength
+}
+</code></pre>
+
+<h4>Object.keys()</h4>
+
+<ul>
+<li>一般用于遍历对象的属性；</li>
+<li>遍历结果为由对象自身可枚举属性组成的数组;</li>
+<li>数组中的属性名排列顺序与使用for in循环遍历该对象时返回的顺序一致；</li>
+<li>与for in区别在于不能遍历出原型链上的属性；</li>
+</ul>
+
+<pre><code>Array.prototype.sayLength = function(){
+console.log(this.length);
+}
+let arr = [&#39;a&#39;,&#39;b&#39;,&#39;c&#39;,&#39;d&#39;];
+arr.name = &#39;数组&#39;;
+Object.defineProperties(arr,{
+type:{
+value:true,
+writable:true,
+enumerable:true
+}
+});
+var keys = Object.keys(arr);
+console.log(keys);//[&quot;0&quot;, &quot;1&quot;, &quot;2&quot;, &quot;3&quot;, &quot;name&quot;, &quot;type&quot;]
+</code></pre>
+
+<h4>for of</h4>
+
+<ul>
+<li>ES6中添加的循环语法；</li>
+<li>一般用于遍历数组；</li>
+<li>for of支持遍历数组、类对象（例如DOM NodeList对象）、字符串、Map对象、Set对象；</li>
+<li>for of不支持遍历普通对象，可通过与Object.keys()搭配使用遍历；（见示例二）</li>
+<li>for of遍历后的输出结果为数组元素的值；</li>
+<li>搭配实例方法entries()，同时输出数组内容和索引；（见示例三）</li>
+</ul>
+
+<p>示例一：</p>
+
+<pre><code>Array.prototype.sayLength = function(){
+console.log(this.length);
+}
+let arr = [&#39;a&#39;,&#39;b&#39;,&#39;c&#39;,&#39;d&#39;];
+arr.name = &#39;数组&#39;;
+Object.defineProperties(arr,{
+type:{
+value:true,
+writable:true,
+enumerable:true
+}
+});
+for(let i of arr){
+console.log(i);//a,b,c,d
+}
+</code></pre>
+
+<p>示例二：</p>
+
+<pre><code class="language-javascript">var person={
+name:&#39;coco&#39;,
+age:22,
+locate:{
+country:&#39;China&#39;,
+city:&#39;beijing&#39;,
+}
+}
+for(var key of Object.keys(person)){
+//使用Object.keys()方法获取对象key的数组
+console.log(key+&quot;: &quot;+person[key]);//name: coco,age: 22,locate: [object Object]
+}
+</code></pre>
+
+<p>示例三：</p>
+
+<pre><code class="language-javascript">  let arr3 = [&#39;a&#39;, &#39;b&#39;, &#39;c&#39;];
+       for (let [index, val] of arr3.entries()) {
+             console.log(index + &#39;:&#39; + val);//0:a 1:b 2:c
+        }
+</code></pre>
+
+<p>PS：让jquery对象支持for of遍历</p>
+
+<p>// 因为jQuery对象与数组相似 <br>
+// 可以为其添加与数组一致的迭代器方法</p>
+
+<p><code>jQuery.prototype[Symbol.iterator] = Array.prototype[Symbol.iterator];</code><br></p>
+
+<p>####  forEach</p>
+
+<ul>
+<li> 遍历数组中的元素；</li>
+<li>为每个元素执行回调；</li>
+<li><p>无返回值； </p>
+
+<pre><code>const arr = [&#39;a&#39;, &#39;b&#39;, &#39;c&#39;];
+arr.forEach(function(element) {
+console.log(element);
+});//a,b,c
+</code></pre></li>
+</ul>
+
+<h4>map</h4>
+
+<ul>
+<li>遍历数组中的元素；</li>
+<li>通过对每个元素调用函数，将每个元素“映射（map）到一个新元素，从而创建一个新数组；</li>
+<li>将会创建一个新数组；</li>
+<li>想得到一个结果，但不想改变原始数组，用.map()。如果你只需要在数组上做迭代修改，用forEach。</li>
+</ul>
+
+<pre><code>const arr2 = [1,2,3];
+let arr3 = arr2.map(ele=&gt;{
+    return ele*2;
+})
+console.log(arr3);//[2,4,6]
+</code></pre>
+
+<p><em>注：本文部分内容来自以下链接内容<br>
+MDN web docs<br>
+深入浅出ES6（二）<br>
+杜培东的博客</em><br></p>
+
+            </section>
+
+            <footer class="post-footer">
+
+                <figure class="author-image">
+                    <img class="img" src="https://i.loli.net/2018/02/14/5a843d9dc3706.jpg" alt="author" lazyload="on">
+                </figure>
+
+                <section class="author">
+                    <center><h4><a href="/">nerrol</a></h4></center>
+                    <p></p>
+                </section>
+
+                
+
+            </footer>
+
+        </article>
+    </main>
+
+<footer class="site-footer clearfix">
+    <section class="copyright"><a href="/">Nerrol</a> &copy; 2020</section>
+    <section class="poweredby">Powered by <a href="https://silverblog.org">SilverBlog</a> , Theme By Casper</section>
+    
+</footer>
+</div>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/highlight.js@9.13.1/lib/highlight.min.js"></script>
+<script type="text/javascript" src="/static/casper/js/index.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bplayer@1.0.7/dist/bplayer.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bplayer@1.0.7/dist/bp_init.js"></script>
+
+</body>
+</html>

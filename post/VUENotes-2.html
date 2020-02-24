@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="renderer" content="webkit">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Vue导航切换的几种方式</title>
+    <meta name="description" content="总结一下vue导航切换的一些方法 数据驱动的导航切换通过变更每个导航内容页的数据来渲染整个区块。这里的思路是通过给每个导航tab添加一个dataid，并添加点击事件处理函数switchTab,取event参数，获取当前点击tab的dataid，从而通过对应的数据键值更新数据源；此时的数据格式为：{ "list1":{">
+    <link rel="shortcut icon" href="https://nerrol.com/static/user_file/favicon.ico">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@9.13.1/styles/github.css">
+    <link rel="stylesheet" href="/static/casper/css/screen.css">
+    
+</head>
+<body class="post-template nav-closed">
+<div class="nav">
+    <h3 class="nav-title">Menu</h3>
+    <a href="#" class="nav-close">
+        <span class="hidden">关闭</span>
+    </a>
+    <ul>
+        <li><a class="nav-" role="presentation" href="/">Index</a></li></ul>
+    <a class="subscribe-button icon-feed" href="/rss">Feed</a>
+</div>
+<span class="nav-cover"></span>
+<div class="site-wrapper">
+    <header class="main-header post-head no-cover">
+        <nav class="main-nav clearfix">
+            <a class="menu-button icon-menu" href="#"><span class="word">Menu</span></a>
+        </nav>
+    </header>
+
+    <main class="content" role="main">
+        <article class="post">
+
+            <header class="post-header">
+                <h1 class="post-title">Vue导航切换的几种方式</h1>
+                <section class="post-meta">
+                    <time class="post-date" datetime="2018-05-31">2018-05-31</time>
+                </section>
+            </header>
+
+            <section class="post-content">
+                <p>总结一下vue导航切换的一些方法~</p>
+
+<hr>
+
+<h4>数据驱动的导航切换</h4>
+
+<p>通过变更每个导航内容页的数据来渲染整个区块。</p>
+
+<pre><code>&lt;template&gt;
+  &lt;li @click=&quot;switchTab&quot; &gt;&lt;/li&gt;
+&lt;/template&gt;
+&lt;template&gt;
+export default {
+   data(){
+         return {
+             }
+     },
+     methods:{
+       switchTab(e){
+           var currentKey = e.getAttribute(&quot;data-id&quot;);
+      this.curListData = this.listData[currentKey];
+         }
+     }
+}
+&lt;/template&gt;
+</code></pre>
+
+<p>这里的思路是通过给每个导航tab添加一个data-id，并添加点击事件处理函数switchTab,取event参数，获取当前点击tab的data-id，从而通过对应的数据键值更新数据源；此时的数据格式为：</p>
+
+<pre><code>{
+ &quot;list1&quot;:{
+ },
+ &quot;list2&quot;:{
+ }
+}
+</code></pre>
+
+<p>使用这种方式一定要跟后台对好结构，不然就会GG（接口数据以键值对的形式）</p>
+
+<hr>
+
+<h4>动态组件的导航切换</h4>
+
+<p>这里vue官方文档有给出一个很有代表性的例子：</p>
+
+<pre><code>&lt;div id=&quot;counter-event-example&quot;&gt;
+    &lt;button v-for=&quot;tab in tabs&quot; v-bind:key=&quot;tab&quot; v-bind:class=&quot;[&#39;tab-button&#39;, { active: currentTab === tab }]&quot; v-on:click=&quot;currentTab = tab&quot;&gt;{{ tab }}&lt;/button&gt;
+    &lt;keep-alive&gt;
+      &lt;component v-bind:is=&quot;currentTabComponent&quot; class=&quot;tab&quot;&gt;&lt;/component&gt;
+    &lt;/keep-alive&gt;
+  &lt;/div&gt;
+    &lt;script&gt;
+  Vue.component(&#39;tab-posts&#39;, {
+    data: function() {
+      return {
+        posts: [{
+            id: 1,
+            title: &#39;Tab1&#39;,
+            content: &#39;&lt;p&gt;Conten1&lt;/p&gt;&#39;
+          },
+          {
+            id: 2,
+            title: &#39;Tab2&#39;,
+            content: &#39;&lt;p&gt;Conten2&lt;/p&gt;&#39;
+          },
+          {
+            id: 3,
+            title: &#39;Tab3&#39;,
+            content: &#39;&lt;p&gt;Conten3&lt;/p&gt;&#39;
+          }
+        ],
+        selectedPost: null
+      }
+    },
+    
+  template: `
+        &lt;div class=&quot;posts-tab&quot;&gt;
+      &lt;ul class=&quot;posts-sidebar&quot;&gt;
+        &lt;li
+          v-for=&quot;post in posts&quot;
+          v-bind:key=&quot;post.id&quot;
+          v-bind:class=&quot;{ selected: post === selectedPost }&quot;
+          v-on:click=&quot;selectedPost = post&quot;
+        &gt;
+          {{ post.title }}
+        &lt;/li&gt;
+      &lt;/ul&gt;
+      &lt;div class=&quot;selected-post-container&quot;&gt;
+        &lt;div 
+          v-if=&quot;selectedPost&quot;
+          class=&quot;selected-post&quot;
+        &gt;
+          &lt;h3&gt;{{ selectedPost.title }}&lt;/h3&gt;
+          &lt;div v-html=&quot;selectedPost.content&quot;&gt;&lt;/div&gt;
+        &lt;/div&gt;
+        &lt;strong v-else&gt;
+          Click on a blog title to the left to view it.
+        &lt;/strong&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+      `
+  });
+  Vue.component(&quot;tab-archive&quot;, {
+    template: `
+      &lt;div&gt;Archive component&lt;/div&gt;
+    `
+  });
+  var vm = new Vue({
+    el: &#39;#counter-event-example&#39;,
+    data: function() {
+      return {
+        currentTab: &#39;Posts&#39;,
+        tabs: [&#39;Posts&#39;, &#39;Archive&#39;]
+      }
+
+    },
+    computed: {
+      currentTabComponent: function() {
+        return &#39;tab-&#39; + this.currentTab.toLowerCase()
+      }
+    },
+    watch: {
+
+    },
+    methods: {
+
+    }
+  });
+  &lt;/script&gt;
+</code></pre>
+
+<p>激活active状态使用了点击tab将当前tab赋值给currentTab，然后进行判断是否相等。（一般都是使用这个方法），例子详细可见官方文档：<a href="https://cn.vuejs.org/v2/guide/components-dynamic-async.html">动态组件</a></p>
+
+<hr>
+
+<h4>基于router-lilnk的导航切换</h4>
+
+<pre><code>//通过配置to跳转到不同的路由
+&lt;router-link tag=&quot;div&quot; class=&quot;tab-item&quot; to=&quot;/recommend&quot;&gt;
+     &lt;span&gt;推荐&lt;/span&gt;
+&lt;/router-link&gt;
+&lt;router-link tag=&quot;div&quot; class=&quot;tab-item&quot; to=&quot;/rank&quot;&gt;
+     &lt;span&gt;排行&lt;/span&gt;
+&lt;/router-link&gt;
+&lt;router-link tag=&quot;div&quot; class=&quot;tab-item&quot; to=&quot;/singer&quot;&gt;
+     &lt;span&gt;歌手&lt;/span&gt;
+&lt;/router-link&gt;
+</code></pre>
+
+<p>Tips：router-link有个active状态下的类名.router-link-active。这个类名是可配置的（这个方法真的是太方便了啊啊啊啊啊！！！少写了几行判断）
+关于这里的详细解释可以看官方文档：<a href="https://router.vuejs.org/zh/api/#active-class">router-link</a></p>
+
+            </section>
+
+            <footer class="post-footer">
+
+                <figure class="author-image">
+                    <img class="img" src="https://i.loli.net/2018/02/14/5a843d9dc3706.jpg" alt="author" lazyload="on">
+                </figure>
+
+                <section class="author">
+                    <center><h4><a href="/">nerrol</a></h4></center>
+                    <p></p>
+                </section>
+
+                
+
+            </footer>
+
+        </article>
+    </main>
+
+<footer class="site-footer clearfix">
+    <section class="copyright"><a href="/">Nerrol</a> &copy; 2020</section>
+    <section class="poweredby">Powered by <a href="https://silverblog.org">SilverBlog</a> , Theme By Casper</section>
+    
+</footer>
+</div>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/highlight.js@9.13.1/lib/highlight.min.js"></script>
+<script type="text/javascript" src="/static/casper/js/index.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bplayer@1.0.7/dist/bplayer.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bplayer@1.0.7/dist/bp_init.js"></script>
+
+</body>
+</html>

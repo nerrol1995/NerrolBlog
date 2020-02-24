@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="renderer" content="webkit">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>关于css原生滚动条</title>
+    <meta name="description" content="webkit内核的浏览器滚动条    ::webkitscrollbar              { / 1 / }    ::webkitscrollbarbutton       { / 2 / }    ::webkitscrollbartrack        { / 3 / }">
+    <link rel="shortcut icon" href="https://nerrol.com/static/user_file/favicon.ico">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@9.13.1/styles/github.css">
+    <link rel="stylesheet" href="/static/casper/css/screen.css">
+    
+</head>
+<body class="post-template nav-closed">
+<div class="nav">
+    <h3 class="nav-title">Menu</h3>
+    <a href="#" class="nav-close">
+        <span class="hidden">关闭</span>
+    </a>
+    <ul>
+        <li><a class="nav-" role="presentation" href="/">Index</a></li></ul>
+    <a class="subscribe-button icon-feed" href="/rss">Feed</a>
+</div>
+<span class="nav-cover"></span>
+<div class="site-wrapper">
+    <header class="main-header post-head no-cover">
+        <nav class="main-nav clearfix">
+            <a class="menu-button icon-menu" href="#"><span class="word">Menu</span></a>
+        </nav>
+    </header>
+
+    <main class="content" role="main">
+        <article class="post">
+
+            <header class="post-header">
+                <h1 class="post-title">关于css原生滚动条</h1>
+                <section class="post-meta">
+                    <time class="post-date" datetime="2018-05-07">2018-05-07</time>
+                </section>
+            </header>
+
+            <section class="post-content">
+                <h4>webkit内核的浏览器滚动条</h4>
+
+<pre><code>    ::-webkit-scrollbar              { /* 1 */ }
+    ::-webkit-scrollbar-button       { /* 2 */ }
+    ::-webkit-scrollbar-track        { /* 3 */ }
+    ::-webkit-scrollbar-track-piece  { /* 4 */ }
+    ::-webkit-scrollbar-thumb        { /* 5 */ }
+    ::-webkit-scrollbar-corner       { /* 6 */ }
+    ::-webkit-resizer                { /* 7 */ }
+</code></pre>
+
+<p><img src="https://img.lyblog.net/usr/uploads/2013/07/scrollbarparts_thumb.png" alt="对应关系"></p>
+
+<p>PS：对以上各个部分定义width,height时。有如下功能：若是水平滚动条，则width属性不起作用，height属性用来控制滚动条相应部分竖直方向高度；若是竖直滚动条，则height属性不起作用，width属性用来控制相应部分的宽度。</p>
+
+<hr>
+
+<p>再来一个关于滚动条的干货~<a href="https://www.lyblog.net/detail/314.html">滚动条相关</a></p>
+
+<hr>
+
+<p>其实webkit内核的浏览器滚动条就样式来说已经可以满足大部分项目的需求，但是这里存在一个问题。滚动条的存在会引起页面“跳动”的问题。这样说可能不够形象，这里说一个实际的例子：假设我们有一个导航栏，当导航栏对应的列表展开时滚动条显示，这时滚动条存在与不存在的情况下，导致导航栏缩小和变大，这时就会引起页面跳动；</p>
+
+<h4>解决：</h4>
+
+<p>这时可以使用单位vw来解决这个问题：将外层容器的width设置为100vw；
+<br/>
+关于视口单位vw的定义及使用场景可以参考以下博文：
+<a href="http://www.zhangxinxu.com/wordpress/2012/09/new-viewport-relative-units-vw-vh-vm-vmin/">视口单位vw</a></p>
+
+<p><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+<em>这里是一个碎碎念：
+很久没写博文。。最近比较忙，代码写的还是比较垃圾，= =可能是思路问题。。。写代码总依赖后期优化，前期就应该有个明确的思路再动手。代码应该精简且明晰！能写一行就不要冗余两行。。。可以用CSS写就不要用JS造成不必要的性能问题！！！希望自己能快点成长！！！</em></p>
+
+            </section>
+
+            <footer class="post-footer">
+
+                <figure class="author-image">
+                    <img class="img" src="https://i.loli.net/2018/02/14/5a843d9dc3706.jpg" alt="author" lazyload="on">
+                </figure>
+
+                <section class="author">
+                    <center><h4><a href="/">nerrol</a></h4></center>
+                    <p></p>
+                </section>
+
+                
+
+            </footer>
+
+        </article>
+    </main>
+
+<footer class="site-footer clearfix">
+    <section class="copyright"><a href="/">Nerrol</a> &copy; 2020</section>
+    <section class="poweredby">Powered by <a href="https://silverblog.org">SilverBlog</a> , Theme By Casper</section>
+    
+</footer>
+</div>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/highlight.js@9.13.1/lib/highlight.min.js"></script>
+<script type="text/javascript" src="/static/casper/js/index.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bplayer@1.0.7/dist/bplayer.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bplayer@1.0.7/dist/bp_init.js"></script>
+
+</body>
+</html>

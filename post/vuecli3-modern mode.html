@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="renderer" content="webkit">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Vue CLI 3 配置中的Modern mode</title>
+    <meta name="description" content="背景：由于公司的技术栈由fisp向webpack迁移，使用了vue cli3来构建项目。线上发现一个现象：将ajax以最快的速度发出，但在chrome的devtools Network面板中出现了预料之外的请求排序，如下图所示。（使用ajax预加载我们的预想是cacheaixos是最早加载的）">
+    <link rel="shortcut icon" href="https://nerrol.com/static/user_file/favicon.ico">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@9.13.1/styles/github.css">
+    <link rel="stylesheet" href="/static/casper/css/screen.css">
+    
+</head>
+<body class="post-template nav-closed">
+<div class="nav">
+    <h3 class="nav-title">Menu</h3>
+    <a href="#" class="nav-close">
+        <span class="hidden">关闭</span>
+    </a>
+    <ul>
+        <li><a class="nav-" role="presentation" href="/">Index</a></li></ul>
+    <a class="subscribe-button icon-feed" href="/rss">Feed</a>
+</div>
+<span class="nav-cover"></span>
+<div class="site-wrapper">
+    <header class="main-header post-head no-cover">
+        <nav class="main-nav clearfix">
+            <a class="menu-button icon-menu" href="#"><span class="word">Menu</span></a>
+        </nav>
+    </header>
+
+    <main class="content" role="main">
+        <article class="post">
+
+            <header class="post-header">
+                <h1 class="post-title">Vue CLI 3 配置中的Modern mode</h1>
+                <section class="post-meta">
+                    <time class="post-date" datetime="2019-04-16">2019-04-16</time>
+                </section>
+            </header>
+
+            <section class="post-content">
+                <p>背景：由于公司的技术栈由fisp向webpack迁移，使用了vue cli3来构建项目。线上发现一个现象：将ajax以最快的速度发出，但在chrome的devtools Network面板中出现了预料之外的请求排序，如下图所示。（使用ajax预加载我们的预想是cache-aixos是最早加载的）</p>
+
+<p><img src="https://wx3.sinaimg.cn/large/006tNc79ly1g1zny31zb6j30v60u07fn.jpg" alt=""></p>
+
+<p>切换到Elements面板，可以看到几个加载优先级比较高的资源的rel属性都被设置为modulepreload。</p>
+
+<p><img src="https://ws2.sinaimg.cn/large/006tNc79ly1g24gwc44k2j31700acgqz.jpg" alt=""></p>
+
+<h3>什么是modulepreload？</h3>
+
+<ul>
+<li><p>在支持原生 ES2015+ 的浏览器中，js会通过 <code>&lt;script type=&quot;module&quot;&gt;</code>加载，并且可以使用 <code>&lt;link rel=&quot;modulepreload&quot;&gt;</code> 预加载。</p></li>
+<li><p>在不支持的浏览器中使用<code>&lt;script nomodule&gt;</code>来加载编译版本，并且这会被支持ES模块的浏览器所忽略。</p></li>
+</ul>
+
+<p>vue cli3提供了Modern mode模式来自动构建出这种特性。感兴趣可以查看vue cli3的实现源码：<a href="https://github.com/vuejs/vue-cli/blob/3b2cc6bd305263f17a5d1d52d4bb03bf9025e9c3/packages/%40vue/babel-preset-app/index.js#L71">查看源码</a></p>
+
+<h3>Modern mode</h3>
+
+<blockquote>
+<p>使用 Babel 我们能够利用 ES2015 中最新的语言特性，但这也意味着必须通过转换和 添加 polyfille 来支持旧浏览器。这些转换后的代码通常比原生 ES2015+ 代码更冗长，并且解析和运行较慢。鉴于当今大多数现代浏览器对原生 ES2015+ 有着不错的支持，而我们不得不将数据量更大和效率底下的代码发送给浏览器，因为我们必须支持那些旧的浏览器。</p>
+</blockquote>
+
+<p>启用该模式会自动构建两个版本的 js 包，针对支持现代浏览器的原生 ES2015+ 包，和针对其他旧浏览器的包，生成的 HTML 会通过 <code>&lt;script type=&quot;module&quot;&gt;</code> 和 <code>&lt;script nomodule&gt;</code>进行自动降级，不需要任何特殊部署配置。原生 ES2015 包几乎不需要任何 polyfill 和编译，代码尺寸更小，现代浏览器 parse 和运行也更快。</p>
+
+<hr>
+
+<p>注：<code>&lt;link rel=&quot;modulepreload&quot;&gt;</code> 是<code>&lt;link rel=&quot;preload&quot;&gt;</code> 的特定模块版本，解决了后者的一些问题。</p>
+
+<h3>区分Preload，Prefetch</h3>
+
+<p>了解了Modern mode，但是关于资源的加载顺序依然会有些疑惑：为什么css文件的优先级会比js文件的优先级要高？我们先来了解下Preload和Prefetch的区别。</p>
+
+<blockquote>
+<p>Prefetch 提示浏览器这个资源将来可能需要，但是把决定是否和什么时间加载这个资源的决定权交给浏览器。
+Preload对浏览器指示预先请求当前页需要的资源（关键的脚本，字体，主要图片），并且Preload不会对load事件造成阻塞。</p>
+
+<p>Preload is also different since it has a functional onload event (which, at least in Chrome, wasn’t working for the other two rel values).
+On top of that, preload does not block the window’s onload event, unless the resource is also requested by a resource that blocks that event.</p>
+</blockquote>
+
+<p>上述来自 Yoav Weiss 的文章<a href="https://www.smashingmagazine.com/2016/02/preload-what-is-it-good-for/">Preload: What Is It Good For?</a></p>
+
+<h3>Preload，Prefetch的缓存行为</h3>
+
+<p>Chrome的四种缓存：</p>
+
+<ul>
+<li>HTTP 缓存；</li>
+<li>内存缓存；</li>
+<li>Service Worker 缓存；</li>
+<li>Push 缓存。</li>
+</ul>
+
+<p>当一个资源被 preload 或者 prefetch 获取后，如果资源可以被缓存（比如说存在有效的cache-control 和 max-age），它被存储在 HTTP 缓存中可以被现在或将来的任务使用，如果资源不能被缓存在 HTTP 缓存中，作为代替，它被放在内存缓存中直到被使用。</p>
+
+<h3>Preload，Prefetch在Chrome中的优先级</h3>
+
+<p>下图是 Blink 内核的 Chrome 46 及更高版本中不同资源的加载优先级情况：</p>
+
+<p><img src="https://ws4.sinaimg.cn/large/006tNc79ly1g25gscgg8uj30u00v2wz1.jpg" alt=""></p>
+
+<blockquote>
+<p>preload 用 “as” 或者用 “type” 属性来表示他们请求资源的优先级，preload 使用 as=&quot;style&quot; 属性将获得最高的优先级，会获得与资源 “type” 属性所拥有的相同的优先级。preload as=&quot;style&quot; 将会获得比 as=“script” 更高的优先级。没有 “as” 属性的将被看作异步请求，“Early”意味着在所有未被预加载的图片请求之前被请求（“late”意味着之后）。</p>
+</blockquote>
+
+<p>优先级信息可以从开发者工具的 Timeline/Performance 区域的 Network 区域都能看到相关信息。</p>
+
+<p><img src="https://ws1.sinaimg.cn/large/006tNc79ly1g25hipptqoj315e0awwi3.jpg" alt=""></p>
+
+            </section>
+
+            <footer class="post-footer">
+
+                <figure class="author-image">
+                    <img class="img" src="https://i.loli.net/2018/02/14/5a843d9dc3706.jpg" alt="author" lazyload="on">
+                </figure>
+
+                <section class="author">
+                    <center><h4><a href="/">nerrol</a></h4></center>
+                    <p></p>
+                </section>
+
+                
+
+            </footer>
+
+        </article>
+    </main>
+
+<footer class="site-footer clearfix">
+    <section class="copyright"><a href="/">Nerrol</a> &copy; 2020</section>
+    <section class="poweredby">Powered by <a href="https://silverblog.org">SilverBlog</a> , Theme By Casper</section>
+    
+</footer>
+</div>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/highlight.js@9.13.1/lib/highlight.min.js"></script>
+<script type="text/javascript" src="/static/casper/js/index.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bplayer@1.0.7/dist/bplayer.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bplayer@1.0.7/dist/bp_init.js"></script>
+
+</body>
+</html>

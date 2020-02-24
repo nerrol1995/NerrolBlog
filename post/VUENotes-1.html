@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="renderer" content="webkit">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Vue组件通信</title>
+    <meta name="description" content="在一开始接触vue的时候，总是对组件通信感觉到困惑。对于组件化模式来说，组件间的通信显然是必不可少的。下面将会给出几种组件之间通信的方式：                                    {{todo.text}}                                    {{msg}} 父子组件：子父在父组件需要使用到子组件中的数据时： 父组件需要在自定义标签中von监听事件； 子组件需要使用$emit触发事件；（一句话来说就">
+    <link rel="shortcut icon" href="https://nerrol.com/static/user_file/favicon.ico">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@9.13.1/styles/github.css">
+    <link rel="stylesheet" href="/static/casper/css/screen.css">
+    
+</head>
+<body class="post-template nav-closed">
+<div class="nav">
+    <h3 class="nav-title">Menu</h3>
+    <a href="#" class="nav-close">
+        <span class="hidden">关闭</span>
+    </a>
+    <ul>
+        <li><a class="nav-" role="presentation" href="/">Index</a></li></ul>
+    <a class="subscribe-button icon-feed" href="/rss">Feed</a>
+</div>
+<span class="nav-cover"></span>
+<div class="site-wrapper">
+    <header class="main-header post-head no-cover">
+        <nav class="main-nav clearfix">
+            <a class="menu-button icon-menu" href="#"><span class="word">Menu</span></a>
+        </nav>
+    </header>
+
+    <main class="content" role="main">
+        <article class="post">
+
+            <header class="post-header">
+                <h1 class="post-title">Vue组件通信</h1>
+                <section class="post-meta">
+                    <time class="post-date" datetime="2018-04-17">2018-04-17</time>
+                </section>
+            </header>
+
+            <section class="post-content">
+                <p>在一开始接触vue的时候，总是对组件通信感觉到困惑。对于组件化模式来说，组件间的通信显然是必不可少的。下面将会给出几种组件之间通信的方式：
+<img src="https://camo.githubusercontent.com/f6777ebb146f024efe3ab7562e048935fdc73ff1/687474703a2f2f76756566652e636e2f696d616765732f70726f70732d6576656e74732e706e67" alt="父子组件通信"></p>
+
+<p><br></p>
+
+<h4>父子组件，父-&gt;子</h4>
+
+<hr>
+
+<p>在子组件需要使用到父组件中的数据时：</p>
+
+<ul>
+<li>父组件需要通过在自定义标签（子组件）中绑定自定义属性传递数据；</li>
+<li>子组件需要通过props属性接收数据；</li>
+</ul>
+
+<p>通过官网的示例可以明确这种关系，详见示例一；
+示例二为传入时进行props验证的情况；</p>
+
+<pre><code>//示例一：无props验证的情况
+&lt;body&gt;
+    &lt;!-- 父组件 --&gt;
+    &lt;div id=&quot;app&quot;&gt;
+        &lt;ul&gt;
+            &lt;!-- 子组件 --&gt;
+            &lt;todo-item v-for=&quot;item in gro&quot; :todo=&quot;item&quot;&gt;&lt;/todo-item&gt;
+        &lt;/ul&gt;
+    &lt;/div&gt;
+    &lt;script&gt;
+        // 子组件
+        Vue.component(&#39;todo-item&#39;,{
+            props:[&#39;todo&#39;],
+            template:&#39;&lt;li&gt;{{todo.text}}&lt;/li&gt;&#39;
+        })
+        // 父组件
+        var app = new Vue({
+            el: &#39;#app&#39;,
+            data: {
+                gro:[
+                    {text:&quot;x&quot;},
+                    {text:&quot;a&quot;},
+                    {text:&quot;b&quot;}
+                ]
+            }
+        })
+    &lt;/script&gt;
+&lt;/body&gt;
+</code></pre>
+
+<p>在这里控制台会输出一个提示：
+<img src="https://i.loli.net/2018/04/17/5ad56b7b9d6ca.jpg" alt="">
+在v-for渲染出的组件列表中需要绑定一个明确的key值，这里可以在自定义标签中写入<code>:key=&quot;item.id&quot;</code>即可，注意data中的数据也需要更新相应的数据；</p>
+
+<pre><code>//示例二：进行传入props数据类型的验证，以及无数据时，默认数据填充的情况
+&lt;body&gt;
+    &lt;!-- 父组件 --&gt;
+    &lt;div id=&quot;app&quot;&gt;
+        &lt;ul&gt;
+            &lt;!-- 子组件 --&gt;
+            &lt;todo-item  :todo=&quot;msg&quot;&gt;&lt;/todo-item&gt;
+        &lt;/ul&gt;
+    &lt;/div&gt;
+    &lt;script&gt;
+        // 子组件
+        Vue.component(&#39;todo-item&#39;,{
+            //写法三：限制传入类型及默认的值
+            props:{
+                msg:{
+                    type: String,
+                    default:&quot;hello&quot;
+                }
+            },
+            template:&#39;&lt;span&gt;{{msg}}&lt;/span&gt;&#39;
+        })
+        // 父组件
+        var app = new Vue({
+            el: &#39;#app&#39;,
+            data: {
+                msg: &quot;&quot;
+            }
+        })
+    &lt;/script&gt;
+&lt;/body&gt;
+</code></pre>
+
+<p>PS ：这里的数据类型（type），可以是：</p>
+
+<ul>
+<li>String</li>
+<li>Number</li>
+<li>Boolean</li>
+<li>Function</li>
+<li>Object</li>
+<li>Array</li>
+<li>Symbol</li>
+</ul>
+
+<blockquote>
+<p>当 prop 验证失败，Vue 会抛出警告 (如果使用的是开发版本)。注意 prop 会在组件实例创建之前进行校验，所以在 default 或 validator 函数里，诸如 data、computed 或 methods 等实例属性还无法使用。</p>
+</blockquote>
+
+<p><br></p>
+
+<h4>父子组件：子-&gt;父</h4>
+
+<hr>
+
+<p>在父组件需要使用到子组件中的数据时：</p>
+
+<ul>
+<li>父组件需要在自定义标签中v-on监听事件；</li>
+<li>子组件需要使用$emit触发事件；（一句话来说就是，子组件报告自己的内部事件，父组件进行监听这个事件，监听到以后可以执行一些动作，或者直接获取到子组件携带的数据）</li>
+<li>如果父组件做监听时想直接在组件上对数据做处理，可以使用$event访问这个被抛出的值；</li>
+</ul>
+
+<pre><code>&lt;body&gt;
+    &lt;div id=&quot;counter-event-example&quot;&gt;
+        &lt;p&gt;{{ total }}&lt;/p&gt;
+        &lt;button-counter @increment=&quot;incrementTotal&quot;&gt;&lt;/button-counter&gt;
+    &lt;/div&gt;
+    &lt;script&gt;
+    Vue.component(&#39;button-counter&#39;, {
+        template: &#39;&lt;button @click=&quot;incrementCounter&quot;&gt;{{ childMsg }}&lt;/button&gt;&#39;,
+        data: function() {
+            return {
+                childMsg: &quot;显示&quot;
+            }
+        },
+        methods: {
+            incrementCounter: function() {
+                        //第二个参数可以传递数据
+                this.$emit(&#39;increment&#39;,&quot;信息&quot;)
+            }
+        },
+    })
+
+    new Vue({
+        el: &#39;#counter-event-example&#39;,
+        data: {
+            total: 0
+        },
+        methods: {
+                //父组件方法可以接收子组件传递的数据（第一个参数）
+            incrementTotal: function(msg) {
+                this.total = msg;
+            }
+        }
+    })
+    &lt;/script&gt;
+&lt;/body&gt;
+</code></pre>
+
+<p><br></p>
+
+<h4>非父子组件间的通信：bus中央事件总线</h4>
+
+<hr>
+
+<ul>
+<li>使用一个新的vue实例作为通信桥梁，也就是事件总线；</li>
+<li>需要传值给别的组件的组件中，使用bus.$emit触发一个自定义事件，并传递数据；</li>
+<li>需要接收数据的组件中用bus.$on监听自定义组件，在回调函数中处理传递过来的参数；</li>
+</ul>
+
+<pre><code>&lt;body&gt;
+//父组件
+    &lt;div id=&quot;counter-event-example&quot;&gt;
+        //子组件A
+        &lt;one&gt;&lt;/one&gt;
+        //子组件B
+        &lt;two&gt;&lt;/two&gt;
+    &lt;/div&gt;
+    &lt;script&gt;
+        //事件总线
+    var bus = new Vue();
+    //子组件A
+    Vue.component(&#39;one&#39;, {
+        template: &#39;&lt;button @click=&quot;incrementCounter&quot;&gt;{{ childMsg }}&lt;/button&gt;&#39;,
+        data: function() {
+            return {
+                childMsg: &quot;显示&quot;
+            }
+        },
+        methods: {
+            incrementCounter: function() {
+                bus.$emit(&quot;increment&quot;,&quot;我是组件one&quot;)
+            }
+        },
+        
+    })
+        //子组件B
+    Vue.component(&#39;two&#39;,{
+        template:&#39;&lt;p&gt;{{ wordMsg }}&lt;/p&gt;&#39;,
+        data: function(){
+           return {
+              wordMsg: &quot;我是组件two&quot;
+           }
+        },
+        mounted:function() {
+            bus.$on(&quot;increment&quot;,function(msg){
+                console.log(msg);
+                wordMsg = msg;
+            })
+
+        }
+    })
+
+    new Vue({
+        el: &#39;#counter-event-example&#39;,
+        methods: {
+        }
+    })
+    &lt;/script&gt;
+&lt;/body&gt;
+</code></pre>
+
+            </section>
+
+            <footer class="post-footer">
+
+                <figure class="author-image">
+                    <img class="img" src="https://i.loli.net/2018/02/14/5a843d9dc3706.jpg" alt="author" lazyload="on">
+                </figure>
+
+                <section class="author">
+                    <center><h4><a href="/">nerrol</a></h4></center>
+                    <p></p>
+                </section>
+
+                
+
+            </footer>
+
+        </article>
+    </main>
+
+<footer class="site-footer clearfix">
+    <section class="copyright"><a href="/">Nerrol</a> &copy; 2020</section>
+    <section class="poweredby">Powered by <a href="https://silverblog.org">SilverBlog</a> , Theme By Casper</section>
+    
+</footer>
+</div>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/highlight.js@9.13.1/lib/highlight.min.js"></script>
+<script type="text/javascript" src="/static/casper/js/index.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bplayer@1.0.7/dist/bplayer.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bplayer@1.0.7/dist/bp_init.js"></script>
+
+</body>
+</html>

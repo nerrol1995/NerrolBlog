@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="renderer" content="webkit">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>页面性能优化</title>
+    <meta name="description" content="性能优化是构建移动端页面必要的一环。下面记录了我优化页面的几个步骤： step1：  css、js文件压缩合并这一步是为了有效减少http请求。压缩合并的方式有很多，可以利用gulp，webpack，fisp等构建工具，因为项目原因我选用fisp对css及js文件进行合并。以下是相关的配置代码：">
+    <link rel="shortcut icon" href="https://nerrol.com/static/user_file/favicon.ico">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@9.13.1/styles/github.css">
+    <link rel="stylesheet" href="/static/casper/css/screen.css">
+    
+</head>
+<body class="post-template nav-closed">
+<div class="nav">
+    <h3 class="nav-title">Menu</h3>
+    <a href="#" class="nav-close">
+        <span class="hidden">关闭</span>
+    </a>
+    <ul>
+        <li><a class="nav-" role="presentation" href="/">Index</a></li></ul>
+    <a class="subscribe-button icon-feed" href="/rss">Feed</a>
+</div>
+<span class="nav-cover"></span>
+<div class="site-wrapper">
+    <header class="main-header post-head no-cover">
+        <nav class="main-nav clearfix">
+            <a class="menu-button icon-menu" href="#"><span class="word">Menu</span></a>
+        </nav>
+    </header>
+
+    <main class="content" role="main">
+        <article class="post">
+
+            <header class="post-header">
+                <h1 class="post-title">页面性能优化</h1>
+                <section class="post-meta">
+                    <time class="post-date" datetime="2018-08-15">2018-08-15</time>
+                </section>
+            </header>
+
+            <section class="post-content">
+                <p>性能优化是构建移动端页面必要的一环。下面记录了我优化页面的几个步骤：</p>
+
+<h4>step1：  css、js文件压缩合并</h4>
+
+<p><strong>这一步是为了有效减少http请求。</strong>
+压缩合并的方式有很多，可以利用gulp，webpack，fisp等构建工具，因为项目原因我选用fisp对css及js文件进行合并。以下是相关的配置代码：</p>
+
+<pre><code>fis.config.merge({
+  namespace: &#39;yike-sell-app&#39;,
+  project: {
+    exclude: /(?:\.(tar|rar|psd|jar|pdf)$|\/output)/i,    // 排除某些后缀，svn相关的默认即排除；排除 output 目录。
+    fileType: {
+      image: &#39;woff2, otf&#39;
+    }
+  },
+  roadmap: {
+    path: [],
+    domain: &#39;&#39;    // 静态文件域名。
+  },
+  settings: {
+    spriter: {
+      csssprites: {
+        layout: &#39;matrix&#39;,    // 按照“矩阵”方式排列图片，可使产出图片体积更小；要求：用于平铺的背景图不可以(MUST NOT)进行 css sprite 处理。
+        margin: 5            // 图片间的间距。
+      }
+    },
+    optimizer: {
+      &#39;html-compress&#39;: {
+        level: &#39;strip_comment&#39;    // 对模板仅去注释，不压缩空白(压缩空白可能引起 class 类名连缀在一起)。
+      }
+    }
+  },
+  modules: {
+    parser: {
+      less: &#39;zuoye-less&#39;    // less 文件使用自定义解析器 zuoye-less 解析。
+    }
+  },
+  pack: {
+    //压缩及合并css js 文件
+    &#39;/pkg/a.js&#39;: [
+      &#39;/widget/folder/**.js&#39;
+    ],
+    &#39;/pkg/a.css&#39;: [
+      &#39;/page/folder/*.less&#39;,
+      &#39;/widget/folder/**.less&#39;,
+    ],
+
+  },
+  deploy: {
+    local: {
+      to: &#39;./output&#39;
+    }
+  }
+});
+</code></pre>
+
+<h4>step2：  对静态资源图片的压缩</h4>
+
+<p><strong>这一步是为了减少资源体积</strong>
+压缩的方式有很多种，我使用一个很好用的小工具：<a href="https://tinypng.com/">tinyPng</a>，目前发现这个工具的弊端在于：需要手动拖拽，替换文件。但压缩图片效果比gulp要好很多，5k的小图标可以被压缩到1k左右。</p>
+
+<hr>
+
+<p>第二种方式可以用base64格式，我个人不是很喜欢用这种格式，性价比很低。列出一些base64格式的缺点：</p>
+
+<ol>
+<li> base64 编码后比原图要大；</li>
+<li> 尽管图片请求少了，但是 HTML 文件本身尺寸会变大，会影响首屏加载，所以要权衡；</li>
+<li> 如果把大图片编码到 html / css 中，会造成后者体积明显增加，明显影响网页的打开速度。</li>
+<li> 使用 base64 的另外一个弊端是 IE 的兼容性问题。IE 8 以下不支持 data url，IE 8 开始支持 data url，却有大小限制，32k（未测试）。</li>
+<li> 还有一个问题是，如果构建工具比较落后（或者没有构建工具），手动插入 base64 是很蛋疼的，编辑器会卡到哭。</li>
+<li> 代码看起来会有点丑，大量编码字符（当然也可以通过构建工具动态插入）;</li>
+<li> base64 无法缓存，要缓存只能缓存包含 base64 的文件，比如 HTML 或者 CSS，这相比直接缓存图片要弱很多，一般 HTML 会改动频繁，所以等同于得不到缓存效益；</li>
+</ol>
+
+<hr>
+
+<p>顺便提一下人类之光webp格式，但是这种格式有个致命弱点：兼容性问题。
+（除了chrome支持其他浏览器基本全红。。）
+<img src="https://s1.ax1x.com/2018/08/15/PRAZjO.png" alt=""></p>
+
+<h4>step3： 开启浏览器缓存</h4>
+
+<p><strong>这一步是为了加速二次加载页面</strong></p>
+
+<h4>step4： 减少重排与重绘</h4>
+
+<p><strong>这一步是为了加速渲染</strong></p>
+
+<ol>
+<li>CSS属性读写分离：浏览器没次对元素样式进行读操作时，都必须进行一次重新渲染（重排 + 重绘），所以我们在使用JS对元素样式进行读写操作时，最好将两者分离开，先读后写，避免出现两者交叉使用的情况。最最最客观的解决方案，就是不用JS去操作元素样式；</li>
+<li>通过切换class或者style.csstext属性去批量操作元素样式；</li>
+<li>DOM元素离线更新：当对DOM进行相关操作时，例如innerHTML、appendChild等都可以使用Document Fragment对象进行离线操作，带元素“组装”完成后再一次插入页面，或者使用display:none 对元素隐藏，在元素“消失”后进行相关操作；</li>
+<li>将没用的元素设为不可见：visibility: hidden，这样可以减小重绘的压力，必要的时候再将元素显示；</li>
+<li>压缩DOM的深度，一个渲染层内不要有过深的子元素，少用DOM完成页面样式，多使用伪元素或者box-shadow取代；</li>
+<li>图片在渲染前指定大小：因为img元素是内联元素，所以在加载图片后会改变宽高，严重的情况会导致整个页面重排，所以最好在渲染前就指定其大小，或者让其脱离文档流；</li>
+<li>对页面中可能发生大量重排重绘的元素单独触发渲染层，使用GPU分担CPU压力。（这项策略需要慎用，得着重考量以牺牲GPU占用率能否换来可期的性能优化，毕竟页面中存在太多的渲染层对与GPU而言也是一种不必要的压力，通常情况下，我们会对动画元素采取硬件加速。</li>
+</ol>
+
+            </section>
+
+            <footer class="post-footer">
+
+                <figure class="author-image">
+                    <img class="img" src="https://i.loli.net/2018/02/14/5a843d9dc3706.jpg" alt="author" lazyload="on">
+                </figure>
+
+                <section class="author">
+                    <center><h4><a href="/">nerrol</a></h4></center>
+                    <p></p>
+                </section>
+
+                
+
+            </footer>
+
+        </article>
+    </main>
+
+<footer class="site-footer clearfix">
+    <section class="copyright"><a href="/">Nerrol</a> &copy; 2020</section>
+    <section class="poweredby">Powered by <a href="https://silverblog.org">SilverBlog</a> , Theme By Casper</section>
+    
+</footer>
+</div>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/highlight.js@9.13.1/lib/highlight.min.js"></script>
+<script type="text/javascript" src="/static/casper/js/index.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bplayer@1.0.7/dist/bplayer.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bplayer@1.0.7/dist/bp_init.js"></script>
+
+</body>
+</html>

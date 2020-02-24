@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="renderer" content="webkit">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>JS高级程序设计笔记-高级函数</title>
+    <meta name="description" content="一、防篡改对象1、不可扩展对象var person  {name:"nicholas"};Object.preventExtensions(person);person.age  12;console.log(person.age);//undefineddelete person.name;">
+    <link rel="shortcut icon" href="https://nerrol.com/static/user_file/favicon.ico">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@9.13.1/styles/github.css">
+    <link rel="stylesheet" href="/static/casper/css/screen.css">
+    
+</head>
+<body class="post-template nav-closed">
+<div class="nav">
+    <h3 class="nav-title">Menu</h3>
+    <a href="#" class="nav-close">
+        <span class="hidden">关闭</span>
+    </a>
+    <ul>
+        <li><a class="nav-" role="presentation" href="/">Index</a></li></ul>
+    <a class="subscribe-button icon-feed" href="/rss">Feed</a>
+</div>
+<span class="nav-cover"></span>
+<div class="site-wrapper">
+    <header class="main-header post-head no-cover">
+        <nav class="main-nav clearfix">
+            <a class="menu-button icon-menu" href="#"><span class="word">Menu</span></a>
+        </nav>
+    </header>
+
+    <main class="content" role="main">
+        <article class="post">
+
+            <header class="post-header">
+                <h1 class="post-title">JS高级程序设计笔记-高级函数</h1>
+                <section class="post-meta">
+                    <time class="post-date" datetime="2018-02-26">2018-02-26</time>
+                </section>
+            </header>
+
+            <section class="post-content">
+                <h4>一、防篡改对象</h4>
+
+<p>1、不可扩展对象</p>
+
+<pre><code>var person = {name:&quot;nicholas&quot;};
+Object.preventExtensions(person);
+person.age = 12;
+console.log(person.age);//undefined
+delete person.name;
+console.log(person.name);//undefined
+</code></pre>
+
+<p>PS：设置为不可扩展对象无法给对象添加属性和方法；但是可以删除属性和方法；<br>
+<strong><em><code>Object.istExtensible()</code>方法</em></strong>：确定对象是否可以扩展；
+<br><br>
+2、密封的对象</p>
+
+<pre><code>var person = {name:&quot;nicholas&quot;};
+Object.seal(person);
+person.age = 12;
+console.log(person.age);//undefined
+delete person.name;
+console.log(person.name);//nicholas
+</code></pre>
+
+<p>PS：密封对象不可扩展，[[configurable]]特性将被设置为false，不能删除属性和方法，也不能添加属性和方法。<br>
+<strong><em><code>Object.isSealed()</code>方法</em></strong>：确定对象是否被密封，密封的对象同样不可扩展；
+<br><br>
+3、冻结的对象</p>
+
+<pre><code>var person = {name:&quot;nicholas&quot;};
+Object.freeze(person);
+person.age = 12;
+console.log(person.age);//undefined
+delete person.name;
+console.log(person.name);//nicholas
+person.name = &quot;Greg&quot;;
+console.log(person.name);//nicholas
+</code></pre>
+
+<p>PS：最严格的防篡改级别对象，冻结对象既不可扩展又是密封的，且对象的数据属性的[[Writable]]特性会被设置为false。<br>
+<strong><em><code>Object.isFrozen()</code>方法</em></strong>：检测冻结对象；</p>
+
+<h4>二、高级定时器</h4>
+
+<blockquote>
+<p>关于定时器，指定的时间间隔表示何时将定时器的代码添加到队列，而不是何时实际执行代码。
+<br>
+1、重复的定时器</p>
+</blockquote>
+
+<pre><code>//避免setInterval()的次重复定时器的缺点（某些间隔可能被跳过），可以使用链式setTimeout()调用
+setTimeout(function(){
+    //处理中
+    setTimeout(arguments.callee,interval);
+},interval)
+
+</code></pre>
+
+<p>2、数组分块技术
+在数据分块模式中，array变量的本质上就是一个“待办事宜”列表，包含了要处理的项目，使用shift()方法获取队列中的下一个要处理的项目，将其传递给某个函数。</p>
+
+<pre><code>//接受三个参数：要处理的项目的数组，用于处理项目的函数，以及可选的运行该函数的环境。
+function chunk(array,process,context){
+    setTimeout(function(){
+        var item = array.shift();
+        process.call(context,item);
+        if(array.length&gt;0){
+            setTimeout(arguments.callee,100);
+        }
+    },100)
+}
+</code></pre>
+
+<p>3、函数节流</p>
+
+<pre><code>//两个参数：要执行的函数，在哪个作用域中执行（定时器id储存在函数的tId属性中）
+function throttle(method,context){
+    clearTimeout(method.tId){
+        method.tId=setTimeout(function(){
+            method.call(context);
+        },100)
+    }
+}
+</code></pre>
+
+            </section>
+
+            <footer class="post-footer">
+
+                <figure class="author-image">
+                    <img class="img" src="https://i.loli.net/2018/02/14/5a843d9dc3706.jpg" alt="author" lazyload="on">
+                </figure>
+
+                <section class="author">
+                    <center><h4><a href="/">nerrol</a></h4></center>
+                    <p></p>
+                </section>
+
+                
+
+            </footer>
+
+        </article>
+    </main>
+
+<footer class="site-footer clearfix">
+    <section class="copyright"><a href="/">Nerrol</a> &copy; 2020</section>
+    <section class="poweredby">Powered by <a href="https://silverblog.org">SilverBlog</a> , Theme By Casper</section>
+    
+</footer>
+</div>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/highlight.js@9.13.1/lib/highlight.min.js"></script>
+<script type="text/javascript" src="/static/casper/js/index.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bplayer@1.0.7/dist/bplayer.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bplayer@1.0.7/dist/bp_init.js"></script>
+
+</body>
+</html>

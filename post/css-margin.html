@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="renderer" content="webkit">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>margin相关</title>
+    <meta name="description" content="图片与文字对齐问题如果图片和文字差不多大时，使用兼容性强的margin负值方法。方法：img{margin:0 3px 3px 0;}方法：（1）父层div设置：{overflow:hidden;}　　　（3）父元素生成BFC; hasLayout详解定义：">
+    <link rel="shortcut icon" href="https://nerrol.com/static/user_file/favicon.ico">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@9.13.1/styles/github.css">
+    <link rel="stylesheet" href="/static/casper/css/screen.css">
+    
+</head>
+<body class="post-template nav-closed">
+<div class="nav">
+    <h3 class="nav-title">Menu</h3>
+    <a href="#" class="nav-close">
+        <span class="hidden">关闭</span>
+    </a>
+    <ul>
+        <li><a class="nav-" role="presentation" href="/">Index</a></li></ul>
+    <a class="subscribe-button icon-feed" href="/rss">Feed</a>
+</div>
+<span class="nav-cover"></span>
+<div class="site-wrapper">
+    <header class="main-header post-head no-cover">
+        <nav class="main-nav clearfix">
+            <a class="menu-button icon-menu" href="#"><span class="word">Menu</span></a>
+        </nav>
+    </header>
+
+    <main class="content" role="main">
+        <article class="post">
+
+            <header class="post-header">
+                <h1 class="post-title">margin相关</h1>
+                <section class="post-meta">
+                    <time class="post-date" datetime="2018-02-14">2018-02-14</time>
+                </section>
+            </header>
+
+            <section class="post-content">
+                <h4>图片与文字对齐问题</h4>
+
+<p>如果图片和文字差不多大时，使用兼容性强的margin负值方法。</p>
+
+<p><em>方法：img{margin:0 3px -3px 0;}</em>
+<br></p>
+
+<h4>div嵌套后margin出现失效（转移）问题</h4>
+
+<p>原因：盒子没有获得haslayout造成margin-top无效（关于hasLayout会在下文给出解释）<br></p>
+
+<p>方法：（1）父层div设置：{overflow:hidden;}<br></p>
+
+<p>　　　（2）父层div设置：{padding-top:1px;}<br></p>
+
+<p>　　　（3）父元素生成BFC;<br></p>
+
+<p>　　    （4）当前元素margin-top外边距转化为padding-top;<br>
+<br></p>
+
+<h4>IE双边距问题</h4>
+
+<p>产生条件：block元素+浮动+margin</p>
+
+<p>原因：inline元素或inline-block不存在双边距问题</p>
+
+<p><em>方法：使用display:inline；</em>
+<br></p>
+
+<h4>hasLayout详解</h4>
+
+<p><strong>定义</strong>：<br>
+haslayout是IE7-浏览器的特有属性。hasLayout是一种只读属性，有两种状态：true或false。当其为true时，代表该元素有自己的布局，否则代表该元素的布局继承于父元素。<br>
+PS：通过element.currentStyle.hasLayout可以得出当前元素的hasLayout情况（仅在IE下）<br></p>
+
+<p>** 触发**<br></p>
+
+<p>HTML标签触发：<br></p>
+
+<ul>
+<li>html,body</li>
+<li>table,tr,th,td</li>
+<li>img</li>
+<li>hr</li>
+<li>input,button,select,textarea,fieldset</li>
+<li>frameset,frame,iframe</li>
+</ul>
+
+<p><strong>CSS触发：</strong><br></p>
+
+<ul>
+<li>display:inline-block</li>
+<li>height/width:除了auto</li>
+<li>float:left/right</li>
+<li>position:absolute</li>
+<li>border:不为none</li>
+<li>writing-mode(IE专有属性，设置文本的垂直显示):tb-rl</li>
+<li>zoom(IE专有属性，设置或检索对象的缩放比例):除了normal</li>
+</ul>
+
+<p><strong>IE7下触发：</strong><br></p>
+
+<ul>
+<li>min-height/max-height/min-width/max-width:除none</li>
+<li>overflow\overflow-x\overflow-y:除visible</li>
+<li>position:fixed</li>
+</ul>
+
+            </section>
+
+            <footer class="post-footer">
+
+                <figure class="author-image">
+                    <img class="img" src="https://i.loli.net/2018/02/14/5a843d9dc3706.jpg" alt="author" lazyload="on">
+                </figure>
+
+                <section class="author">
+                    <center><h4><a href="/">nerrol</a></h4></center>
+                    <p></p>
+                </section>
+
+                
+
+            </footer>
+
+        </article>
+    </main>
+
+<footer class="site-footer clearfix">
+    <section class="copyright"><a href="/">Nerrol</a> &copy; 2020</section>
+    <section class="poweredby">Powered by <a href="https://silverblog.org">SilverBlog</a> , Theme By Casper</section>
+    
+</footer>
+</div>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/highlight.js@9.13.1/lib/highlight.min.js"></script>
+<script type="text/javascript" src="/static/casper/js/index.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bplayer@1.0.7/dist/bplayer.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bplayer@1.0.7/dist/bp_init.js"></script>
+
+</body>
+</html>

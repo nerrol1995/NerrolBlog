@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="renderer" content="webkit">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>网站性能优化</title>
+    <meta name="description" content="1、资源压缩合并（1）图片：雪碧图（2）内存中操作元素，使用文档片段：document.createDocumentFragment()（3）一次性DOM节点生成：通过innerHTML属性一次性生成节点，使用字符串拼接的方式，先生成相应的HTML字符串，再一次性写入innerHTML中。">
+    <link rel="shortcut icon" href="https://nerrol.com/static/user_file/favicon.ico">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@9.13.1/styles/github.css">
+    <link rel="stylesheet" href="/static/casper/css/screen.css">
+    
+</head>
+<body class="post-template nav-closed">
+<div class="nav">
+    <h3 class="nav-title">Menu</h3>
+    <a href="#" class="nav-close">
+        <span class="hidden">关闭</span>
+    </a>
+    <ul>
+        <li><a class="nav-" role="presentation" href="/">Index</a></li></ul>
+    <a class="subscribe-button icon-feed" href="/rss">Feed</a>
+</div>
+<span class="nav-cover"></span>
+<div class="site-wrapper">
+    <header class="main-header post-head no-cover">
+        <nav class="main-nav clearfix">
+            <a class="menu-button icon-menu" href="#"><span class="word">Menu</span></a>
+        </nav>
+    </header>
+
+    <main class="content" role="main">
+        <article class="post">
+
+            <header class="post-header">
+                <h1 class="post-title">网站性能优化</h1>
+                <section class="post-meta">
+                    <time class="post-date" datetime="2018-02-14">2018-02-14</time>
+                </section>
+            </header>
+
+            <section class="post-content">
+                <h4>1、资源压缩合并</h4>
+
+<p>（1）图片：雪碧图<br>
+（2）JS、CSS合并：利用项目构建工具webpack、grunt、gulp等。</p>
+
+<h4>2、加快渲染</h4>
+
+<p>CSS前置</p>
+
+<h4>3、减少DOM操作</h4>
+
+<p>（1）将DOM节点放入局部变量<br>
+（2）内存中操作元素，使用文档片段：document.createDocumentFragment()<br>
+PS：这样做的优点是只会触发一次回流<br>
+（3）一次性DOM节点生成：通过innerHTML属性一次性生成节点，使用字符串拼接的方式，先生成相应的HTML字符串，再一次性写入innerHTML中。<br>
+（4）通过类来修改样式<br>
+（5） 使用事件代理<br></p>
+
+<h4>4、减少HTTP请求</h4>
+
+<p>（1）keep-Alive模式（持久连接）<br>
+每个请求，应答客户和服务器都要新建一个连接，完成后立刻断开，持久连接模式使客户端到浏览器的连接持续有效，后续请求时避免了建立或者重新建立连接。<br>
+PS：HTTP1.1版本支持<br></p>
+
+<p>（2）管线化<br>
+在持久连接的前提下，通过将请求一次性打包发出，有效减少HTTP请求。<br>
+PS：a)只有GET和HEAD请求可以实现管线化，POST有一定的限制；<br>
+        b)初次进行请求时不应该启动管线机制，因为服务器不一定支持HTTP1.1版本。<br></p>
+
+<h4>5、非核心代码异步加载</h4>
+
+<p>（1）<code>&lt;script&gt;</code>标签，动态脚本加载，不等待后续载入的恩党员苏，读到就加载并执行。<br>
+（2）<code>&lt;script defer&gt;</code><br>
+异步加载，后续文档元素和脚本文件同时加载，js脚本的执行要等到文档所有元素加载完后执行<br>
+PS：IE只支持defer<br>
+（3）<code>&lt;script async&gt;</code><br>
+异步加载，后续文档元素和脚本文件同时加载（异步），加载完后自动执行js脚本。<br></p>
+
+<h4>6、利用浏览器缓存</h4>
+
+<p>（1）强缓存<br>
+不请求服务器直接读取文件。<br>
+HTTP 1.0 采用Expires头指定资源过期时间；<br>
+HTTP 1.1 采用Cache-Control指定资源被缓存多久；<br></p>
+
+<p>（2）协商缓存<br>
+向服务器发起请求，如果资源并未更新，response响应码为304，随后从浏览器缓存中下载该文件。<br>
+HTTP 1.0 采用Last-Modified和If-Modified-Since来指定资源过期时间；<br>
+HTTP 1.1 采用E-Tag和If-None-Match来确定该资源是否过期；<br></p>
+
+<h4>7、使用CDN加速资源</h4>
+
+<p>在页面第一次打开时缓存没有作用，使用CDN可以加速资源。</p>
+
+<h4>8、DNS预解析</h4>
+
+<p>（1）页面中所有a标签在浏览器中默认打开dns，如果页面为https，很多浏览器默认关闭dns，使用标签强制打开dns：<br>
+<code>&lt;meta http-equiv=&quot;x-dns-prefetch&quot; href=&quot; &quot;&gt;</code><br></p>
+
+<p>（2）预解析<br>
+<code>&lt;link rel=&quot;dns-prefetch&quot; href=&quot; &quot;&gt;</code></p>
+
+            </section>
+
+            <footer class="post-footer">
+
+                <figure class="author-image">
+                    <img class="img" src="https://i.loli.net/2018/02/14/5a843d9dc3706.jpg" alt="author" lazyload="on">
+                </figure>
+
+                <section class="author">
+                    <center><h4><a href="/">nerrol</a></h4></center>
+                    <p></p>
+                </section>
+
+                
+
+            </footer>
+
+        </article>
+    </main>
+
+<footer class="site-footer clearfix">
+    <section class="copyright"><a href="/">Nerrol</a> &copy; 2020</section>
+    <section class="poweredby">Powered by <a href="https://silverblog.org">SilverBlog</a> , Theme By Casper</section>
+    
+</footer>
+</div>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/highlight.js@9.13.1/lib/highlight.min.js"></script>
+<script type="text/javascript" src="/static/casper/js/index.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bplayer@1.0.7/dist/bplayer.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bplayer@1.0.7/dist/bp_init.js"></script>
+
+</body>
+</html>

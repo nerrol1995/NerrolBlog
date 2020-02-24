@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="renderer" content="webkit">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>animate.css+wow.js页面滚动即时显示动画</title>
+    <meta name="description" content="1、地址引入    new WOW().init();</script注：以下是一些自定义配置：var wow  new WOW({      boxClass: 'wow',      animateClass: 'animated',      offset: 0,">
+    <link rel="shortcut icon" href="https://nerrol.com/static/user_file/favicon.ico">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@9.13.1/styles/github.css">
+    <link rel="stylesheet" href="/static/casper/css/screen.css">
+    
+</head>
+<body class="post-template nav-closed">
+<div class="nav">
+    <h3 class="nav-title">Menu</h3>
+    <a href="#" class="nav-close">
+        <span class="hidden">关闭</span>
+    </a>
+    <ul>
+        <li><a class="nav-" role="presentation" href="/">Index</a></li></ul>
+    <a class="subscribe-button icon-feed" href="/rss">Feed</a>
+</div>
+<span class="nav-cover"></span>
+<div class="site-wrapper">
+    <header class="main-header post-head no-cover">
+        <nav class="main-nav clearfix">
+            <a class="menu-button icon-menu" href="#"><span class="word">Menu</span></a>
+        </nav>
+    </header>
+
+    <main class="content" role="main">
+        <article class="post">
+
+            <header class="post-header">
+                <h1 class="post-title">animate.css+wow.js页面滚动即时显示动画</h1>
+                <section class="post-meta">
+                    <time class="post-date" datetime="2018-02-14">2018-02-14</time>
+                </section>
+            </header>
+
+            <section class="post-content">
+                <h4>1、地址引入</h4>
+
+<pre><code>&lt;link href=&quot;css/animate.min.css&quot; rel=&quot;stylesheet&quot; type=&quot;text/css&quot;&gt;
+&lt;script src=&quot;js/wow.min.js&quot; type=&quot;text/javascript&quot;&gt;&lt;/script&gt;
+</code></pre>
+
+<h4>2、HTML部分</h4>
+
+<p><code>&lt;div class=&quot;animated bounceInRight wow&quot; data-wow-delay=&quot;0.4s&quot; style=&quot;visibility: visible;animation-delay: 0.4s&quot;&gt;&lt;/div&gt;</code></p>
+
+<p>注：bounceInRight为animate.css中的动画方式，具体可见官方API给出的示例：<a href="https://daneden.github.io/animate.css">https://daneden.github.io/animate.css</a></p>
+
+<h4>3、wow.js初始化代码</h4>
+
+<pre><code>&lt;script type=&quot;text/javascript&quot;&gt;
+    new WOW().init();
+&lt;/script&gt;
+</code></pre>
+
+<p>注：以下是一些自定义配置：
+<code>
+var wow = new WOW({  
+    boxClass: &#39;wow&#39;,  
+    animateClass: &#39;animated&#39;,  
+    offset: 0,  
+    mobile: true,  
+    live: true  
+});  
+wow.init(); 
+</code></p>
+
+            </section>
+
+            <footer class="post-footer">
+
+                <figure class="author-image">
+                    <img class="img" src="https://i.loli.net/2018/02/14/5a843d9dc3706.jpg" alt="author" lazyload="on">
+                </figure>
+
+                <section class="author">
+                    <center><h4><a href="/">nerrol</a></h4></center>
+                    <p></p>
+                </section>
+
+                
+
+            </footer>
+
+        </article>
+    </main>
+
+<footer class="site-footer clearfix">
+    <section class="copyright"><a href="/">Nerrol</a> &copy; 2020</section>
+    <section class="poweredby">Powered by <a href="https://silverblog.org">SilverBlog</a> , Theme By Casper</section>
+    
+</footer>
+</div>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/highlight.js@9.13.1/lib/highlight.min.js"></script>
+<script type="text/javascript" src="/static/casper/js/index.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bplayer@1.0.7/dist/bplayer.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bplayer@1.0.7/dist/bp_init.js"></script>
+
+</body>
+</html>

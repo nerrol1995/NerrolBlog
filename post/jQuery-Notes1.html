@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="renderer" content="webkit">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>一些jQuery函数</title>
+    <meta name="description" content="最近在熟悉项目的过程中，看到一些没有接触过jQuery函数，记录下来。 closest() 说明：遍历方法。从当前元素开始，沿着DOM树向上遍历，获得匹配选择器的第一个祖先元素。 语法：		(1)$(selector).closest(filter)；		(2)$(selector).closest(filter,context);">
+    <link rel="shortcut icon" href="https://nerrol.com/static/user_file/favicon.ico">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@9.13.1/styles/github.css">
+    <link rel="stylesheet" href="/static/casper/css/screen.css">
+    
+</head>
+<body class="post-template nav-closed">
+<div class="nav">
+    <h3 class="nav-title">Menu</h3>
+    <a href="#" class="nav-close">
+        <span class="hidden">关闭</span>
+    </a>
+    <ul>
+        <li><a class="nav-" role="presentation" href="/">Index</a></li></ul>
+    <a class="subscribe-button icon-feed" href="/rss">Feed</a>
+</div>
+<span class="nav-cover"></span>
+<div class="site-wrapper">
+    <header class="main-header post-head no-cover">
+        <nav class="main-nav clearfix">
+            <a class="menu-button icon-menu" href="#"><span class="word">Menu</span></a>
+        </nav>
+    </header>
+
+    <main class="content" role="main">
+        <article class="post">
+
+            <header class="post-header">
+                <h1 class="post-title">一些jQuery函数</h1>
+                <section class="post-meta">
+                    <time class="post-date" datetime="2018-03-25">2018-03-25</time>
+                </section>
+            </header>
+
+            <section class="post-content">
+                <p>最近在熟悉项目的过程中，看到一些没有接触过jQuery函数，记录下来。</p>
+
+<hr>
+
+<h4>closest()</h4>
+
+<ul>
+<li>说明：遍历方法。从当前元素开始，沿着DOM树向上遍历，获得匹配选择器的第一个祖先元素。</li>
+<li>语法：
+    (1)$(selector).closest(filter)；
+    (2)$(selector).closest(filter,context);
+    filter：缩小祖先元素范围的选择器表达式；
+    context：可选，在其内可以找到匹配元素的DOM元素；</li>
+<li>用法示例：通过closest()完成事件委托：（详见示例一）</li>
+</ul>
+
+<pre><code>//示例一：点击元素切换活动状态
+$( document ).bind(&quot;click&quot;, function( e ) {
+    $( e.target ).closest(&quot;li&quot;).toggleClass(&quot;hilight&quot;).siblings(&quot;li&quot;).removeClass(&quot;hilight&quot;);
+  });
+</code></pre>
+
+<hr>
+
+<h4>inArray()</h4>
+
+<ul>
+<li>说明：在数组中查找指定值并返回它的索引，如果没有找到则返回-1。</li>
+<li>语法：$.inArray(value,array,fromIndex)；
+    value：要查找的值；
+    array：一个数组，通过它来查找；
+    fromIndex：数组索引值，表示从哪里开始查找；（默认为0，查找整个数组）</li>
+<li><p>用法示例：（详见示例二）</p>
+
+<pre><code>//示例二：值之间严格比较，代码返回-1
+$.inArray( 5 + 5, [ &quot;8&quot;, &quot;9&quot;, &quot;10&quot;, 10 + &quot;&quot; ] );
+</code></pre></li>
+</ul>
+
+<p>PS：类似于JS原生方法indexOf()，不过后者应用于字符串。</p>
+
+<hr>
+
+<h4>getQuery()</h4>
+
+<ul>
+<li>说明：返回URL中的查询部分</li>
+<li>语法：n=URL.getQuery(url)；</li>
+<li>用法示例：（详见示例三）</li>
+</ul>
+
+<pre><code>//示例三
+var a=URL.getQuery(&quot;http://example.com/go.asp?name=bill&quot;);
+var b=URL.getQuery(&quot;http://example.com&quot;);
+//a=&quot;bill&quot;
+//b=&quot;&quot;
+</code></pre>
+
+<hr>
+
+<h4>getJSON()</h4>
+
+<ul>
+<li>说明：使用一个HTTP GET请求从服务器加载JSON编码的数据。</li>
+<li>语法：$.getJSON(url,data,callback)；
+            url:发送请求的url字符串;
+                            data:普通的对象或字符串，用来发送请求给服务器；
+                            callback:请求成功后的回调函数；</li>
+<li>用法示例：（详见示例七）</li>
+</ul>
+
+<pre><code>//示例七：
+$.getJSON(&#39;ajax/test.json&#39;, function(data) {
+  var items = [];
+ 
+  $.each(data, function(key, val) {
+    items.push(&#39;&lt;li id=&quot;&#39; + key + &#39;&quot;&gt;&#39; + val + &#39;&lt;/li&gt;&#39;);
+  });
+ 
+  $(&#39;&lt;ul/&gt;&#39;, {
+    &#39;class&#39;: &#39;my-new-list&#39;,
+    html: items.join(&#39;&#39;)
+  }).appendTo(&#39;body&#39;);
+});
+</code></pre>
+
+<hr>
+
+<h4>extend()</h4>
+
+<ul>
+<li>说明：将obj1及之后的对象的所有属性添加到目标对象，并返回目标对象。</li>
+<li>语法：$.extend({},obj1,obj2)；</li>
+<li>用法示例：（详见示例四、示例五）</li>
+</ul>
+
+<pre><code>//示例四：第一个参数为true
+var object1 = {
+  apple: 0,
+  banana: { weight: 52, price: 100 },
+  cherry: 97
+};
+var object2 = {
+  banana: { price: 200 },
+  durian: 100
+};
+$.extend( true, object1, object2 );
+console.log(object1);
+/*[object Object] {
+  apple: 0,
+  banana: [object Object] {
+    price: 200,
+    weight: 52
+  },
+  cherry: 97,
+  durian: 100
+}*/
+</code></pre>
+
+<pre><code>//示例五：第一个参数为对象，返回这个对象
+var object1 = {
+  apple: 0,
+  banana: { weight: 52, price: 100 },
+  cherry: 97
+};
+var object2 = {
+  banana: { price: 200 },
+  durian: 100
+};
+$.extend( {}, object1, object2 );
+console.log($.extend( {}, object1, object2 ));
+/*[object Object] {
+  apple: 0,
+  banana: [object Object] {
+    price: 200
+  },
+  cherry: 97,
+  durian: 100
+}*/
+</code></pre>
+
+<hr>
+
+<h4>replaceWith()</h4>
+
+<ul>
+<li>说明：将参数内容替换集合中所有匹配的元素，并返回被删除元素的集合。</li>
+<li>语法：$dom1.replaceWith($dom2)；</li>
+<li>用法示例：（详见示例六）</li>
+</ul>
+
+<pre><code>//示例六：
+$(&#39;div.second&#39;).replaceWith(&#39;&lt;h2&gt;New heading&lt;/h2&gt;&#39;);
+</code></pre>
+
+<hr>
+
+<h4>serializeArray()</h4>
+
+<ul>
+<li>说明：将用作提交的表单元素的值编译成拥有name和value对象组成的数组。</li>
+<li>语法：$(&quot;:input&quot;).serializeArray()；</li>
+<li>PS：该方法不接受任何参数；</li>
+<li>用法示例：（详见示例八）</li>
+</ul>
+
+<pre><code>$(&#39;form&#39;).submit(function() {
+  console.log($(this).serializeArray());
+});
+</code></pre>
+
+            </section>
+
+            <footer class="post-footer">
+
+                <figure class="author-image">
+                    <img class="img" src="https://i.loli.net/2018/02/14/5a843d9dc3706.jpg" alt="author" lazyload="on">
+                </figure>
+
+                <section class="author">
+                    <center><h4><a href="/">nerrol</a></h4></center>
+                    <p></p>
+                </section>
+
+                
+
+            </footer>
+
+        </article>
+    </main>
+
+<footer class="site-footer clearfix">
+    <section class="copyright"><a href="/">Nerrol</a> &copy; 2020</section>
+    <section class="poweredby">Powered by <a href="https://silverblog.org">SilverBlog</a> , Theme By Casper</section>
+    
+</footer>
+</div>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/highlight.js@9.13.1/lib/highlight.min.js"></script>
+<script type="text/javascript" src="/static/casper/js/index.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bplayer@1.0.7/dist/bplayer.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bplayer@1.0.7/dist/bp_init.js"></script>
+
+</body>
+</html>

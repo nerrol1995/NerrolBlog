@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="renderer" content="webkit">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>window对象</title>
+    <meta name="description" content="由于window对象同事扮演者ECMAScript中的Global对象的角色，因此所有在全局作用域中声明的变量、函数都会变成window对象的属性和方法。 window.location 对象 window.location 对象用于获得当前页面的地址 (URL)，并把浏览器重定向到新的页面。window.location 对象在编写时可不使用 window 这个前缀。">
+    <link rel="shortcut icon" href="https://nerrol.com/static/user_file/favicon.ico">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@9.13.1/styles/github.css">
+    <link rel="stylesheet" href="/static/casper/css/screen.css">
+    
+</head>
+<body class="post-template nav-closed">
+<div class="nav">
+    <h3 class="nav-title">Menu</h3>
+    <a href="#" class="nav-close">
+        <span class="hidden">关闭</span>
+    </a>
+    <ul>
+        <li><a class="nav-" role="presentation" href="/">Index</a></li></ul>
+    <a class="subscribe-button icon-feed" href="/rss">Feed</a>
+</div>
+<span class="nav-cover"></span>
+<div class="site-wrapper">
+    <header class="main-header post-head no-cover">
+        <nav class="main-nav clearfix">
+            <a class="menu-button icon-menu" href="#"><span class="word">Menu</span></a>
+        </nav>
+    </header>
+
+    <main class="content" role="main">
+        <article class="post">
+
+            <header class="post-header">
+                <h1 class="post-title">window对象</h1>
+                <section class="post-meta">
+                    <time class="post-date" datetime="2018-02-24">2018-02-24</time>
+                </section>
+            </header>
+
+            <section class="post-content">
+                <blockquote>
+<p>由于window对象同事扮演者ECMAScript中的Global对象的角色，因此所有在全局作用域中声明的变量、函数都会变成window对象的属性和方法。</p>
+</blockquote>
+
+<h4>window.location 对象</h4>
+
+<ul>
+<li><p>window.location 对象用于获得当前页面的地址 (URL)，并把浏览器重定向到新的页面。window.location 对象在编写时可不使用 window 这个前缀。</p></li>
+<li><p>location.hostname 返回 web 主机的域名</p></li>
+<li><p>location.pathname 返回当前页面的路径和文件名</p></li>
+<li><p>location.port 返回 web 主机的端口 （80 或 443）</p></li>
+<li><p>location.protocol 返回所使用的 web 协议（http:// 或 https://）</p></li>
+<li><p>window.location.href= &quot;<a href="http://www.xxxxxxxx.net">http://www.xxxxxxxx.net</a>&quot; ; 跳转后有后退功能 </p></li>
+<li><p>window.location.replace(&quot;<a href="http://www.xxxxxxxx.net%22">http://www.xxxxxxxx.net&quot;</a>) ; 跳转后没有后退功能 </p></li>
+<li><p>window.open(&quot;<a href="http://www.xxxxxxxx.net%22">http://www.xxxxxxxx.net&quot;</a>);  在新的窗口打开链接，一般用于简单的弹出页面，现在基本上都被屏蔽掉　</p></li>
+<li><p>window.location.reload( ); 刷新当前页面.</p></li>
+<li><p>parent.location.reload( ); 刷新父亲对象（用于框架）</p></li>
+<li><p>opener.location.reload( ); 刷新父窗口对象（用于单开窗口）</p></li>
+<li><p>top.location.reload( ); 刷新最顶端对象（用于多开窗口）</p></li>
+</ul>
+
+<h4>window.history 对象</h4>
+
+<ul>
+<li><p>window.history 对象包含浏览器的历史。window.history对象在编写时可不使用 window 这个前缀。</p></li>
+<li><p>window.history.back() - 加载历史列表中的前一个 URL，与在浏览器点击后退按钮相同，</p></li>
+<li><p>window.history.forward() -加载历史列表中的下一个 URL。 与在浏览器中点击按钮向前相同</p></li>
+</ul>
+
+<h4>window.navigator 对象</h4>
+
+<ul>
+<li>window.navigator 对象包含有关访问者浏览器的信息，来自 navigator 对象的信息具有误导性，不应该被用于检测浏览器版本，这是因为：navigator 数据可被浏览器使用者更改，一些浏览器对测试站点会识别错误，浏览器无法报告晚于浏览器发布的新操作系统。
+　　</li>
+<li><p>window.navigator 对象在编写时可不使用 window 这个前缀。</p></li>
+<li><p>window.navigator.appCodeName返回浏览器的代码名。</p></li>
+<li><p>window.navigator.appName返回代表浏览器名的字符串。</p></li>
+<li><p>window.navigator.appMinorVersion返回浏览器的次版本号。该属性是一个只读的字符串。仅IE有效。</p></li>
+<li><p>window.navigator.userAgent返回代表浏览器名和版本号的字符串。</p></li>
+<li><p>window.navigator.platform返回浏览器平台的字符串（&quot;Win32&quot;, &quot;Win16&quot;, &quot;WinCE&quot;, &quot;Mac68k&quot;, &quot;MacPPC&quot;, &quot;HP-UX&quot;, &quot;SunOS&quot; 等）。</p></li>
+<li><p>window.navigator.cpuClass 返回CPU的信息（&quot;x86&quot;, &quot;68K&quot;, &quot;Alpha&quot;, &quot;PPC&quot; 等）。仅IE有效。</p></li>
+<li><p>window.navigator.browserLanguage返回浏览器的语言种类。仅IE有效。</p></li>
+<li><p>window.navigator.systemLanguage返回系统的语言种类。仅IE有效。</p></li>
+<li><p>window.navigator.userLanguage userLanguage 返回用户环境的语言种类。仅IE有效。</p></li>
+<li><p>window.navigator.cookieEnabled返回 cookie 是否可用的真伪值。</p></li>
+<li><p>window.navigator.onLine返回是否能连上网络的真伪值。</p></li>
+<li><p>window.navigator.javaEnabled()返回 Java 是否可用的真伪值。</p></li>
+<li><p>window.navigator.userProfile保存着用户信息的对象。拥有 addReadRequest() doReadRequest() getAttribute() clearRequest() 等方法。</p></li>
+<li><p>window.navigator.taintEnabled() 是否可以加密数据的真伪值。仅IE有效。</p></li>
+</ul>
+
+<h4>window对象的一些其它方法</h4>
+
+<ul>
+<li><p>setInterval() 和 setTimeout() 是 HTML DOM Window对象的两个方法。</p></li>
+<li><p>window.setInterval() - 间隔指定的毫秒数不停地执行指定的代码。</p></li>
+<li><p>window.setTimeout() - 暂停指定的毫秒数后执行指定的代码</p></li>
+<li><p>window.clearInterval() 方法用于停止 setInterval() 方法执行的函数代码。</p></li>
+<li><p>window.clearTimeout() 方法用于停止执行setTimeout()方法的函数代码。</p></li>
+<li><p>window.alert()- 警告框经常用于确保用户可以得到某些信息。当警告框出现后，用户需要点击确定按钮才能继续进行操作。</p></li>
+<li><p>window.prompt()- 确认框用于使用户可以验证或者接受某些信息。当确认框出现后，用户需要点击确定或者取消按钮才能继续进行操作。如果用户点击确认，那么返回值为 true。如果用户点击取消，那么返回值为 false。</p></li>
+<li><p>window.confirm()- 提示框经常用于提示用户在进入页面前输入某个值。当提示框出现后，用户需要输入某个值，然后点击确认或取消按钮才能继续操纵。如果用户点击确认，那么返回值为输入的值。如果用户点击取消，那么返回值为 null。</p></li>
+<li><p>window.open() - 打开新窗口</p></li>
+<li><p>window.close() - 关闭当前窗口</p></li>
+<li><p>window.moveTo() - 移动当前窗口</p></li>
+<li><p>window.resizeTo() - 调整当前窗口的尺寸</p></li>
+<li><p>window.frameElement 获取当前文档的宿主节点iframe元素</p></li>
+<li><p>window.execScript() execScript函数与eval的功能相同，不同的是eval函数执行后的脚本的作用域是当前执行上下文，而execScript则总是针对全局作用域。</p></li>
+</ul>
+
+            </section>
+
+            <footer class="post-footer">
+
+                <figure class="author-image">
+                    <img class="img" src="https://i.loli.net/2018/02/14/5a843d9dc3706.jpg" alt="author" lazyload="on">
+                </figure>
+
+                <section class="author">
+                    <center><h4><a href="/">nerrol</a></h4></center>
+                    <p></p>
+                </section>
+
+                
+
+            </footer>
+
+        </article>
+    </main>
+
+<footer class="site-footer clearfix">
+    <section class="copyright"><a href="/">Nerrol</a> &copy; 2020</section>
+    <section class="poweredby">Powered by <a href="https://silverblog.org">SilverBlog</a> , Theme By Casper</section>
+    
+</footer>
+</div>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/highlight.js@9.13.1/lib/highlight.min.js"></script>
+<script type="text/javascript" src="/static/casper/js/index.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bplayer@1.0.7/dist/bplayer.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bplayer@1.0.7/dist/bp_init.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="renderer" content="webkit">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>JS高级程序设计笔记-ECMA基础</title>
+    <meta name="description" content="一、原始值和引用值原始值：存储在栈（stack）中的简单数据段，它们的值直接存储在变量访问的位置。 二、原始类型：（基本数据类型） undefined、null、boolean、number、string1、undefinedvar value1;console.log(typeof value1);//undefined">
+    <link rel="shortcut icon" href="https://nerrol.com/static/user_file/favicon.ico">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@9.13.1/styles/github.css">
+    <link rel="stylesheet" href="/static/casper/css/screen.css">
+    
+</head>
+<body class="post-template nav-closed">
+<div class="nav">
+    <h3 class="nav-title">Menu</h3>
+    <a href="#" class="nav-close">
+        <span class="hidden">关闭</span>
+    </a>
+    <ul>
+        <li><a class="nav-" role="presentation" href="/">Index</a></li></ul>
+    <a class="subscribe-button icon-feed" href="/rss">Feed</a>
+</div>
+<span class="nav-cover"></span>
+<div class="site-wrapper">
+    <header class="main-header post-head no-cover">
+        <nav class="main-nav clearfix">
+            <a class="menu-button icon-menu" href="#"><span class="word">Menu</span></a>
+        </nav>
+    </header>
+
+    <main class="content" role="main">
+        <article class="post">
+
+            <header class="post-header">
+                <h1 class="post-title">JS高级程序设计笔记-ECMA基础</h1>
+                <section class="post-meta">
+                    <time class="post-date" datetime="2018-02-21">2018-02-21</time>
+                </section>
+            </header>
+
+            <section class="post-content">
+                <h4>一、原始值和引用值</h4>
+
+<p>原始值：存储在栈（stack）中的简单数据段，它们的值直接存储在变量访问的位置。<br></p>
+
+<p>引用值：存储在堆（heap）中的对象，存储在变量处的值是一个指针，指向存储对象的内存处。<br></p>
+
+<h4>二、原始类型：（基本数据类型）</h4>
+
+<blockquote>
+<p>undefined、null、boolean、number、string<br></p>
+</blockquote>
+
+<h4>三、typeof运算符（判断基本数据类型）</h4>
+
+<p>输出结果：undefined、boolean、number、string、object<br></p>
+
+<p>1、undefined<br></p>
+
+<p>当一个未声明的变量和一个声明但并未初始化的变量使用typeof都会输出undefined，如下代码所示：<br>
+var value1;<br>
+//var value2<br>
+console.log(typeof value1);//undefined<br>
+console.log(typeof value2);//undefined<br>
+PS：当函数无明确返回值时，返回的也是undefined。<br></p>
+
+<p>2、null类型<br></p>
+
+<p>undefined派生自null。null表示尚未存在的对象。<br></p>
+
+<p>3、number类型<br></p>
+
+<p>（1）八进制：首数字为0；<br></p>
+
+<p>（2）十六进制：首数字为0x；<br></p>
+
+<p>（3）ECMAScript默认把6个或6个以上的前导0的浮点数转换为科学计数法；<br></p>
+
+<p>（4）几个被定义为Number类型的特殊值：<br></p>
+
+<p>Number.MAX_VALUE<br></p>
+
+<p>Number.MIN_VALUE<br></p>
+
+<p>（5）isFinit()方法：确定该数不是无穷大<br></p>
+
+<p>（6） NaN （非数），特性：不能用于算数计算；<br></p>
+
+<p>　　　　　　　　　　　　    与自身不相等；<br></p>
+
+<p>（7）　isNaN()方法：确定是否为NaN；<br></p>
+
+<p>4、String类型<br></p>
+
+<p>首字符从位置0开始，字符串最后一个字符的位置是字符串的长度减1；<br></p>
+
+<h4>四、转换</h4>
+
+<p>1、转换成字符串：toString()方法<br></p>
+
+<p>Boolean类型：输出“true”或“false”<br></p>
+
+<p>Number类型：根据两种模式：<br></p>
+
+<p>　　　　　　　默认模式：相应数字值得字符串输出；<br></p>
+
+<p>　　　　　　　基模式：输出不同进制形式数字对应的字符串；<br></p>
+
+<p>2、转换成数字<br></p>
+
+<p>只有对string类型调用这些方法才能正确运行，对其他类型返回NaN;</p>
+
+<p>parseInt()：<br></p>
+
+<p>运行机制：从位置0开始查找判断是否为有效数字，如果不是返回NaN，如果是则继续向后查找，直到找到非有效数字，将之前的字符串转换为数字。<br></p>
+
+<p>PS：parseInt()方法有基模式，将二进制、八进制、十六进制的字符串转化为整数，由第二个参数指定。<br></p>
+
+<p>parseFloat()：<br></p>
+
+<p>运行机制：从位置0开始查找每个字符，直到出现第一个非有效字符，将之前的字符串转化为数字。第一个出现的小数点是有效字符，第二个是无效的。<br></p>
+
+<p>PS：字符串必须以十进制形式表示浮点数，不能用八进制或十六进制形式，没有基模式。<br></p>
+
+<p>3、强制类型转换<br></p>
+
+<p>Boolean(value)：<br></p>
+
+<p>（1）转换成Boolean类型；<br></p>
+
+<p>（2）转换的值至少是有一个字符的字符串、非0数字或对象时，返回true；<br></p>
+
+<p>（3）转换的值为空字符串、数字0、undefined、Null，返回false；<br></p>
+
+<p>Number(value)：转换成数字；<br></p>
+
+<p>（1）与parseInt(),parseFloat类似，但转化的是整个值，不是部分值。如果字符串值能完整的被转换，Number()将判断调用parseInt()还是parseFloat()。<br></p>
+
+<p>String(value)：将任何值转换成字符串；<br></p>
+
+<h4>五、引用类型</h4>
+
+<p>1、Object类<br></p>
+
+<p>2、Boolean类<br></p>
+
+<p>3、Number类<br></p>
+
+<p>（1）toFixed()方法：返回具有指定位数小数的数字的字符串表示，参数是几说明了应该显示几位小数。<br></p>
+
+<p>　　  toExponential()方法：返回科学计数法表示的数字的字符串形式。参数是指定要输出的小数的位数。<br></p>
+
+<p>　　  toPrecision()方法：参数表示数的数字总数，不包括指数。<br></p>
+
+<p>PS：这些方法都会进行舍入操作。<br></p>
+
+<p>4、String类<br></p>
+
+<p>（1）valueOf()和toString()方法都会返回string类型的原始值；<br></p>
+
+<pre><code>var oStr = new String(&quot;hello&quot;);
+console.log(oStr.valueOf() === oStr.toString()) //true
+</code></pre>
+
+<p>（2）length属性<br></p>
+
+<p>（3）charAt()：返回包含指定位置处的字符的字符串；<br></p>
+
+<p>　　  charCodeAt()：返回包含指定位置处的字符的字符代码；<br></p>
+
+<p>　　  concat()：将一个或多个字符串连接到String对象的原始值上，该方法会保持原始的String对象不变；<br></p>
+
+<p>（4）indexOf()：从位置0开始检索，返回指定的子串在另一个字符串中的位置。（-1表示没有找到）<br></p>
+
+<p>　　  lastIndexOf()：从字符串结尾开始检索，返回指定的子串在另一个字符串中的位置。（-1表示没有找到）<br></p>
+
+<p>（5）localeCompare()：对字符串值进行排序，参数是要进行比较的字符串；<br></p>
+
+<p>（6）slice()：第一个参数是要获取的子串的起始位置，第二个参数是要获取子串终止前的位置，省略的话就默认为字符串的长度。<br></p>
+
+<p>　　  substring()：同上；<br></p>
+
+<p>PS：当两者参数为负数时有些不同；slice()会用字符串长度加参数，substring将其作为0处理（忽略）；<br></p>
+
+<p>（7）toLowerCase()：字符串转换为全小写；<br></p>
+
+<p>　　  toUpperCase()：转化成全大写；<br></p>
+
+<p>5、instanceof运算符<br></p>
+
+<p>xxx instanceof Object(Object/Array/Date/Function)；<br></p>
+
+<h4>六、运算符</h4>
+
+<p>1、delete：删除对以前定义的对象属性或方法的引用<br></p>
+
+<pre><code>var o =new Object();
+o.name = &quot;coco&quot;;
+ console.log(o.name);//coco
+delete o.name;
+console.log(o.name);//undefined
+ ```
+ 
+PS：不能删除开发者未定义的属性和方法，如原始的ECMAScript方法。&lt;br&gt;
+
+2、void：对任何值都返回undefined，通常用于避免输出不应该输出的值。&lt;br&gt;
+
+`&lt;a href=&quot;javascript:void(window.open(&#39;about:blank&#39;))&quot;&gt;click&lt;/a&gt;`
+
+3、（1）前增量运算符：（++num,--num）&lt;br&gt;
+
+ 先加减后运算；&lt;br&gt;
+
+（2）后增量运算符：（num++,num--）&lt;br&gt;
+
+先运算后加减；&lt;br&gt;
+
+4、一元运算符&lt;br&gt;
+
+5、位运算符&lt;br&gt;
+
+（1）位运算NOT（~）&lt;br&gt;
+
+（2）位运算AND（&amp;）&lt;br&gt;
+
+（3）位运算OR（|）&lt;br&gt;
+
+（4）位运算XOR（^）&lt;br&gt;
+
+（5）左移运算（&lt;&lt;）&lt;br&gt;
+
+（6）有符号右移运算（&gt;&gt;）&lt;br&gt;
+
+（7）无符号右移运算（&gt;&gt;&gt;）&lt;br&gt;
+
+6、Boolean运算符&lt;br&gt;
+
+（1）逻辑NOT（！）&lt;br&gt;
+
+PS：两个！！给出变量真正的boolean值；&lt;br&gt;
+
+（2）逻辑AND（&amp;&amp;）&lt;br&gt;
+
+PS：如果第一个运算数是false，则不再计算第二个运算数，结果为false。&lt;br&gt;
+
+（3）逻辑OR（||）&lt;br&gt;
+
+PS：如果第一个运算数是true，则不再计算第二个运算数，结果为true。&lt;br&gt;
+
+7、乘性运算符&lt;br&gt;
+
+（1）乘法运算符（*）&lt;br&gt;
+
+（2）除法运算符（/）&lt;br&gt;
+
+（3）取模运算符（%）&lt;br&gt;
+
+8、加性运算符&lt;br&gt;
+
+（1）加法运算符（+）&lt;br&gt;
+
+（2）减法运算符（-）&lt;br&gt;
+
+ 9、关系运算符&lt;br&gt;
+
+10、等性运算符&lt;br&gt;
+
+（1）等号（==）和非等号（!=）&lt;br&gt;
+
+如果一个运算数是Boolean值，在检查相等性之前，将它转换成数字值；false-&gt;0；true-&gt;1；&lt;br&gt;
+
+如果一个运算数是字符串，另一个是数字，在检查相等性之前，尝试将字符串转换成数字；&lt;br&gt;
+
+null与undefined相等；&lt;br&gt;
+
+不能将null和undefined转换成其他值；&lt;br&gt;
+
+（2）全等号（===）和非全等号（!==）&lt;br&gt;
+
+只有在无需类型转换运算数就相等的情况下才返回true；&lt;br&gt;
+
+11、条件运算符（三元）&lt;br&gt;
+
+12、赋值运算符（=、+=、-=、*=、/=、%=、&gt;&gt;=、&lt;&lt;=）&lt;br&gt;
+
+#### 七、语句
+
+1、if语句&lt;br&gt;
+2、迭代语句&lt;br&gt;
+（1）do-while语句：计算表达式之前至少会执行循环主体一次；&lt;br&gt;
+（2）while语句&lt;br&gt;
+（3）for语句&lt;br&gt;
+（4）for-in语句：遍历对象的可枚举属性；&lt;br&gt;
+（5）break语句：立即退出循环；&lt;br&gt;
+　　  continue语句：退出当前循环，进行下一次循环；&lt;br&gt;
+（6）with语句&lt;br&gt;
+（7）switch语句&lt;br&gt;
+
+#### 八、函数
+
+1、无重载&lt;br&gt;
+2、arguments&lt;br&gt;
+            length属性&lt;br&gt;
+3、Function类&lt;br&gt;
+4、闭包&lt;br&gt;
+
+ 
+</code></pre>
+
+            </section>
+
+            <footer class="post-footer">
+
+                <figure class="author-image">
+                    <img class="img" src="https://i.loli.net/2018/02/14/5a843d9dc3706.jpg" alt="author" lazyload="on">
+                </figure>
+
+                <section class="author">
+                    <center><h4><a href="/">nerrol</a></h4></center>
+                    <p></p>
+                </section>
+
+                
+
+            </footer>
+
+        </article>
+    </main>
+
+<footer class="site-footer clearfix">
+    <section class="copyright"><a href="/">Nerrol</a> &copy; 2020</section>
+    <section class="poweredby">Powered by <a href="https://silverblog.org">SilverBlog</a> , Theme By Casper</section>
+    
+</footer>
+</div>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/highlight.js@9.13.1/lib/highlight.min.js"></script>
+<script type="text/javascript" src="/static/casper/js/index.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bplayer@1.0.7/dist/bplayer.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bplayer@1.0.7/dist/bp_init.js"></script>
+
+</body>
+</html>

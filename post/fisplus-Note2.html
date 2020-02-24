@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="renderer" content="webkit">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>fisp学习笔记</title>
+    <meta name="description" content="关于运行fisp项目的必要环境配置，可查看以往文章fisp环境构建。 发布及预览 step1：进入到具体的fisp项目文件夹； step2： fisp release r xxx ; step3：fisp server start;(启动服务器并预览) step4： fisp release wc;(实时编译预览)">
+    <link rel="shortcut icon" href="https://nerrol.com/static/user_file/favicon.ico">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@9.13.1/styles/github.css">
+    <link rel="stylesheet" href="/static/casper/css/screen.css">
+    
+</head>
+<body class="post-template nav-closed">
+<div class="nav">
+    <h3 class="nav-title">Menu</h3>
+    <a href="#" class="nav-close">
+        <span class="hidden">关闭</span>
+    </a>
+    <ul>
+        <li><a class="nav-" role="presentation" href="/">Index</a></li></ul>
+    <a class="subscribe-button icon-feed" href="/rss">Feed</a>
+</div>
+<span class="nav-cover"></span>
+<div class="site-wrapper">
+    <header class="main-header post-head no-cover">
+        <nav class="main-nav clearfix">
+            <a class="menu-button icon-menu" href="#"><span class="word">Menu</span></a>
+        </nav>
+    </header>
+
+    <main class="content" role="main">
+        <article class="post">
+
+            <header class="post-header">
+                <h1 class="post-title">fisp学习笔记</h1>
+                <section class="post-meta">
+                    <time class="post-date" datetime="2018-04-11">2018-04-11</time>
+                </section>
+            </header>
+
+            <section class="post-content">
+                <h5>关于运行fisp项目的必要环境配置，可查看以往文章<a href="https://nerrol.com/post/fisplus-Note1/">fisp环境构建</a>。</h5>
+
+<hr>
+
+<h4>发布及预览</h4>
+
+<ul>
+<li>step1：进入到具体的fisp项目文件夹；</li>
+<li>step2： fisp release -r xxx ;</li>
+<li>step3：fisp server start;(启动服务器并预览)</li>
+<li>step4： fisp release -wc;(实时编译预览)</li>
+</ul>
+
+<h4>本地测试数据</h4>
+
+<ul>
+<li><p>step1：新建浏览器书签，内容为以下：</p>
+
+<pre><code>//新建浏览器书签，网址为以下内容
+javascript:void function(){var d=new Date();d.setFullYear(d.getFullYear()+1);document.cookie=&#39;FIS_DEBUG=YlwtSmt;path=/;expires=&#39;+d.toGMTString()+&#39;&#39;;document.cookie=&#39;FIS_DEBUG_EDIT=1;path=/;expires=&#39;+d.toGMTString()+&#39;&#39;;document.cookie=&#39;LITE_DEBUG=model;expires=&#39;+new(Date)(+new(Date)+1000).toGMTString();location.reload();}();
+</code></pre></li>
+<li><p>step2：在已经可以预览到本地页面之后，点击保存的书签，选择格式进行数据渲染；</p></li>
+<li><p>PS：<strong>test中的测试数据遵循同名依赖原则，同名tpl文件直接寻找test下其同名的测试数据文件进行渲染；而server.conf中配置的则是tpl文件中异步请求接口路径对应的测试数据文件。（测试数据需要放在test文件下的同名文件下）</strong></p></li>
+</ul>
+
+<h4>测试数据</h4>
+
+<ul>
+<li>step1：新建浏览器书签，内容为以下：</li>
+</ul>
+
+<pre><code>javascript:void function(){var d=new Date();d.setFullYear(d.getFullYear()+1);document.cookie=&#39;FIS_DEBUG=YlwtSmt;path=/;expires=&#39;+d.toGMTString()+&#39;&#39;;document.cookie=&#39;FIS_DEBUG_EDIT=1;path=/;expires=&#39;+d.toGMTString()+&#39;&#39;;location.reload();}();
+</code></pre>
+
+<ul>
+<li> step2：在已经可以预览到本地页面之后，点击保存的书签，选择格式进行数据渲染；</li>
+<li> step3：使用fisp release -wcd xxx推送到远程测试机；(xxx为测试机号，可以在fis-conf.js中进行配置)；</li>
+</ul>
+
+            </section>
+
+            <footer class="post-footer">
+
+                <figure class="author-image">
+                    <img class="img" src="https://i.loli.net/2018/02/14/5a843d9dc3706.jpg" alt="author" lazyload="on">
+                </figure>
+
+                <section class="author">
+                    <center><h4><a href="/">nerrol</a></h4></center>
+                    <p></p>
+                </section>
+
+                
+
+            </footer>
+
+        </article>
+    </main>
+
+<footer class="site-footer clearfix">
+    <section class="copyright"><a href="/">Nerrol</a> &copy; 2020</section>
+    <section class="poweredby">Powered by <a href="https://silverblog.org">SilverBlog</a> , Theme By Casper</section>
+    
+</footer>
+</div>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/highlight.js@9.13.1/lib/highlight.min.js"></script>
+<script type="text/javascript" src="/static/casper/js/index.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bplayer@1.0.7/dist/bplayer.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bplayer@1.0.7/dist/bp_init.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="renderer" content="webkit">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>关于Smarty使用过程中的小tips</title>
+    <meta name="description" content="循环数组中存在空数组项在使用smarty的过程中，循环遍历数组时，会遇到数组项为空的情况，例如：var arr  ["a","b","","d"];，这里的数据项没有值，smarty在循环这样的数组时会默认将其跳过，也就是说，这个空的数据项没有匹配的索引。如果我们在操作数组的过程中并不想跳过这一项的索引，那么可以使用内置函数foreach的@iteration项，它代表循环次数。下面会给出一个例子说明这个小问题。">
+    <link rel="shortcut icon" href="https://nerrol.com/static/user_file/favicon.ico">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@9.13.1/styles/github.css">
+    <link rel="stylesheet" href="/static/casper/css/screen.css">
+    
+</head>
+<body class="post-template nav-closed">
+<div class="nav">
+    <h3 class="nav-title">Menu</h3>
+    <a href="#" class="nav-close">
+        <span class="hidden">关闭</span>
+    </a>
+    <ul>
+        <li><a class="nav-" role="presentation" href="/">Index</a></li></ul>
+    <a class="subscribe-button icon-feed" href="/rss">Feed</a>
+</div>
+<span class="nav-cover"></span>
+<div class="site-wrapper">
+    <header class="main-header post-head no-cover">
+        <nav class="main-nav clearfix">
+            <a class="menu-button icon-menu" href="#"><span class="word">Menu</span></a>
+        </nav>
+    </header>
+
+    <main class="content" role="main">
+        <article class="post">
+
+            <header class="post-header">
+                <h1 class="post-title">关于Smarty使用过程中的小tips</h1>
+                <section class="post-meta">
+                    <time class="post-date" datetime="2018-04-24">2018-04-24</time>
+                </section>
+            </header>
+
+            <section class="post-content">
+                <h4>循环数组中存在空数组项</h4>
+
+<p>在使用smarty的过程中，循环遍历数组时，会遇到数组项为空的情况，例如：<code>var arr = [&quot;a&quot;,&quot;b&quot;,&quot;&quot;,&quot;d&quot;];</code>，这里的数据项没有值，smarty在循环这样的数组时会默认将其跳过，也就是说，这个空的数据项没有匹配的索引。如果我们在操作数组的过程中并不想跳过这一项的索引，那么可以使用内置函数foreach的@iteration项，它代表循环次数。下面会给出一个例子说明这个小问题。</p>
+
+<pre><code>{%foreach $arr as $item%}
+       {%$item@iteration%}
+{%/foreach%}
+//此时会输出1,2,3,4
+</code></pre>
+
+<p>PS：需要注意的是，@iteration是从1开始的，而@index是从0开始的。（个人觉得这个@iteration简直太好用了）</p>
+
+<hr>
+
+<h4>遍历数组获取数组项index的两种写法</h4>
+
+<p>写法一：</p>
+
+<pre><code>{%foreach $arr as $item%}
+       {%$item@index%}
+{%/foreach%}
+</code></pre>
+
+<p>写法二：</p>
+
+<pre><code>{%foreach $arr as $index =&gt; $item%}
+       {% $index%}
+{%/foreach%}
+//$item为数组项，$index为数组项的索引，位置不可互换
+</code></pre>
+
+<p>（两种写法我个人使用起来觉得差不多，没有什么区别= =！）</p>
+
+<hr>
+
+<h4>select标签中设置默认的显示项</h4>
+
+<p>在数据是循环后台返回的值时，可以用在option标签加{%if $value eq x%}select{%/if%}，来进行设置。</p>
+
+            </section>
+
+            <footer class="post-footer">
+
+                <figure class="author-image">
+                    <img class="img" src="https://i.loli.net/2018/02/14/5a843d9dc3706.jpg" alt="author" lazyload="on">
+                </figure>
+
+                <section class="author">
+                    <center><h4><a href="/">nerrol</a></h4></center>
+                    <p></p>
+                </section>
+
+                
+
+            </footer>
+
+        </article>
+    </main>
+
+<footer class="site-footer clearfix">
+    <section class="copyright"><a href="/">Nerrol</a> &copy; 2020</section>
+    <section class="poweredby">Powered by <a href="https://silverblog.org">SilverBlog</a> , Theme By Casper</section>
+    
+</footer>
+</div>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/highlight.js@9.13.1/lib/highlight.min.js"></script>
+<script type="text/javascript" src="/static/casper/js/index.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bplayer@1.0.7/dist/bplayer.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bplayer@1.0.7/dist/bp_init.js"></script>
+
+</body>
+</html>

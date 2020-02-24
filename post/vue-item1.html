@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="renderer" content="webkit">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>webpack+vuecli打包生成资源相对引用路径与背景图片的正确引用</title>
+    <meta name="description" content="资源相对引用路径 问题描述：一般情况下，通过webpack+vuecli默认打包的css、js等资源，路径都是绝对的。 解决办法： 打开webpack.prod.conf.js 找到output：增加 publicPath: './', 即可，如图。PS:当然在config文件夹下的index.js中修改 assetsPublicPath: './'同样也可以达到资源的相对引用。">
+    <link rel="shortcut icon" href="https://nerrol.com/static/user_file/favicon.ico">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@9.13.1/styles/github.css">
+    <link rel="stylesheet" href="/static/casper/css/screen.css">
+    
+</head>
+<body class="post-template nav-closed">
+<div class="nav">
+    <h3 class="nav-title">Menu</h3>
+    <a href="#" class="nav-close">
+        <span class="hidden">关闭</span>
+    </a>
+    <ul>
+        <li><a class="nav-" role="presentation" href="/">Index</a></li></ul>
+    <a class="subscribe-button icon-feed" href="/rss">Feed</a>
+</div>
+<span class="nav-cover"></span>
+<div class="site-wrapper">
+    <header class="main-header post-head no-cover">
+        <nav class="main-nav clearfix">
+            <a class="menu-button icon-menu" href="#"><span class="word">Menu</span></a>
+        </nav>
+    </header>
+
+    <main class="content" role="main">
+        <article class="post">
+
+            <header class="post-header">
+                <h1 class="post-title">webpack+vuecli打包生成资源相对引用路径与背景图片的正确引用</h1>
+                <section class="post-meta">
+                    <time class="post-date" datetime="2018-02-21">2018-02-21</time>
+                </section>
+            </header>
+
+            <section class="post-content">
+                <h4>资源相对引用路径</h4>
+
+<h5>问题描述：</h5>
+
+<p>一般情况下，通过webpack+vuecli默认打包的css、js等资源，路径都是绝对的。<br>
+但当部署到带有文件夹的项目中，这种绝对路径就会出现问题，因为把配置的static文件夹当成了根路径，那么要解决这种问题，就得引用相对路径。<br></p>
+
+<h5>解决办法：</h5>
+
+<ul>
+<li>打开webpack.prod.conf.js</li>
+<li>找到output：增加 publicPath: &#39;./&#39;, 即可，如图。</li>
+</ul>
+
+<p><img src="https://i.loli.net/2018/02/21/5a8d8e12d4a56.png" alt=""></p>
+
+<p>PS:当然在config文件夹下的index.js中修改 assetsPublicPath: &#39;./&#39;同样也可以达到资源的相对引用。</p>
+
+<h4>背景图片引用路径</h4>
+
+<h5>问题描述：</h5>
+
+<p>资源里面的背景图片，不像index.html中加载资源一样，通过./static/js/app.js引用可以正常加载，图片资源是通过css加载的，如 background: url(&quot;../../assets/images/logo-index.png&quot;) no-repeat;被相对打包后变成了url(static/img/logo-index.2f00bf2.png) no-repeat所以我们要保留css引用图片的正常路径，即：<br>
+<code>url(../../static/img/logo-index.2f00bf2.png) no-repeat</code> <br></p>
+
+<p>那么就需要修改build文件夹下的utils.js代码，如图。</p>
+
+<p><img src="https://i.loli.net/2018/02/21/5a8d8e1fac6d3.png" alt=""></p>
+
+<p>添加如图所示的一行代码，这样不论是字体还是图片的引用问题都能解决。<br></p>
+
+<p><br>
+<br>
+<br>
+<br></p>
+
+<p><em>本文引用自<a href="https://www.cnblogs.com/moqiutao/p/7496718.html">风雨后见彩虹的博客</a></em></p>
+
+            </section>
+
+            <footer class="post-footer">
+
+                <figure class="author-image">
+                    <img class="img" src="https://i.loli.net/2018/02/14/5a843d9dc3706.jpg" alt="author" lazyload="on">
+                </figure>
+
+                <section class="author">
+                    <center><h4><a href="/">nerrol</a></h4></center>
+                    <p></p>
+                </section>
+
+                
+
+            </footer>
+
+        </article>
+    </main>
+
+<footer class="site-footer clearfix">
+    <section class="copyright"><a href="/">Nerrol</a> &copy; 2020</section>
+    <section class="poweredby">Powered by <a href="https://silverblog.org">SilverBlog</a> , Theme By Casper</section>
+    
+</footer>
+</div>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/highlight.js@9.13.1/lib/highlight.min.js"></script>
+<script type="text/javascript" src="/static/casper/js/index.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bplayer@1.0.7/dist/bplayer.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bplayer@1.0.7/dist/bp_init.js"></script>
+
+</body>
+</html>

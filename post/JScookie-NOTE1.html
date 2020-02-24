@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="renderer" content="webkit">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>关于cookie</title>
+    <meta name="description" content="在这里记录一个使用cookie的小需求场景是：用户在网站每日点击的第一次弹出一个悬浮框。说到每日更新就会想到使用缓存来做这件事，缓存有cookie，localstorage，sessionstorage。但是这个业务场景我选择了使用cookie，原因是cookie可以设置过期时间。为此我封装了一个cookie的自定义对象：">
+    <link rel="shortcut icon" href="https://nerrol.com/static/user_file/favicon.ico">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@9.13.1/styles/github.css">
+    <link rel="stylesheet" href="/static/casper/css/screen.css">
+    
+</head>
+<body class="post-template nav-closed">
+<div class="nav">
+    <h3 class="nav-title">Menu</h3>
+    <a href="#" class="nav-close">
+        <span class="hidden">关闭</span>
+    </a>
+    <ul>
+        <li><a class="nav-" role="presentation" href="/">Index</a></li></ul>
+    <a class="subscribe-button icon-feed" href="/rss">Feed</a>
+</div>
+<span class="nav-cover"></span>
+<div class="site-wrapper">
+    <header class="main-header post-head no-cover">
+        <nav class="main-nav clearfix">
+            <a class="menu-button icon-menu" href="#"><span class="word">Menu</span></a>
+        </nav>
+    </header>
+
+    <main class="content" role="main">
+        <article class="post">
+
+            <header class="post-header">
+                <h1 class="post-title">关于cookie</h1>
+                <section class="post-meta">
+                    <time class="post-date" datetime="2018-06-08">2018-06-08</time>
+                </section>
+            </header>
+
+            <section class="post-content">
+                <p>在这里记录一个使用cookie的小需求~
+<br/>
+场景是：用户在网站每日点击的第一次弹出一个悬浮框。说到每日更新就会想到使用缓存来做这件事，缓存有cookie，localstorage，sessionstorage。但是这个业务场景我选择了使用cookie，原因是cookie可以设置过期时间。为此我封装了一个cookie的自定义对象：</p>
+
+<pre><code>//自定义cookie对象
+var cookie = {
+  &quot;setCookie&quot;: function(name, value) {
+      var curDate = new Date();
+      //当前时间戳  
+      var curTamp = curDate.getTime();
+      //当前日期
+      var curDay = curDate.toLocaleDateString().replace(/年|月|日/g,&#39;/&#39;);
+      var curWeeHours = new Date(curDay).getTime() + (8 * 60 * 60 * 1000) - 1;
+      //当日已经过去的时间（毫秒）  
+      var passedTamp = curTamp - curWeeHours;
+      //当日剩余时间  
+      var leftTamp = 24 * 60 * 60 * 1000 - passedTamp;
+      var leftTime = new Date();
+      leftTime.setTime(leftTamp + curTamp);
+      document.cookie = name + &quot;=&quot; + value + &quot;;expires=&quot; + leftTime.toGMTString() + &quot;;path=/&quot;;
+  },
+  &quot;getCookie&quot;: function(name) {
+      //name 为想要取到的键值的键名
+      var reg = /\s/g;
+      var result = document.cookie.replace(reg, &quot;&quot;);
+      var resultArr = result.split(&quot;;&quot;);
+      for (var i = 0; i &lt; resultArr.length; i++) {
+          var nameArr = resultArr[i].split(&quot;=&quot;);
+          if (nameArr[0] == name) {
+              return nameArr[1];
+          }
+      }
+  },
+  &quot;removeCookie&quot;: function(name) {
+      //name为想要删除的Cookie的键名
+      var oDate = new Date(); //时间对象
+      oDate.setDate(new Date().getDate() - 1);
+      document.cookie = name + &quot;=123;expires=&quot; + oDate + &quot;;path=/&quot;;
+  }
+}
+
+</code></pre>
+
+<p>TIPS：这里有一个坑（= =），就是在变量curWeeHours的计算时使用了toLocaleDateString()这个方法。这个方法是获取当前的日期，但是在IE和chrome下的表现是不同的。IE会输出：xxxx年xx月xx日；Chrome则是输出：xxxx/xx/xx；因此这里我使用了正则替换。（使用debug发现这个问题，debug真乃神器啊！！！）</p>
+
+<hr>
+
+<p>接着在做点击事件之前获取当前点击次数，在点击事件回调函数中设置一个点击次数的cookie，具体代码如下：</p>
+
+<pre><code>//从cookie里获取点击次数，因为设置了过期时间，第二天cookie被销毁，此时点击次数置空为0
+var clickcount = cookie.getCookie(&quot;clickcount&quot;)?cookie.getCookie(&quot;clickcount&quot;):0;
+ ($btn.on(&#39;click&#39;,function(){
+ //当前点击次数做一个累计
+  clickcount++;
+  console.log(clickcount);
+    //把点击次数存入cookie
+  cookie.setCookie(&quot;clickcount&quot;,clickcount)
+  if(clickcount === 1){
+    //业务代码（弹出悬浮框什么的都可以啦）
+  }else{    
+   //除去第一次点击的其他情况
+});
+
+</code></pre>
+
+            </section>
+
+            <footer class="post-footer">
+
+                <figure class="author-image">
+                    <img class="img" src="https://i.loli.net/2018/02/14/5a843d9dc3706.jpg" alt="author" lazyload="on">
+                </figure>
+
+                <section class="author">
+                    <center><h4><a href="/">nerrol</a></h4></center>
+                    <p></p>
+                </section>
+
+                
+
+            </footer>
+
+        </article>
+    </main>
+
+<footer class="site-footer clearfix">
+    <section class="copyright"><a href="/">Nerrol</a> &copy; 2020</section>
+    <section class="poweredby">Powered by <a href="https://silverblog.org">SilverBlog</a> , Theme By Casper</section>
+    
+</footer>
+</div>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/highlight.js@9.13.1/lib/highlight.min.js"></script>
+<script type="text/javascript" src="/static/casper/js/index.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bplayer@1.0.7/dist/bplayer.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bplayer@1.0.7/dist/bp_init.js"></script>
+
+</body>
+</html>

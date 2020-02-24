@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="renderer" content="webkit">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>关于Promise</title>
+    <meta name="description" content="一、什么是Promise？在Chrome控制台中可以用console.dir()这个命令打印一下，结果如下图：可以清楚的看到：Promise是一个构造函数，有reject()、resolve()、all()、race()等方法，在它的原型上有then()、catch()这些比较常用的方法。">
+    <link rel="shortcut icon" href="https://nerrol.com/static/user_file/favicon.ico">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@9.13.1/styles/github.css">
+    <link rel="stylesheet" href="/static/casper/css/screen.css">
+    
+</head>
+<body class="post-template nav-closed">
+<div class="nav">
+    <h3 class="nav-title">Menu</h3>
+    <a href="#" class="nav-close">
+        <span class="hidden">关闭</span>
+    </a>
+    <ul>
+        <li><a class="nav-" role="presentation" href="/">Index</a></li></ul>
+    <a class="subscribe-button icon-feed" href="/rss">Feed</a>
+</div>
+<span class="nav-cover"></span>
+<div class="site-wrapper">
+    <header class="main-header post-head no-cover">
+        <nav class="main-nav clearfix">
+            <a class="menu-button icon-menu" href="#"><span class="word">Menu</span></a>
+        </nav>
+    </header>
+
+    <main class="content" role="main">
+        <article class="post">
+
+            <header class="post-header">
+                <h1 class="post-title">关于Promise</h1>
+                <section class="post-meta">
+                    <time class="post-date" datetime="2018-05-28">2018-05-28</time>
+                </section>
+            </header>
+
+            <section class="post-content">
+                <h4>一、什么是Promise？</h4>
+
+<p>在Chrome控制台中可以用console.dir()这个命令打印一下，结果如下图：
+<img src="http://i4.bvimg.com/647446/21c73a246ac81ef9.png" alt="promise">
+可以清楚的看到：Promise是一个构造函数，有reject()、resolve()、all()、race()等方法，在它的原型上有then()、catch()这些比较常用的方法。</p>
+
+<pre><code> const promise = new Promise (function(resolve,reject){
+        setTimeout(function(){
+            resolve(&quot;数据1&quot;);
+        },2000)
+      })
+</code></pre>
+
+<p>以上是一个生成promise实例的过程，promise构造函数接收两个参数：resolve,reject。</p>
+
+<ul>
+<li>resolve的作用是将Promise对象的状态从“未完成”变成“成功”（pending--&gt;fulfilled）；</li>
+<li>reject的作用是将Promise对象的状态从“未完成”变成“失败”（pending--&gt;reject）；</li>
+</ul>
+
+<p>（就我个人的理解来说，resolve和reject是两种情况成功&amp;失败对应的状态，成功的情况resolve()，失败的话reject()）</p>
+
+<h4>二、Promise的特点</h4>
+
+<ul>
+<li>对象状态不受外界影响：
+三种状态：pending（进行中）、fulfilled（已成功）、rejected（已失败），
+    只有异步操作的结果可以决定当前是哪一种状态，任何其他操作都不可以改变；</li>
+<li>一旦状态改变就不会再变化，也就是说状态只有可能从pending变为fulfilled和从pending变为rejected，这两种状态的任意一种一旦发生就已经不会再做变更。</li>
+<li>缺点：一旦建立就会立即执行，无法中途取消；（一般放在函数中新建，最后再返回Promis对象，见下述示例一）</li>
+</ul>
+
+<pre><code>//示例一
+function runAsync() {
+      const promise = new Promise (function(resolve,reject){
+        setTimeout(function(){
+            resolve(&quot;数据1&quot;);
+        },2000)
+      })
+      return promise;
+    }
+</code></pre>
+
+<h4>三、Promise原型函数（实例函数）</h4>
+
+<p>上文有提到：Promise原型对象上有then()，catch()等函数，于是我们可以在示例一的基础上继续写：</p>
+
+<pre><code>//示例二
+runAsync()
+ .then(function(data){
+   console.log(data);
+     //打印出：“数据1”
+ })
+</code></pre>
+
+<p>then()函数中接收到的参数就是resolve传入的数据；then()的效果就类似于回调函数，与普通回调函数不同的是，它可以解决多重回调的问题。</p>
+
+<h4>四、链式操作</h4>
+
+<p>以下是一个应用promise正确的场景：</p>
+
+<pre><code>//示例三
+runAsync1()
+  .then(function(data){
+        console.log(data);
+        return runAsync2();
+      })
+  .then(function(data){
+        console.log(data);
+        return runAsync3();
+      })
+  .then(function(data){
+        console.log(data);
+      });
+            
+    function runAsync1() {
+      var p = new Promise (function(resolve,reject){
+        setTimeout(function(){
+          console.log(&quot;异步任务1执行完成&quot;);
+          resolve(&quot;数据1&quot;)
+        },2000)
+      })
+      return p;
+    }
+
+    function runAsync2() {
+      var p = new Promise (function(resolve,reject){
+        setTimeout(function(){
+          console.log(&quot;异步任务2执行完成&quot;);
+          resolve(&quot;数据2&quot;)
+        },2000)
+      })
+      return p;
+    }
+
+    function runAsync3() {
+      var p = new Promise (function(resolve,reject){
+        setTimeout(function(){
+          console.log(&quot;异步任务3执行完成&quot;);
+          resolve(&quot;数据3&quot;)
+        },2000)
+      })
+      return p;
+    }
+</code></pre>
+
+<p>结果按顺序每隔2s依次打印：
+<img src="http://i2.bvimg.com/647446/b094bac7d0716204.png" alt="链式操作">
+当然也可以在then()函数中直接return一个数据，这样在下一个then()中会获取到这个数据；</p>
+
+<h4>五、reject用法</h4>
+
+<p>reject是一种当promise状态为失败时的一种状态，可以在then()和catch()中被捕获：</p>
+
+<ul>
+<li>在then()方法中传入方法的第二个参数即为捕获reject情况的回调，见示例四；</li>
+<li>在catch()方法中与then()方法的第二个参数作用相同，指定reject的回调，但是它与then()有一个不同点在于：如果在执行then()第一个参数方法时抛出异常，那么js不会报错被卡死，而是会进入catch()方法中，类似于try catch语句。见示例五；</li>
+</ul>
+
+<pre><code>//示例四
+ runAsync1()
+    .then(function(data) {
+      console.log(data);
+      return runAsync2();
+    })
+    .catch(function(reason) {
+      console.log(&quot;reject&quot;);
+      console.log(reason);
+      return runAsync2();
+    })
+    .then(function(data) {
+      console.log(data);
+      return runAsync3();
+    })
+    .then(function(data) {
+      console.log(data);
+    })
+
+  function runAsync1() {
+    var p = new Promise(function(resolve, reject) {
+      setTimeout(function() {
+        var num = Math.ceil(Math.random() * 10);
+        if (num &lt;= 8) {
+          resolve(num);
+        } else {
+          reject(&quot;数字过大&quot;)
+        }
+        console.log(&quot;异步任务1执行完成&quot;);
+      }, 2000)
+    })
+    return p;
+  }
+
+  function runAsync2() {
+    var p = new Promise(function(resolve, reject) {
+      setTimeout(function() {
+        console.log(&quot;异步任务2执行完成&quot;);
+        resolve(&quot;数据2&quot;)
+      }, 2000)
+    })
+    return p;
+  }
+
+  function runAsync3() {
+    var p = new Promise(function(resolve, reject) {
+      setTimeout(function() {
+        console.log(&quot;异步任务3执行完成&quot;);
+        resolve(&quot;数据3&quot;)
+      }, 2000)
+    })
+    return p;
+  }
+</code></pre>
+
+<p>这里runAsync1()随机生成的数字如果小于8，结果为：
+<img src="http://i1.bvimg.com/647446/2ff36a77fb13fe3b.png" alt="catch">
+如果大于8,结果为：
+<img src="http://i1.bvimg.com/647446/a7f18890b47bbb54.png" alt="catch"></p>
+
+<p><br>
+<br>
+<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+本文内容根据<a href="https://www.cnblogs.com/lvdabao/p/es6-promise-1.html#undefined">吕大豹的博客</a>整理</p>
+
+            </section>
+
+            <footer class="post-footer">
+
+                <figure class="author-image">
+                    <img class="img" src="https://i.loli.net/2018/02/14/5a843d9dc3706.jpg" alt="author" lazyload="on">
+                </figure>
+
+                <section class="author">
+                    <center><h4><a href="/">nerrol</a></h4></center>
+                    <p></p>
+                </section>
+
+                
+
+            </footer>
+
+        </article>
+    </main>
+
+<footer class="site-footer clearfix">
+    <section class="copyright"><a href="/">Nerrol</a> &copy; 2020</section>
+    <section class="poweredby">Powered by <a href="https://silverblog.org">SilverBlog</a> , Theme By Casper</section>
+    
+</footer>
+</div>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/highlight.js@9.13.1/lib/highlight.min.js"></script>
+<script type="text/javascript" src="/static/casper/js/index.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bplayer@1.0.7/dist/bplayer.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bplayer@1.0.7/dist/bp_init.js"></script>
+
+</body>
+</html>

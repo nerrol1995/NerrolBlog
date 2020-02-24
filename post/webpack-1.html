@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="renderer" content="webkit">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>编写一个loader</title>
+    <meta name="description" content="什么是loader？loader是负责将webpack打包过程中，加载的资源文件进行一些处理。如下图：loader的本质就是接收字符串，再返回处理完的字符串的过程。loader就是一个node模块，webpack会将加载的资源作为参数传入loader方法，交于loader处理再返回。">
+    <link rel="shortcut icon" href="https://nerrol.com/static/user_file/favicon.ico">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@9.13.1/styles/github.css">
+    <link rel="stylesheet" href="/static/casper/css/screen.css">
+    
+</head>
+<body class="post-template nav-closed">
+<div class="nav">
+    <h3 class="nav-title">Menu</h3>
+    <a href="#" class="nav-close">
+        <span class="hidden">关闭</span>
+    </a>
+    <ul>
+        <li><a class="nav-" role="presentation" href="/">Index</a></li></ul>
+    <a class="subscribe-button icon-feed" href="/rss">Feed</a>
+</div>
+<span class="nav-cover"></span>
+<div class="site-wrapper">
+    <header class="main-header post-head no-cover">
+        <nav class="main-nav clearfix">
+            <a class="menu-button icon-menu" href="#"><span class="word">Menu</span></a>
+        </nav>
+    </header>
+
+    <main class="content" role="main">
+        <article class="post">
+
+            <header class="post-header">
+                <h1 class="post-title">编写一个loader</h1>
+                <section class="post-meta">
+                    <time class="post-date" datetime="2019-10-28">2019-10-28</time>
+                </section>
+            </header>
+
+            <section class="post-content">
+                <h3>什么是loader？</h3>
+
+<p>loader是负责将webpack打包过程中，加载的资源文件进行一些处理。如下图：</p>
+
+<p><img src="https://i.loli.net/2019/10/28/NmcYsMjpJZ7uVav.png" alt="WechatIMG1.png"></p>
+
+<blockquote>
+<p>loader的本质就是接收字符串，再返回处理完的字符串的过程。loader就是一个node模块，webpack会将加载的资源作为参数传入loader方法，交于loader处理再返回。</p>
+</blockquote>
+
+<h3>loader的配置</h3>
+
+<h4>单个loader配置</h4>
+
+<p>增加config.module.rules数组中的规则对象。</p>
+
+<pre><code class="language-javaScript">let webpackConfig = {
+  module: {
+      rules: [{
+          test: /.js$/,
+            use: [{
+              loader: path.resolve(__dirname,&#39;loaders/a-loader.js&#39;),
+                options:{}
+            }]
+        }]
+    }
+}
+</code></pre>
+
+<h4>多个loader配置</h4>
+
+<pre><code class="language-javaScript">let webpackConfig = {
+    //...
+    module: {
+        rules: [{
+            test: /\.js$/,
+            use: [{
+                //这里写 loader 名即可
+                loader: &#39;a-loader&#39;, 
+                options: {/* ... */}
+            }, {
+                loader: &#39;b-loader&#39;, 
+                options: {/* ... */}
+            }]
+        }]
+    },
+    resolveLoader: {
+        // 告诉 webpack 该去那个目录下找 loader 模块
+        modules: [&#39;node_modules&#39;, path.resolve(__dirname, &#39;loaders&#39;)]
+    }
+}
+</code></pre>
+
+<h3>实现一个loader</h3>
+
+<p>这个loader的功能是将加载的html文件都嵌套在一个layout.html文件中：</p>
+
+<pre><code>&lt;!-- layout.html --&gt;
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+  &lt;meta charset=&quot;utf-8&quot;&gt;
+  &lt;title&gt;Pure Web&lt;/title&gt;
+  &lt;meta name=viewport content=&quot;width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,user-scalable=no&quot;&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;header&gt;This is Header&lt;/header&gt;
+
+  &lt;!-- 我希望我webpack加载的html，都会被嵌套在这个{{__content__}}部分 --&gt;
+  {{__content__}}
+
+  &lt;footer&gt;This is footer&lt;/header&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+
+<h4>获取loader配置</h4>
+
+<p>通过loader-utils可以获取loader的配置项：</p>
+
+<pre><code class="language-javaScript">const loaderUtils = require(&#39;loader-utils&#39;);
+const fs = require(&#39;fs&#39;)
+module.exports = function (source) {
+  const options = loaderUtils.getOptions(this);
+    const layoutHtml = fs.readFileSync(options.layout,&#39;utf-8&#39;);
+    return layoutHtml.replace(&#39;{{__content__}}&#39;,source);
+}
+</code></pre>
+
+<p>webpack的config增加loader设置：</p>
+
+<pre><code class="language-javaScript">let webpackConfig = {
+ test: /\.(html)$/,
+ loader: &#39;html-layout-loader&#39;,
+ include: htmlPath,
+ options: {
+ // path of layout html
+   layout: layoutHtmlPath
+ }
+}
+</code></pre>
+
+            </section>
+
+            <footer class="post-footer">
+
+                <figure class="author-image">
+                    <img class="img" src="https://i.loli.net/2018/02/14/5a843d9dc3706.jpg" alt="author" lazyload="on">
+                </figure>
+
+                <section class="author">
+                    <center><h4><a href="/">nerrol</a></h4></center>
+                    <p></p>
+                </section>
+
+                
+
+            </footer>
+
+        </article>
+    </main>
+
+<footer class="site-footer clearfix">
+    <section class="copyright"><a href="/">Nerrol</a> &copy; 2020</section>
+    <section class="poweredby">Powered by <a href="https://silverblog.org">SilverBlog</a> , Theme By Casper</section>
+    
+</footer>
+</div>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/highlight.js@9.13.1/lib/highlight.min.js"></script>
+<script type="text/javascript" src="/static/casper/js/index.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bplayer@1.0.7/dist/bplayer.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bplayer@1.0.7/dist/bp_init.js"></script>
+
+</body>
+</html>
